@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "hubermjonathan",
+  "owner": {
+    "name": "Jonathan Huber",
+    "url": "https://github.com/hubermjonathan"
+  },
+  "plugins": [
+    {
+      "name": "skills",
+      "source": "./",
+      "description": "skills for coding agents"
+    }
+  ]
+}
