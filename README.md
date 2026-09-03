@@ -33,16 +33,11 @@ scope cannot vouch for a marketplace:
 }
 ```
 
-`hubermjonathan/dot` declares it this way in its `claude` module.
-
-for a single skill without the marketplace, or for a non-claude agent:
+or without the marketplace, which also covers non-claude agents:
 
 ```sh
-npx -y skills add hubermjonathan/skills -g -y -a claude-code -s <skill>
+npx -y skills add hubermjonathan/skills
 ```
-
-`--all` takes every skill, and `-a '*'` every supported agent. note the agent token is
-`claude-code`, not `claude`.
 
 ## skills
 
