@@ -34,6 +34,7 @@ so nothing else belongs there.
 ## when adding or renaming a skill
 
 - add or update the row in the skills table in `README.md`, linking the name to its `SKILL.md`
+  and filling the `user invoked` column with `yes` or `no`
 - add or update `agents/openai.yaml` for the skill, with the `policy` block if user-invoked
 - bump `version` in both `plugin.json` and `.claude-plugin/plugin.json`, keeping them identical,
   so installed copies refresh. once per pr, not per commit: if the branch already carries a

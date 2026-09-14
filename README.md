@@ -57,13 +57,10 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 
 ## skills
 
-| skill | what it does |
-|-------|--------------|
-| [`caveman`](skills/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra |
-| [`grill-me`](skills/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea |
-
-`grill-me` is user-invoked: type its name to start it. `caveman` is model-invoked too, so an
-agent can reach for it on its own.
+| skill | what it does | user invoked |
+|-------|--------------|--------------|
+| [`caveman`](skills/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
+| [`grill-me`](skills/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | yes |
 
 ## adding a skill
 
