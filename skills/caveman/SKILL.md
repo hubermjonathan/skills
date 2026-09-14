@@ -1,7 +1,10 @@
 ---
 name: caveman
-description: Compressed response style that cuts output tokens while keeping technical substance intact. Levels: lite, full, ultra (default).
-disable-model-invocation: true
+description: >
+  Compressed response style that cuts output tokens while keeping technical substance intact.
+  Levels: lite, full, ultra (default).
+  Use when the user says "caveman mode", "talk like caveman", "be brief", "less tokens",
+  or invokes /caveman. Also applies when token efficiency is asked for.
 ---
 
 Respond terse. Technical substance stays. Only fluff dies.
