@@ -65,8 +65,3 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 ## adding a skill
 
 see [AGENTS.md](AGENTS.md).
-
-## credits
-
-`grill-me` is adapted from [`grilling`](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling)
-in [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed.
