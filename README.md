@@ -1,10 +1,21 @@
 # skills
 
-skills for coding agents. this repo is a claude code plugin marketplace named
-`hubermjonathan`, exposing a single plugin, `skills`, that carries everything under
-[`skills/`](skills).
+skills for coding agents. every skill lives under [`skills/`](skills) as a plain
+`SKILL.md`, so any agent that speaks the skill format can use this repo. claude code and
+codex each get a native plugin on top of that.
 
 ## install
+
+### any agent
+
+```sh
+npx -y skills add hubermjonathan/skills
+```
+
+this is the main path. it copies the skills into whichever agent you point it at and works
+for agents with no plugin system of their own.
+
+### claude code
 
 as a marketplace, which picks up every skill in the repo and keeps them updated together:
 
@@ -19,7 +30,7 @@ or from inside a session:
 /plugin marketplace add hubermjonathan/skills
 ```
 
-to declare it in `~/.claude/settings.json` instead — user scope, since project and local
+to declare it in `~/.claude/settings.json` instead, user scope, since project and local
 scope cannot vouch for a marketplace:
 
 ```json
@@ -33,20 +44,24 @@ scope cannot vouch for a marketplace:
 }
 ```
 
-or without the marketplace, which also covers non-claude agents:
+### codex
 
 ```sh
-npx -y skills add hubermjonathan/skills
+codex plugin marketplace add hubermjonathan/skills
+codex plugin install skills
 ```
+
+the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace manifest at
+[`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json). each skill also ships an
+`agents/openai.yaml` so it gets a proper display name in codex.
 
 ## skills
 
-| skill | what it does |
-|-------|--------------|
-| [`caveman`](skills/caveman) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra |
+| skill | what it does | user invoked |
+|-------|--------------|--------------|
+| [`caveman`](skills/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
+| [`grill-me`](skills/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | yes |
 
 ## adding a skill
 
-drop `skills/<name>/SKILL.md` with `name` and `description` frontmatter. that layout satisfies
-both the plugin convention and `npx skills` discovery, so either install path picks it up. bump
-`version` in `.claude-plugin/plugin.json` so installed copies refresh.
+see [AGENTS.md](AGENTS.md).
