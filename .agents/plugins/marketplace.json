@@ -1,0 +1,14 @@
+{
+  "name": "hubermjonathan",
+  "interface": {
+    "displayName": "hubermjonathan skills"
+  },
+  "plugins": [
+    {
+      "name": "skills",
+      "source": { "source": "local", "path": "../.." },
+      "description": "skills for coding agents",
+      "category": "Productivity"
+    }
+  ]
+}
