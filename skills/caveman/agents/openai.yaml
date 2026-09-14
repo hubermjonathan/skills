@@ -1,3 +1,5 @@
 interface:
   display_name: "caveman"
   short_description: "compressed responses that keep the technical substance"
+policy:
+  allow_implicit_invocation: false
