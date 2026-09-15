@@ -14,16 +14,26 @@ Work the tree in **rounds**. The **frontier** is every decision whose prerequisi
 Format a round like so:
 
 ```
-❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, no options here>
+
+🔀 **Options**
+**a)** <option> - <one line on what it means or costs>
+**b)** <option> - <one line on what it means or costs>
 
 ➡️ <your recommended answer>
 
 ---
 
-❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, no options here>
+
+🔀 **Options**
+**a)** <option> - <one line on what it means or costs>
+**b)** <option> - <one line on what it means or costs>
 
 ➡️ <your recommended answer>
 ```
+
+Some questions are genuinely open ended, with no set of choices to pick from. Ask those without an options block rather than inventing choices to fill it.
 
 Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
