@@ -60,7 +60,7 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 | skill | what it does | user invoked |
 |-------|--------------|--------------|
 | [`caveman`](skills/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
-| [`grill-me`](skills/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | yes |
+| [`grill-me`](skills/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | no |
 | [`unslop`](skills/unslop/SKILL.md) | rewrites text to strip ai writing tells | no |
 
 ## adding a skill
