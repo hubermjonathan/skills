@@ -1,5 +1,3 @@
 interface:
   display_name: "unslop"
-  short_description: "rewrites text to strip AI writing tells"
-policy:
-  allow_implicit_invocation: false
+  short_description: "rewrites text to strip ai writing tells"
