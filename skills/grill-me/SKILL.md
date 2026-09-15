@@ -9,21 +9,31 @@ description: >
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
+Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question, list its options, and give your recommended answer. Keep the three apart. The question body states the decision and the context behind it and never lists the choices. The options block holds the choices, one per line, each labeled so the user can answer by label. The recommendation names one option and says why. Then wait for the user's answers before the next round.
 
 Format a round like so:
 
 ```
-❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, no options here>
 
-➡️ <your recommended answer>
+🔀 **Options**
+**a)** <option> - <one line on what it means or costs>
+**b)** <option> - <one line on what it means or costs>
+
+➡️ **<recommended option label>** - <why this one>
 
 ---
 
-❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
+❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, no options here>
 
-➡️ <your recommended answer>
+🔀 **Options**
+**a)** <option> - <one line on what it means or costs>
+**b)** <option> - <one line on what it means or costs>
+
+➡️ **<recommended option label>** - <why this one>
 ```
+
+Some questions are genuinely open ended, with no set of choices to pick from. Ask those without an options block rather than inventing choices to fill it.
 
 Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
