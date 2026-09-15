@@ -9,7 +9,7 @@ description: >
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
 
-Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question, list its options, and give your recommended answer. Keep the three apart. The question body states the decision and the context behind it and never lists the choices. The options block holds the choices, one per line, each labeled so the user can answer by label. The recommendation names one option and says why. Then wait for the user's answers before the next round.
+Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.
 
 Format a round like so:
 
@@ -20,7 +20,7 @@ Format a round like so:
 **a)** <option> - <one line on what it means or costs>
 **b)** <option> - <one line on what it means or costs>
 
-➡️ **<recommended option label>** - <why this one>
+➡️ <your recommended answer>
 
 ---
 
@@ -30,7 +30,7 @@ Format a round like so:
 **a)** <option> - <one line on what it means or costs>
 **b)** <option> - <one line on what it means or costs>
 
-➡️ **<recommended option label>** - <why this one>
+➡️ <your recommended answer>
 ```
 
 Some questions are genuinely open ended, with no set of choices to pick from. Ask those without an options block rather than inventing choices to fill it.
