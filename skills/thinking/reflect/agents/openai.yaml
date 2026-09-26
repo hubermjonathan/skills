@@ -1,0 +1,5 @@
+interface:
+  display_name: "reflect"
+  short_description: "turn session learnings into config and skill edits"
+policy:
+  allow_implicit_invocation: false

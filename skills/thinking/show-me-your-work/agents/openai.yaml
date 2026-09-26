@@ -1,0 +1,3 @@
+interface:
+  display_name: "show me your work"
+  short_description: "decision log for long or unattended runs"
