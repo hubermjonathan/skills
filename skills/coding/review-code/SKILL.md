@@ -17,7 +17,7 @@ Review what was asked for against what was built.
    - simplicity: a smaller way to get the same result
 5. Back every finding by reading the code. Drop what you cannot back.
 6. Stay blind when reviewing your own work: judge against the ticket and the diff, not your plan or your reasons. Subagent prompts may quote the ticket and the diff but never your theories about the intended design.
-7. When the user wants a consensus review from several independent reviewers, call the Skill tool with "review-pr" if it is installed.
+7. When the user wants several independent reviewers, or says "consensus review", "swarm review", or "N reviewers", call the Skill tool with "swarm". Frame it as a race of N reviewers (default 3) on identical, blind briefs: the ticket text and the diff command, plus steps 4 and 5 of this skill, and nothing about intended design. Use the `majority` selection rule, then back each surviving finding yourself with step 5 before reporting it.
 
 ## Output
 

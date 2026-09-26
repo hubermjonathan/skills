@@ -1,0 +1,3 @@
+interface:
+  display_name: "swarm"
+  short_description: "fan out parallel workers, return one report"
