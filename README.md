@@ -59,9 +59,29 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 
 | skill | what it does | user invoked |
 |-------|--------------|--------------|
-| [`caveman`](skills/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
-| [`grill-me`](skills/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | no |
-| [`unslop`](skills/unslop/SKILL.md) | rewrites text to strip ai writing tells | no |
+| [`caveman`](skills/thinking/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
+| [`grill-me`](skills/thinking/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | no |
+| [`unslop`](skills/thinking/unslop/SKILL.md) | rewrites text to strip ai writing tells | no |
+| [`writing-for-agents`](skills/thinking/writing-for-agents/SKILL.md) | writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions. adapted from [mattpocock/skills](https://github.com/mattpocock/skills), mit | no |
+| [`create-ticket`](skills/planning/create-ticket/SKILL.md) | drafts and files work, bug, and change tickets | no |
+| [`refine-ticket`](skills/planning/refine-ticket/SKILL.md) | turns a ticket into a plan you agree with before any code | no |
+| [`babysit-pr`](skills/coding/babysit-pr/SKILL.md) | drives a pr to green checks, answered comments, and approval | no |
+| [`comment-pr`](skills/coding/comment-pr/SKILL.md) | reads every kind of pr comment and replies in the right place | no |
+| [`git`](skills/coding/git/SKILL.md) | branch, worktree, commit, and cleanup conventions | no |
+| [`open-pr`](skills/coding/open-pr/SKILL.md) | opens a draft pr with a fixed title and body format | no |
+| [`push-pr`](skills/coding/push-pr/SKILL.md) | pushes to an open pr, then fixes its title and body to match | no |
+| [`review-code`](skills/coding/review-code/SKILL.md) | reviews a pr against its ticket, optionally fixes the findings | no |
+| [`write-code`](skills/coding/write-code/SKILL.md) | smallest change that solves the problem, then a simplification pass | no |
+| [`create-prod-pr`](skills/shipping/create-prod-pr/SKILL.md) | opens a prod promotion pr per service, sets up review and tickets | no |
+| [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | follows ci promotion prs until the change is on staging | no |
+| [`walk-test-plan`](skills/shipping/walk-test-plan/SKILL.md) | walks a test plan one step at a time, recording each result | no |
+| [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | writes a staging test plan a later session can run | no |
+| [`create-design-profile`](skills/tools/create-design-profile/SKILL.md) | mines a design system into a new profile | yes |
+| [`design-profile`](skills/tools/design-profile/SKILL.md) | styles html artifacts with the active design profile's tokens and rules | no |
+| [`install-design-profile`](skills/tools/install-design-profile/SKILL.md) | installs or updates a design profile from local files | yes |
+| [`slack`](skills/tools/slack/SKILL.md) | drafts and sends short slack messages | no |
+| [`switch-design-profile`](skills/tools/switch-design-profile/SKILL.md) | switches the active design profile, or turns profiles off | yes |
+| [`wizard`](skills/tools/wizard/SKILL.md) | writes a bash wizard that walks you through steps only a human can do. from [mattpocock/skills](https://github.com/mattpocock/skills), mit | no |
 
 ## adding a skill
 

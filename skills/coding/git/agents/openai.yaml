@@ -1,0 +1,3 @@
+interface:
+  display_name: "git"
+  short_description: "branch, commit, and cleanup conventions"

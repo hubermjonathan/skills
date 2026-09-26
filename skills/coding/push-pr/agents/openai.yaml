@@ -1,0 +1,3 @@
+interface:
+  display_name: "push pr"
+  short_description: "push to a pr and keep its body true"

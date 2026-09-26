@@ -1,0 +1,5 @@
+interface:
+  display_name: "create design profile"
+  short_description: "mine a design system into a profile"
+policy:
+  allow_implicit_invocation: false

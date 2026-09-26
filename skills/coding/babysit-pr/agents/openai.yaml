@@ -1,0 +1,3 @@
+interface:
+  display_name: "babysit pr"
+  short_description: "drive a pr to mergeable"

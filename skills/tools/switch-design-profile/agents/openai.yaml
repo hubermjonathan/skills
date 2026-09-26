@@ -1,0 +1,5 @@
+interface:
+  display_name: "switch design profile"
+  short_description: "switch or turn off the design profile"
+policy:
+  allow_implicit_invocation: false

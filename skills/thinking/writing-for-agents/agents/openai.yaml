@@ -1,0 +1,3 @@
+interface:
+  display_name: "writing for agents"
+  short_description: "write skills, claude md, and agent prompts"

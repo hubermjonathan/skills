@@ -1,0 +1,3 @@
+interface:
+  display_name: "review code"
+  short_description: "review a pr against its ticket"

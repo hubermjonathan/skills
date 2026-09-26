@@ -1,9 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "skills",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "skills for coding agents",
   "author": {
     "name": "Jonathan Huber"
-  }
+  },
+  "skills": [
+    "./skills/thinking/",
+    "./skills/planning/",
+    "./skills/coding/",
+    "./skills/shipping/",
+    "./skills/tools/"
+  ]
 }

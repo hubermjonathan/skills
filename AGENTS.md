@@ -1,7 +1,13 @@
 # repo conventions
 
-skills live at `skills/<name>/SKILL.md`, one folder per skill, flat. the folder name, the
-`name` in frontmatter, and the skill's invocation name all match.
+skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill, grouped by area. the
+groups are `thinking`, `planning`, `coding`, `shipping`, and `tools`. keep groups wide: add a new
+one only when a skill fits none of these. the skill folder name, the
+`name` in frontmatter, and the skill's invocation name all match. names stay unique across
+groups, since the group never shows up in the invocation name.
+
+claude code does not scan nested folders, so every group folder is listed in the
+`skills` array of `.claude-plugin/plugin.json`. a new group gets a new entry there.
 
 ## invocation
 
@@ -26,7 +32,7 @@ with no trigger list.
 `SKILL.md` frontmatter carries `name`, `description`, and, for user-invoked skills only,
 `disable-model-invocation`.
 
-`skills/<name>/agents/openai.yaml` holds codex-only presentation metadata
+`agents/openai.yaml`, next to each `SKILL.md`, holds codex-only presentation metadata
 (`interface.display_name`, `interface.short_description`) and, for user-invoked skills, the
 invocation policy. it is not part of the `SKILL.md` standard and every other agent ignores it,
 so nothing else belongs there.

@@ -1,0 +1,3 @@
+interface:
+  display_name: "open pr"
+  short_description: "open a pr with a short title and body"

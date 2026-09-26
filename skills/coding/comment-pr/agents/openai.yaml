@@ -1,0 +1,3 @@
+interface:
+  display_name: "comment pr"
+  short_description: "read and reply to pr comments"
