@@ -59,7 +59,6 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 
 | skill | what it does | user invoked |
 |-------|--------------|--------------|
-| [`caveman`](skills/thinking/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
 | [`grill-me`](skills/thinking/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | no |
 | [`reflect`](skills/thinking/reflect/SKILL.md) | mines the session so far and turns learnings into skill, instruction file, or settings edits. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | yes |
 | [`show-me-your-work`](skills/thinking/show-me-your-work/SKILL.md) | keeps a tsv decision log for long or unattended runs. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | no |
