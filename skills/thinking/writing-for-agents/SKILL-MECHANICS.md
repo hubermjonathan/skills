@@ -25,8 +25,8 @@ When user-invoked skills multiply past what you can remember, that piled-up cogn
 
 A skill chains to another by telling the agent to invoke it, never by inlining its steps:
 
-> Call the Skill tool with "{skill-name}".
+> Invoke the `{skill-name}` skill.
 
-- One line per handoff, with the exact skill name in quotes.
+- One line per handoff, with the exact skill name in backticks. The wording names no agent's tool, so the handoff works in any agent that loads skills.
 - Say when to call it, not what it does. The called skill is the single source of truth for its own steps.
 - Never duplicate the other skill's instructions. A copy goes stale the moment the original changes.

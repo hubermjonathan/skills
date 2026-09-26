@@ -175,11 +175,11 @@ if [ -z "$cur" ]; then
     echo "no profile is selected, so the 'offerup' default means this profile is active."
   else
     echo "no profile is selected, so the default 'offerup' is active — NOT '$PROFILE'."
-    echo "to use it, run the /skills:switch-design-profile skill with '$PROFILE'."
+    echo "to use it, run the switch-design-profile skill with '$PROFILE'."
   fi
 elif [ "$cur" != "$PROFILE" ]; then
   echo "the active profile is '$cur', so '$PROFILE' will NOT be used until you switch."
-  echo "run the /skills:switch-design-profile skill with '$PROFILE'."
+  echo "run the switch-design-profile skill with '$PROFILE'."
 else
   echo "the active profile is '$cur', so this profile is the one in use."
 fi

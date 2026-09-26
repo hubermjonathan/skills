@@ -8,19 +8,19 @@ description: >
 
 ## Start
 
-1. Start the watcher under the Monitor tool and leave it running:
+1. Start the watcher as a background process and leave it running:
 
        <this skill's directory>/scripts/pr-watch.sh <pr> [--repo <owner/name>]
 
-   It prints one JSON line per change and never a heartbeat. The first poll seeds its memory and reports nothing, so history reaches you only through step 2. Set `WATCH_INTERVAL` to change the 60 second poll.
-2. Right after, sweep what is already on the PR: call the Skill tool with "comment-pr". Treat anything unanswered as work. Start the watcher before the sweep so there is no gap between them.
-3. If the PR conflicts with its base, merge the latest base in (`git fetch`, then `git merge origin/<base>`, usually `master` or `main`), resolve the conflicts, and push. Call the Skill tool with "push-pr" for the push.
+   It prints one JSON line per change and never a heartbeat. Handle each line as it arrives. The first poll seeds its memory and reports nothing, so history reaches you only through step 2. Set `WATCH_INTERVAL` to change the 60 second poll.
+2. Right after, sweep what is already on the PR: invoke the `comment-pr` skill. Treat anything unanswered as work. Start the watcher before the sweep so there is no gap between them.
+3. If the PR conflicts with its base, merge the latest base in (`git fetch`, then `git merge origin/<base>`, usually `master` or `main`), resolve the conflicts, and push. Invoke the `push-pr` skill for the push.
 
 ## Per event
 
 - `check_failed`: confirm it on the current head with `gh pr checks <n>` first, since the watcher can report a superseded run. Then read the failing log (`gh run view <run-id> --log-failed`). Fix it if this diff caused it. If not, say so in a PR comment and keep going.
 - `check_passed`: note it.
-- `review_comment`: reply first, then push the smallest fix. Call the Skill tool with "comment-pr" if it is not loaded yet, and "push-pr" for the push.
+- `review_comment`: reply first, then push the smallest fix. Invoke the `comment-pr` skill if it is not loaded yet, and the `push-pr` skill for the push.
 - `review_decision`: `CHANGES_REQUESTED` is work. `APPROVED` satisfies the review requirement.
 - `merge_blocked`: on `conflict`, merge the latest base in as in step 3, resolve, and push. On `behind_base`, merge the base in only if branch protection requires an up-to-date branch. Tell the user if a conflict needs their decision.
 - `pr_merged` or `pr_closed`: stop.

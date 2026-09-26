@@ -56,8 +56,8 @@ if [ ! -d "$PROFILES/$P" ]; then
   echo "available profiles:"
   ls "$PROFILES" 2>/dev/null | sed 's/^/  /' || echo "  (none)"
   echo
-  echo "either switch to one of the above with the /skills:switch-design-profile skill,"
-  echo "install it with the /skills:install-design-profile skill,"
+  echo "either switch to one of the above with the switch-design-profile skill,"
+  echo "install it with the install-design-profile skill,"
   echo "or switch to 'none' to opt out of design profiles entirely."
   exit 1
 fi

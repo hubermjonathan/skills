@@ -17,12 +17,13 @@ GHARGS=(); [[ -n "$GHREPO" ]] && GHARGS=(--repo "$GHREPO")
 REPO_SLUG="$GHREPO"
 [[ -n "$REPO_SLUG" ]] || REPO_SLUG="$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)"
 INTERVAL="${WATCH_INTERVAL:-60}"
+SIG="${AGENT_SIGNATURE:-claude}"   # the name agent-written comments end with, as "- <name>"
 
 PREV="$(mktemp)"; SEEN="$(mktemp)"   # SEEN: ids already reported
 trap 'rm -f "$PREV" "$SEEN"' EXIT
 
 now() { date -u +%FT%TZ; }
-# every line carries repo and pr, so one Monitor can watch several prs.
+# every line carries repo and pr, so one reader can follow several watchers.
 emit() {
   printf '{"type":"%s","at":"%s","repo":"%s","pr":"%s"%s}\n' \
     "$1" "$(now)" "$GHREPO" "$PR" "${2:+,$2}"
@@ -58,7 +59,7 @@ while :; do
   # all. an empty review body is normal when the substance is all inline, which
   # is why .reviews is no longer filtered on a non-empty body either.
   inline="$(gh api "/repos/$REPO_SLUG/pulls/$PR/comments" --paginate 2>/dev/null \
-    | jq -r '.[]? | "r\(.id) \(.user.login//"") \(if (.in_reply_to_id != null) or ((.body//"")|test("-\\s*claude\\s*$")) then "agent" else "human" end) \(.path//"?"):\(.line // .original_line // 0) \(.body // "" | gsub("[\r\n]+"; " "))"')"
+    | jq -r --arg sig "$SIG" '.[]? | "r\(.id) \(.user.login//"") \(if (.in_reply_to_id != null) or ((.body//"")|test("-\\s*" + $sig + "\\s*$")) then "agent" else "human" end) \(.path//"?"):\(.line // .original_line // 0) \(.body // "" | gsub("[\r\n]+"; " "))"')"
 
   # comments, review bodies and line comments, by id. each source prefixes its
   # own ids so two numbering spaces cannot collide in SEEN.
@@ -72,8 +73,8 @@ while :; do
     fi
   # array concat, not a comma inside one [...]: `,` binds tighter than `|` in jq,
   # so a comma-joined pair of generators would feed the second one the first's output.
-  done < <( { jq -r '([(.comments // [])[] | {id:("c"+(.id|tostring)),author:(.author.login//""),
-                          agent:(if ((.body//"")|test("-\\s*claude\\s*$")) then "agent" else "human" end),body:(.body//"")}]
+  done < <( { jq -r --arg sig "$SIG" '([(.comments // [])[] | {id:("c"+(.id|tostring)),author:(.author.login//""),
+                          agent:(if ((.body//"")|test("-\\s*" + $sig + "\\s*$")) then "agent" else "human" end),body:(.body//"")}]
                     + [(.reviews  // [])[] | {id:("v"+(.id|tostring)),author:(.author.login//""),
                           agent:"human",body:(((.state//"") + " " + (.body//""))|ltrimstr(" "))}])
                     | .[] | "\(.id) \(.author) \(.agent) \(.body | gsub("[\r\n]+"; " "))"' <<<"$snap"

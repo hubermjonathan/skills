@@ -9,6 +9,14 @@ groups, since the group never shows up in the invocation name.
 claude code does not scan nested folders, so every group folder is listed in the
 `skills` array of `.claude-plugin/plugin.json`. a new group gets a new entry there.
 
+## agent agnostic
+
+every skill works in any agent that loads `SKILL.md` files. skill text names no agent's tools,
+models, or file paths: say "invoke the `x` skill", "spawn a background subagent", "run it as a
+background process", not an agent's tool names. when a script needs to know about specific agents,
+such as where each one stores session logs, the script holds that list with an env var override,
+and the skill text stays generic.
+
 ## invocation
 
 a skill is either model-invoked or user-invoked, and the setting is mirrored in both harnesses

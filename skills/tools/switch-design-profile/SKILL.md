@@ -2,7 +2,6 @@
 name: switch-design-profile
 description: Switch which design profile HTML artifacts use, or turn profiles off.
 disable-model-invocation: true
-allowed-tools: [Bash]
 ---
 
 # Switch the active design profile

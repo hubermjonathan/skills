@@ -9,8 +9,8 @@ description: >
 
 The user's instructions on titles and bodies win over the defaults below.
 
-1. Bump versions (see below), then commit and push. Call the Skill tool with "git" before committing.
-2. Remove debug output and stray files from the diff. For comments and docs, call the Skill tool with "kill-comments".
+1. Bump versions (see below), then commit and push. Invoke the `git` skill before committing.
+2. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
 3. Write the title and body in the format below.
 4. Open as a draft (`gh pr create --draft`) unless the user says it is ready.
 5. Reply with the PR url.

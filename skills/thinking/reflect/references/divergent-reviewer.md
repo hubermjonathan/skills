@@ -20,7 +20,7 @@ Scan for:
 
 Findings must point to skills, tools, MCPs, or config this session actually used or was shown. Speculative routings to skills the parent never opened do not count. To check whether a skill was used, scan the transcript for:
 
-- `Skill` tool calls, and `Read` calls against any `SKILL.md`
+- Skill loads: a skill tool call, or a read of any `SKILL.md`
 - Agent prompts that name a skill
 - Tool calls (Bash, MCP, etc.) that match a skill's documented commands
 - The skill list the session was shown, for skills that were available but never called
@@ -32,12 +32,12 @@ Two valid finding shapes:
 
 The "skill should have been invoked but wasn't" bullet above is the canonical missed-trigger case. Route those to `tune description`. If the skill was neither invoked nor a missed-trigger candidate, drop it.
 
-Findings about config, not skills, are valid too: a rule the user had to repeat that belongs in a CLAUDE.md, or a permission prompt, hook, or env setting that cost time. Route those as `claude md: <file> <section>` or `settings: <file>`.
+Findings about config, not skills, are valid too: a rule the user had to repeat that belongs in an agent instruction file (CLAUDE.md, AGENTS.md, or the like), or a permission prompt, hook, or env setting that cost time. Route those as `instructions: <file> <section>` or `settings: <file>`.
 
 List each durable learning you find. For each:
 - Principle: one sentence naming the contrarian or second-order observation. Don't restate the obvious learning. Name the one beneath it.
 - Evidence: the exact moment in the transcript (turn number or short quote, including what was said AND what wasn't).
-- Routing: `edit skill: <skill> <section>`, OR `tune description: <skill>` when the skill should have triggered but didn't, OR `claude md: <file> <section>`, OR `settings: <file>`, OR `new skill: <kebab-name>`.
+- Routing: `edit skill: <skill> <section>`, OR `tune description: <skill>` when the skill should have triggered but didn't, OR `instructions: <file> <section>`, OR `settings: <file>`, OR `new skill: <kebab-name>`.
 
 Skip trivial things. Skip anything already obvious from the existing skill the parent followed. Skip implementation details that drift: specific SHAs, current file paths, version numbers, exact byte counts. Only surface principles and patterns that survive code drift.
 

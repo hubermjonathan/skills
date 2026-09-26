@@ -57,13 +57,7 @@ Commit it only when the work is ambitious enough that a reviewer needs the trail
 
 ## Audit the log against the transcript
 
-At the end of the run, before handing back, check the log told the truth. Read this run's own transcript, found by where your agent writes it:
-
-- **Claude Code**: `~/.claude/projects/<encoded-start-dir>/<session-id>.jsonl`, where the encoded dir is the session's starting directory with `/` and `.` replaced by `-`.
-- **Codex**: `~/.codex/sessions/<yyyy>/<mm>/<dd>/rollout-*.jsonl`.
-- **Any other agent**: its own session log, if it keeps one.
-
-Take the newest file whose first user message matches this conversation, and read only the first line of any other candidate. If no transcript is reachable, audit against the conversation itself and say so in the Attention section. Walk this run's rows against what actually happened. Each stretch of them begins at one of this run's `start` rows, or at the first row if this run created the log, and ends at the next `start` row of another run:
+At the end of the run, before handing back, check the log told the truth. Read this run's own transcript. To find it, run `scripts/find-transcript.sh "<a distinctive phrase from this conversation's first user message>"`. It prints the matching session file and reads nothing from any other session. If it finds nothing, set `TRANSCRIPT_DIRS` to your agent's session store if you know it and retry. If the transcript is still out of reach, audit against the conversation in your context and say so in the Attention section. Walk this run's rows against what actually happened. Each stretch of them begins at one of this run's `start` rows, or at the first row if this run created the log, and ends at the next `start` row of another run:
 
 - Check that every row maps to a real decision or action.
 - Check that each row's evidence resolves and shows what the row claims.
@@ -73,11 +67,7 @@ Correct the log, not the story. The audit never edits or removes a row, even an 
 
 ## Independent review of the trail
 
-Before handing back, get the trail reviewed by something other than you. Self-review is not a substitute. Pick the first option that works:
-
-1. **The other agent.** A different model family catches what yours misses. From Claude Code, run `codex exec -s read-only "<review prompt>"`. From Codex, run `claude -p "<review prompt>"`. Check the CLI actually runs first (`codex --version`, `claude --version`), since a shim on `PATH` can exist without it.
-2. **A fresh subagent on a different model.** In Claude Code, an Agent call with `model` set to one the work did not run on, such as `sonnet` when the work ran on `opus`.
-3. **Neither.** Say in the Attention section that no independent review ran, and why.
+Before handing back, get the trail reviewed by a fresh subagent. Self-review is not a substitute: the reviewer starts with no memory of the work. If your agent lets you pick the subagent's model, use a different one from the model that did the work, from the same provider. If your agent has no subagents, say in the Attention section that no independent review ran.
 
 The review prompt names the log path and the transcript path, and asks for a scan, not a redo of the work. The reviewer flags what the user should pay attention to:
 

@@ -20,7 +20,7 @@ If nothing has appeared yet, wait and look again. Never guess the chain shape.
 
 1. Read the diff. It is usually a generated version bump.
 2. Decide whether it needs an env-specific change, such as a staging terraform variable override. Most do not. If one does, check out the PR branch in an infra worktree, make the smallest edit, and push to that branch.
-3. Watch it under the Monitor tool with `../../coding/babysit-pr/scripts/pr-watch.sh <pr> --repo <infra-repo>`, relative to this skill's directory.
+3. Watch it by running `../../coding/babysit-pr/scripts/pr-watch.sh <pr> --repo <infra-repo>` (relative to this skill's directory) as a background process, and handle each line it prints.
 4. Read the plan output the PR's checks post (for example a terraform plan comment). Flag anything destructive or unexpected to the user before approval.
 5. Approval must be a submitted review (`gh pr review <n> --approve`), not a comment. Bot-authored promotion PRs are often excluded from auto-approvers, and a comment never satisfies branch protection. Approve and merge only when the user said to do it on their behalf.
 6. After a merge, look for the next hop again.

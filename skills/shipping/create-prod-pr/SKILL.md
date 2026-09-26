@@ -24,7 +24,7 @@ description: >
 - The terraform plan lands as a PR comment. Read it and flag anything destructive or unexpected, such as a dropped KMS key or a replaced resource.
 - Prod needs env-specific values sometimes, such as a terraform variable override. Make the smallest edit on the PR's branch and push.
 - If the user asks for a changelog, put a short non-technical list of what changed in each version between the prod version and the new one (inclusive) in the PR body.
-- You authored these PRs, so you cannot approve them, and `auto-merge-disabler` strips auto-merge on `**/prod/**`. They need a teammate's review and a direct merge. Offer the review ask: Call the Skill tool with "slack".
-- Offer a change ticket per service: Call the Skill tool with "create-ticket".
+- You authored these PRs, so you cannot approve them, and `auto-merge-disabler` strips auto-merge on `**/prod/**`. They need a teammate's review and a direct merge. Offer the review ask: Invoke the `slack` skill.
+- Offer a change ticket per service: Invoke the `create-ticket` skill.
 
 Reply with one line per service: service, version, PR url.

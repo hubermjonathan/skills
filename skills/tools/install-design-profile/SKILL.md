@@ -2,7 +2,6 @@
 name: install-design-profile
 description: Install or update a design profile for HTML artifacts.
 disable-model-invocation: true
-allowed-tools: [Bash, Read, Glob, Grep]
 ---
 
 # Install a design profile
@@ -81,7 +80,7 @@ The script's last line says whether the profile it just installed is the one tha
 **used**. Installing `acme` while another profile is selected changes nothing on screen — the single
 most likely confusion here, so pass that line along rather than only saying "installed".
 
-To switch, run `/skills:switch-design-profile <name>`, or write the name into
+To switch, run the `switch-design-profile` skill with the profile name, or write the name into
 `~/.claude/artifact-design-profile` by hand.
 
 Also warn that a re-install **overwrites** a profile's files: profiles are a shared source of truth, so
@@ -99,5 +98,5 @@ runs this itself, so a clean install has already proven the profile loads.
 ## Authoring a profile from scratch
 
 Not this skill's job — it installs files that already exist. To build a profile by mining a design
-system, use `/skills:create-design-profile`; it mines and writes the profile itself, so it does not
+system, use the `create-design-profile` skill; it mines and writes the profile itself, so it does not
 come back through here.

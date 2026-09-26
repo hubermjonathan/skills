@@ -47,7 +47,7 @@ esac
 if [ "$NAME" != none ] && [ ! -d "$PROFILES/$NAME" ]; then
   echo "profile '$NAME' is not installed." >&2
   echo "installed: $(installed)" >&2
-  echo "install it with the /skills:install-design-profile skill, or use 'none' to opt out." >&2
+  echo "install it with the install-design-profile skill, or use 'none' to opt out." >&2
   exit 1
 fi
 

@@ -1,0 +1,3 @@
+interface:
+  display_name: "technical writing"
+  short_description: "layered standard for chat, docs, prs, and commits"

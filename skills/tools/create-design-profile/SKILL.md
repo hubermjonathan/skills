@@ -2,7 +2,6 @@
 name: create-design-profile
 description: Build a new design profile by mining a design system for its real values.
 disable-model-invocation: true
-allowed-tools: [Bash, Read, Grep, Glob, Write, Agent, Task]
 ---
 
 # Create a design profile
@@ -124,6 +123,6 @@ sh ../design-profile/scripts/profile.sh <name>
 Passing the name asks about that profile specifically, without disturbing whichever one is currently
 active. Exit 0 with the three paths printed means done. Exit 1 means a file is missing or empty — fix
 it, don't report success. Then tell the person the profile is installed but **not active** until they run
-`/skills:switch-design-profile <name>`.
+the `switch-design-profile` skill with the profile name.
 
-`/skills:install-design-profile` is for files that already exist somewhere else; you don't need it here.
+the `install-design-profile` skill is for files that already exist somewhere else; you don't need it here.

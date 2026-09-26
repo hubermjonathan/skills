@@ -61,9 +61,10 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 |-------|--------------|--------------|
 | [`caveman`](skills/thinking/caveman/SKILL.md) | compressed response style. cuts output tokens, keeps technical substance. levels: lite, full, ultra | no |
 | [`grill-me`](skills/thinking/grill-me/SKILL.md) | interviews you round by round to stress-test a plan, decision, or idea | no |
-| [`reflect`](skills/thinking/reflect/SKILL.md) | mines the session so far and turns learnings into skill, claude md, or settings edits. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | yes |
-| [`show-me-your-work`](skills/thinking/show-me-your-work/SKILL.md) | keeps a tsv decision log for long or unattended runs, reviewed by the other agent (codex or claude) when installed. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | no |
+| [`reflect`](skills/thinking/reflect/SKILL.md) | mines the session so far and turns learnings into skill, instruction file, or settings edits. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | yes |
+| [`show-me-your-work`](skills/thinking/show-me-your-work/SKILL.md) | keeps a tsv decision log for long or unattended runs. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | no |
 | [`swarm`](skills/thinking/swarm/SKILL.md) | fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | no |
+| [`technical-writing`](skills/thinking/technical-writing/SKILL.md) | layered writing standard for chat replies, docs, prs, tickets, and commits. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | no |
 | [`unslop`](skills/thinking/unslop/SKILL.md) | rewrites text to strip ai writing tells | no |
 | [`writing-for-agents`](skills/thinking/writing-for-agents/SKILL.md) | writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions. adapted from [mattpocock/skills](https://github.com/mattpocock/skills), mit | no |
 | [`create-ticket`](skills/planning/create-ticket/SKILL.md) | drafts and files work, bug, and change tickets | no |
@@ -73,6 +74,7 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 | [`git`](skills/coding/git/SKILL.md) | branch, worktree, commit, and cleanup conventions | no |
 | [`kill-comments`](skills/coding/kill-comments/SKILL.md) | deletes code comments and "what" docs so code is the what and docs are the why | no |
 | [`open-pr`](skills/coding/open-pr/SKILL.md) | opens a draft pr with a fixed title and body format | no |
+| [`principles`](skills/coding/principles/SKILL.md) | six code-level principles `write-code` reads before building. adapted from [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), mit | no |
 | [`push-pr`](skills/coding/push-pr/SKILL.md) | pushes to an open pr, then fixes its title and body to match | no |
 | [`review-code`](skills/coding/review-code/SKILL.md) | reviews a pr against its ticket, optionally fixes the findings | no |
 | [`write-code`](skills/coding/write-code/SKILL.md) | smallest change that solves the problem, then a simplification pass | no |
