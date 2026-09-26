@@ -13,7 +13,7 @@ description: >
 2. Update from the base when it conflicts or the repo requires an up-to-date branch: `git fetch`, then `git merge origin/<base>`. Merge rather than rebase, so no force-push is needed on a reviewed PR. Rebase only when the user asks. Call the Skill tool with "git" first. Resolve conflicts by keeping both sides' intent, and never abort.
 3. Recheck the version bump. If the base has moved past the branch's version, or a conflict landed in a version file, re-bump once relative to the new base. Call the Skill tool with "open-pr" for the bump rules.
 4. If this push answers review comments, reply to them first. Call the Skill tool with "comment-pr".
-5. Remove any code comments, debug output, or stray files the new commits added.
+5. Remove debug output and stray files the new commits added. For comments and docs, call the Skill tool with "kill-comments".
 6. Run the narrowest build, lint, and tests that cover what changed since the last push.
 7. Check what will ship, not the working tree: `git diff --cached` before committing, and `git diff origin/<head>...HEAD` before pushing. A stray unstaged edit means the commit does not hold what you just checked.
 

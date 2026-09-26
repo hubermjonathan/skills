@@ -68,6 +68,7 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 | [`babysit-pr`](skills/coding/babysit-pr/SKILL.md) | drives a pr to green checks, answered comments, and approval | no |
 | [`comment-pr`](skills/coding/comment-pr/SKILL.md) | reads every kind of pr comment and replies in the right place | no |
 | [`git`](skills/coding/git/SKILL.md) | branch, worktree, commit, and cleanup conventions | no |
+| [`kill-comments`](skills/coding/kill-comments/SKILL.md) | deletes code comments and "what" docs so code is the what and docs are the why | no |
 | [`open-pr`](skills/coding/open-pr/SKILL.md) | opens a draft pr with a fixed title and body format | no |
 | [`push-pr`](skills/coding/push-pr/SKILL.md) | pushes to an open pr, then fixes its title and body to match | no |
 | [`review-code`](skills/coding/review-code/SKILL.md) | reviews a pr against its ticket, optionally fixes the findings | no |
