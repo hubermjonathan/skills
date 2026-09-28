@@ -1,6 +1,6 @@
 ---
 name: design-profile
-description: "Use whenever building, editing, or reviewing an HTML artifact — any self-contained HTML page, whether published through an artifact tool or saved as a file, including dashboards, reports, charts, trackers, timelines, calculators, landing pages, and one-off interactive tools. Load it before writing the page's markup or choosing any color, font, spacing, or radius, not after. It supplies the styling system every artifact should use — the active design profile's grammar, design tokens, and icon sprite, selected by the ~/.claude/artifact-design-profile mode file and defaulting to 'offerup'. When the selected profile is 'none' the skill stands down and applies nothing."
+description: "Use whenever building, editing, or reviewing an HTML artifact — any self-contained HTML page, whether published through an artifact tool or saved as a file, including dashboards, reports, charts, trackers, timelines, calculators, landing pages, and one-off interactive tools. Load it before writing the page's markup or choosing any color, font, spacing, or radius, not after. It supplies the styling system every artifact should use — the active design profile's grammar, design tokens, and icon sprite, selected by the ~/.claude/artifact-design-profile mode file and defaulting to 'offerup'. A profile name passed as the skill's argument, or named by the user for this page, overrides the default for that page only. When the selected profile is 'none' the skill stands down and applies nothing."
 ---
 
 # Apply a design profile
@@ -12,13 +12,18 @@ This is the default styling path for artifacts, not an occasional exception: a p
 its own colors and spacing when a profile is active is the failure mode this exists to prevent. Resolve
 the profile *before* writing markup, so the tokens shape the page rather than getting retrofitted onto it.
 
-## Step 1 — resolve the active profile
+## Step 1 — resolve the profile
+
+Check for an override first. The user overrides the default for this page by passing a profile name as the skill's argument (`design-profile offerup`, `design-profile none`) or by naming one in the request ("use the offerup profile", "no design profile"). "No design profile" and similar mean `none`.
 
 ```sh
-sh scripts/profile.sh
+sh scripts/profile.sh <override>   # an override was given
+sh scripts/profile.sh              # no override: the active profile
 ```
 
-It prints the profile name, where it came from, and absolute paths to that profile's files. The
+An override applies to this page only. It never writes the mode file, so the next page goes back to the default. To change the default, use the `switch-design-profile` skill.
+
+Either form prints the profile name, where it came from, and absolute paths to that profile's files. The
 selection lives in the mode file `~/.claude/artifact-design-profile` — one profile name on one line —
 and is `offerup` when that file is absent or empty. The file is read on every run, so
 the `switch-design-profile` skill applies to the next artifact with no restart.
@@ -31,7 +36,7 @@ Act on its exit code:
   misconfiguration, so don't offer to fix it, don't suggest installing a profile, and don't mention
   the profile machinery in your answer.
 - **1** — the named profile isn't installed; it lists what is available. Do not silently fall back to
-  a different profile; say which one was requested and stop.
+  a different profile, including the default when an override was given; say which one was requested and stop.
 
 ## Step 2 — read and apply
 

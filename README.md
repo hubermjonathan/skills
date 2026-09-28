@@ -82,7 +82,7 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 | [`walk-test-plan`](skills/shipping/walk-test-plan/SKILL.md) | walks a test plan one step at a time, recording each result | no |
 | [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | writes a staging test plan a later session can run | no |
 | [`create-design-profile`](skills/tools/create-design-profile/SKILL.md) | mines a design system into a new profile | yes |
-| [`design-profile`](skills/tools/design-profile/SKILL.md) | styles html artifacts with the active design profile's tokens and rules | no |
+| [`design-profile`](skills/tools/design-profile/SKILL.md) | styles html artifacts with the active design profile's tokens and rules. pass a profile name, or `none`, to override the default for one page | no |
 | [`install-design-profile`](skills/tools/install-design-profile/SKILL.md) | installs or updates a design profile from local files | yes |
 | [`slack`](skills/tools/slack/SKILL.md) | drafts and sends short slack messages | no |
 | [`switch-design-profile`](skills/tools/switch-design-profile/SKILL.md) | switches the active design profile, or turns profiles off | yes |
