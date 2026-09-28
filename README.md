@@ -78,7 +78,8 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 | [`review-code`](skills/coding/review-code/SKILL.md) | reviews a pr against its ticket, optionally fixes the findings | no |
 | [`write-code`](skills/coding/write-code/SKILL.md) | smallest change that solves the problem, then a simplification pass | no |
 | [`create-prod-pr`](skills/shipping/create-prod-pr/SKILL.md) | opens a prod promotion pr per service, sets up review and tickets | no |
-| [`deploy-prod`](skills/shipping/deploy-prod/SKILL.md) | merges an approved prod pr, watches its actions, then watches the rollout in datadog by version and closes the change ticket after a 30 minute soak | no |
+| [`deploy-prod`](skills/shipping/deploy-prod/SKILL.md) | merges an approved prod pr, watches its actions, then hands off to `monitor-prod` | no |
+| [`monitor-prod`](skills/shipping/monitor-prod/SKILL.md) | watches a prod rollout in datadog by version, flags regressions, closes the change ticket after a 30 minute soak. starts from a pr, a ticket, or a service and version | no |
 | [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | follows ci promotion prs until the change is on staging | no |
 | [`walk-test-plan`](skills/shipping/walk-test-plan/SKILL.md) | walks a test plan one step at a time, recording each result | no |
 | [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | writes a staging test plan a later session can run | no |

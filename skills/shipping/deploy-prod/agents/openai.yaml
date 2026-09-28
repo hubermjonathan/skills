@@ -1,3 +1,3 @@
 interface:
   display_name: "deploy prod"
-  short_description: "merge a prod pr, watch actions and the rollout"
+  short_description: "merge a prod pr, watch its actions, then monitor"
