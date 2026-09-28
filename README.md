@@ -80,6 +80,7 @@ the repo carries a portable [`plugin.json`](plugin.json) and a codex marketplace
 | [`create-prod-pr`](skills/shipping/create-prod-pr/SKILL.md) | opens a prod promotion pr per service, sets up review and tickets | no |
 | [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | follows ci promotion prs until the change is on staging | no |
 | [`walk-test-plan`](skills/shipping/walk-test-plan/SKILL.md) | walks a test plan one step at a time, recording each result | no |
+| [`watch-prod-deploy`](skills/shipping/watch-prod-deploy/SKILL.md) | watches a prod rollout in datadog version against version, flags regressions, closes the change ticket after a 30 minute soak | no |
 | [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | writes a staging test plan a later session can run | no |
 | [`create-design-profile`](skills/tools/create-design-profile/SKILL.md) | mines a design system into a new profile | yes |
 | [`design-profile`](skills/tools/design-profile/SKILL.md) | styles html artifacts with the active design profile's tokens and rules. pass a profile name, or `none`, to override the default for one page | no |
