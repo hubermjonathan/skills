@@ -81,6 +81,6 @@ The deploy succeeded when the old version has had no traffic for a full check, t
 
 Then:
 
-1. Post a short non-technical comment on the change ticket: the version deployed, the soak time, and that errors and latency held steady against the previous version.
+1. Post a comment on the change ticket, written with the `brief` skill: the version deployed, the soak time, and that errors and latency held steady against the previous version.
 2. Close the ticket. Read the ticket's available transitions and take the one that completes it, such as Done, Closed, or Complete. If none clearly does, ask the user which to use.
 3. Tell the user in two lines: the result, and the ticket link.

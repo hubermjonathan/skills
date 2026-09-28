@@ -24,8 +24,8 @@ The user's instructions on titles and bodies win over the defaults below.
 All lowercase prose, `##` headers in lowercase, sections in this order:
 
     ## context
-    1 to 4 non-technical sentences: the problem in plain words, what was tried before if
-    relevant, and what this change does about it. readable by a pm.
+    the problem, what was tried before if relevant, and what this change does about it,
+    written with the `brief` skill for a pm, 1 to 4 sentences.
 
     ## why
     the technical reason, short. evidence when it helps: numbers, error text, a linked

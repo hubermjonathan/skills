@@ -23,7 +23,7 @@ description: >
 **Change ticket for a prod deploy.** One per service, with these fields:
 
 - type `Change`, title `deploy {service} v{version} to prod`
-- description: 1 to 2 non-technical sentences, specific to that service, readable by someone approving the change without knowing the codebase. Add the prod promotion PR link.
+- description: what changed for that service, written with the `brief` skill for a change approver who does not know the codebase. Add the prod promotion PR link.
 - change impact description: the same text
 - change verified in staging: `Yes`
 - planned start date: the next working day at 11:00 local, unless the user gives one
@@ -34,7 +34,7 @@ Once created, move it to review if the user asks.
 
 ## Rules
 
-- Keep it short. A reader should get the ask in ten seconds.
+- Write every description with the `brief` skill. A reader should get the ask in ten seconds.
 - Link every blocked and blocking ticket you know of. Ask if the relationship is unclear.
 - Show the draft (type, title, fields, description) and create only after the user confirms, unless they already said to create it.
 - If a create fails with a permission error on one Atlassian tool, try the other connected Atlassian tool before giving up.
