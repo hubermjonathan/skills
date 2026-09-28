@@ -28,3 +28,5 @@ description: >
 - Offer a change ticket per service: Invoke the `create-ticket` skill.
 
 Reply with one line per service: service, version, PR url.
+
+Once a teammate approves a prod PR, invoke the `deploy-prod` skill on it.
