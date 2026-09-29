@@ -30,6 +30,8 @@ description: >
 - assignee: the user
 - sprint: the team's active sprint, unless the user names one
 
+After creating it, link it to the original ticket, the one the work was for. Find that key in the prod promotion PR's title or description, and ask if there is none or more than one. Add a linked work item on the change ticket so it reads "Is the Release for" the original: link type `Released`, with the original as the inward issue and the change ticket as the outward issue. The original then reads "Is released in" the change ticket. Check the link from the change ticket's side before moving on.
+
 Once created, move it to review if the user asks.
 
 ## Rules
