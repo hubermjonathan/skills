@@ -2,8 +2,8 @@
 name: create-prod-pr
 description: >
   Open the OfferUp prod promotion PR in mono-repo-infra for each service a change
-  touched, with `gh ou promote`. Use when the user says "create the prod pr",
-  "open the prod prs", "promote to prod", or "make the prod prs".
+  touched, with `gh ou promote`. Use when a change that has passed staging needs its
+  prod promotion PRs opened.
 ---
 
 ## Per service

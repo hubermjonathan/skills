@@ -1,10 +1,10 @@
 ---
 name: deploy-prod
 description: >
-  Take an approved prod promotion PR to prod: merge it, watch the GitHub Actions
-  the merge starts, then hand off to the `monitor-prod` skill. Stops and flags the
-  user on a failed check or run. Use when the user says "deploy this prod pr",
-  "ship it to prod", or "merge the prod pr and watch it".
+  Take an approved prod promotion PR to prod: merge it, watch the GitHub Actions the
+  merge starts, then hand off to the `monitor-prod` skill. Stops and flags the user
+  on a failed check or run. Use when an approved prod promotion PR needs merging and
+  deploying.
 ---
 
 # Deploy to prod

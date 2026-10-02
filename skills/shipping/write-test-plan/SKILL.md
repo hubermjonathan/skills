@@ -2,8 +2,8 @@
 name: write-test-plan
 description: >
   Write a staging test plan for a change that another session can walk the user
-  through, doing as much of it as it can alone. Use when the user says "write a
-  test plan", "how do we test this on staging", or wants a plan for a later session.
+  through, doing as much of it as it can alone. Use when a change needs a test plan
+  for staging, or a plan a later session can run.
 ---
 
 Write the plan for the code as it stands now, after any review fixes, not as the plan intended it.

@@ -1,10 +1,9 @@
 ---
 name: open-pr
 description: >
-  Open a pull request with a short title and a body in a fixed format. Use when the
-  user says "open a pr", "make a pr", "create a pr", "put this up for review", after
-  finishing a change that needs review, or when another skill needs the PR title and
-  body format.
+  Open a pull request with a short title and a body in a fixed format. Use when
+  asked to open a PR or put a change up for review, after finishing a change that
+  needs review, or when another skill needs the PR title and body format.
 ---
 
 The user's instructions on titles and bodies win over the defaults below.

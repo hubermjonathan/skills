@@ -2,8 +2,7 @@
 name: git
 description: >
   Branch, worktree, commit, and cleanup conventions. Use when making a branch or
-  worktree, committing, pushing, or when the user says "commit this", "make a
-  branch", "clean up branches", "clean up worktrees", or "clean up local".
+  worktree, committing, pushing, or cleaning up local branches and worktrees.
 ---
 
 The user's instructions on naming win over everything below. These are the defaults.

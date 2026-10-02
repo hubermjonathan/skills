@@ -24,8 +24,9 @@ so it never differs by agent.
 
 **model-invoked** is the default: the model can reach for it on its own. omit
 `disable-model-invocation` from the frontmatter and the `policy` block from `agents/openai.yaml`.
-the `description` is model-facing, so it keeps trigger phrasing ("use when the user says...")
-that auto-invocation matches against.
+the `description` is model-facing. it says when to use the skill as cases ("use when asked to
+babysit a pr, get its checks passing, or get it ready to merge"), never as quoted phrases to
+match: the agent infers from the situation rather than matching strings.
 
 **user-invoked** means only the human typing its name can fire it, never the model. set both:
 

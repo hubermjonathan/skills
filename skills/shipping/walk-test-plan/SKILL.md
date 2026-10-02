@@ -2,8 +2,8 @@
 name: walk-test-plan
 description: >
   Walk the user through a test plan one step at a time, doing the steps it can
-  itself and recording each result as it goes. Use when the user says "walk me
-  through the test plan", "let's run the test plan", or points at a test plan file.
+  itself and recording each result as it goes. Use when asked to run or walk through
+  a test plan, or when handed a test plan file to execute.
 ---
 
 1. Read the plan. If it has a setup section, prompt the user through their part and do yours. Never assume setup was done in an earlier session. Verify every precondition before step 1.

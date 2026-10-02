@@ -1,10 +1,9 @@
 ---
 name: swarm
 description: >
-  Fan out N parallel workers, drain them, and return one report. Use for /swarm,
-  "swarm this", multi-reviewer code review, parallel coverage of separate slices,
-  races on the same brief, or exploration, and when another skill needs parallel
-  workers.
+  Fan out N parallel workers, drain them, and return one report. Use for multi-
+  reviewer code review, parallel coverage of separate slices, races on the same
+  brief, or parallel exploration, and when another skill needs parallel workers.
 ---
 
 # Swarm

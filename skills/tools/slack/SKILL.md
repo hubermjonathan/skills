@@ -2,8 +2,8 @@
 name: slack
 description: >
   Draft and send Slack messages: review asks, status updates, questions to a
-  teammate, and ticket links posted into a thread. Use when the user says "send on
-  slack", "message <person>", "post in <channel>", or "draft a slack message".
+  teammate, and ticket links posted into a thread. Use when asked to message a
+  person, post in a channel or thread, or draft a Slack message.
 ---
 
 1. Resolve every target before writing. Look up the channel id with a channel search and each person's user id with a user search. Never post to a channel name you have not resolved, and ask if a search returns more than one match.

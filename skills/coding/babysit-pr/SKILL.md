@@ -2,8 +2,8 @@
 name: babysit-pr
 description: >
   Drive a pull request to mergeable: green checks, every comment answered, required
-  approval in. Use when the user says "babysit this pr", "get this pr ready to
-  merge", "watch the checks", "get checks passing", or "keep an eye on the pr".
+  approval in. Use when asked to babysit or watch a PR, get its checks passing, or
+  get it ready to merge.
 ---
 
 ## Start

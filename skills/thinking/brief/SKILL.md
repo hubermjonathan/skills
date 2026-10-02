@@ -1,11 +1,11 @@
 ---
 name: brief
 description: >
-  Turn an investigation, the session so far, or a block of text into a short,
-  plain, non-technical version for a person to read in Slack, Jira, or a PR. Use
-  when the user asks for something "brief", "concise", "short", "non-technical",
-  "in plain words", "under N words", or "for <person or channel>", and when another
-  skill needs text written for someone outside the work.
+  Turn an investigation, the session so far, or a block of text into a short, plain,
+  non-technical version for a person to read in Slack, Jira, or a PR. Use when asked
+  for a short, concise, or non-technical version of something, a summary for a
+  person or channel, or text under a length limit, and when another skill needs text
+  written for someone outside the work.
 ---
 
 # Brief

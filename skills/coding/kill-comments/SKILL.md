@@ -3,8 +3,8 @@ name: kill-comments
 description: >
   Delete code comments and "what" docs so the code is the only source of truth for
   what it does, and docs carry only the why. Use after writing or changing code,
-  before opening or pushing to a PR, or when the user says "remove the comments",
-  "kill the comments", or "clean up the docs".
+  before opening or pushing to a PR, or when asked to remove code comments or trim
+  docs down to the why.
 ---
 
 The code says what. Docs say why. A comment that restates the code is a second copy that drifts, and a comment that explains confusing code is an apology for code that should be clearer.

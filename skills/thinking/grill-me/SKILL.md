@@ -1,10 +1,10 @@
 ---
 name: grill-me
 description: >
-  Interview the user round by round to stress-test a plan, decision, or idea.
-  Use when the user says "grill me", "poke holes in this", "stress-test this",
-  "interview me", or invokes /grill-me. Also applies when a plan or decision needs
-  its open questions surfaced before any work starts.
+  Interview the user round by round to stress-test a plan, decision, or idea. Use
+  when asked to stress-test or poke holes in a plan, decision, or idea, or to be
+  interviewed about it, and when a plan or decision needs its open questions
+  surfaced before any work starts.
 ---
 
 Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.

@@ -3,8 +3,7 @@ name: write-code
 description: >
   How to implement a change: smallest code that solves the problem, repo conventions
   first, one simplification pass before handing off. Use when implementing a plan,
-  building a feature, fixing a bug, or when the user says "implement this", "build
-  it", "make the change", or "fix it".
+  building a feature, fixing a bug, or making any code change.
 ---
 
 Core principle: as little code as required to solve the problem.

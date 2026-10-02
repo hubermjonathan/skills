@@ -2,9 +2,8 @@
 name: create-ticket
 description: >
   Draft and create Jira tickets: work tickets, bugs from a Slack or PR thread, and
-  change tickets for a prod deploy. Use when the user says "make a ticket", "file a
-  ticket", "draft a ticket", "create a change ticket", or asks to capture work for
-  someone else to pick up.
+  change tickets for a prod deploy. Use when asked to draft or file a ticket, create
+  a change ticket, or capture work for someone else to pick up.
 ---
 
 ## Before writing

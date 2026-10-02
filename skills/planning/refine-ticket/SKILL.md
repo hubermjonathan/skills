@@ -2,8 +2,8 @@
 name: refine-ticket
 description: >
   Turn a ticket into an implementation plan the user agrees with, before any code is
-  written. Use when the user hands over a Jira or issue ticket and says "refine this",
-  "plan this ticket", "turn this into a plan", or wants to settle an approach first.
+  written. Use when handed a ticket to plan, or when an approach needs settling
+  before any code is written.
 ---
 
 You refine one ticket into a plan. You do not write code here.

@@ -2,8 +2,8 @@
 name: deploy-staging
 description: >
   Get a merged change onto staging through CI-generated promotion PRs in an infra
-  repo. Use when the user says "deploy to staging", "watch the staging deploy",
-  "watch for the follow-up prs", or "monitor until it hits staging".
+  repo. Use when a merged change needs to reach staging, or when asked to watch a
+  staging deploy or its follow-up promotion PRs.
 ---
 
 Merging a code PR makes CI open a promotion PR per service in the infra repo. That can take 15 minutes. Some chains have a second hop: a terraform promotion PR whose merge opens an ArgoCD or EC2 follow-up. Take the repo names, bot accounts, and deploy tooling from the user's instructions or the repo's CLAUDE.md.

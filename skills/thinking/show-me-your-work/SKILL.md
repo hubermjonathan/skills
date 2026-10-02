@@ -2,9 +2,9 @@
 name: show-me-your-work
 description: >
   Keep a reviewable decision trail for long-running or unattended work: a TSV log
-  with one row per decision (what, why, evidence, result). Use for
-  /show-me-your-work, autonomous or multi-phase runs, work a human reviews after
-  stepping away, or when another skill needs an audit trail.
+  with one row per decision (what, why, evidence, result). Use for autonomous or
+  multi-phase runs, work a human reviews after stepping away, or when another skill
+  needs an audit trail.
 ---
 
 # Show me your work

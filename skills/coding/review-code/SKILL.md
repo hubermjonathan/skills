@@ -1,9 +1,9 @@
 ---
 name: review-code
 description: >
-  Review a pull request or diff against the ticket that asked for it, then optionally
-  address the findings. Use when the user says "review this pr", "review my
-  changes", "code review", or "check this against the ticket".
+  Review a pull request or diff against the ticket that asked for it, then
+  optionally address the findings. Use when asked to review a PR or a set of
+  changes, or to check a change against its ticket.
 ---
 
 Review what was asked for against what was built.

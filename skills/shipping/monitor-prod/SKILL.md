@@ -3,9 +3,8 @@ name: monitor-prod
 description: >
   Watch a prod rollout in Datadog, version against version, until the new version
   has soaked for 30 minutes. Stops and flags the user on a regression, and on
-  success closes the change ticket. Use when the user says "monitor the prod
-  deploy", "watch the rollout", or "keep an eye on prod", or after the
-  `deploy-prod` skill finishes its merge.
+  success closes the change ticket. Use when asked to monitor or watch a prod deploy
+  or rollout, or after the `deploy-prod` skill finishes its merge.
 ---
 
 # Monitor a prod rollout
