@@ -73,8 +73,8 @@ Run `claude plugin validate . --strict` after touching either Claude manifest.
 
 ## Prose
 
-All prose uses normal sentence case: `README.md`, `AGENTS.md`, `SKILL.md` bodies, and commit
-messages.
+All prose uses normal sentence case: `README.md`, `AGENTS.md`, and `SKILL.md` bodies. Commit
+messages follow the `git` skill.
 
 No em-dashes anywhere. Rewrite the sentence with a comma, colon, period, or conjunction
 instead of substituting a character.
