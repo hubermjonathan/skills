@@ -5,8 +5,7 @@
 #
 #   sh install-profile.sh --profile NAME --grammar PATH --tokens PATH [--icons PATH]
 #
-# --profile is required; there is no default. 'offerup' is only a default in the
-# resolver, as the fallback when nothing selects a profile.
+# --profile is required; there is no default.
 #
 # Source filenames are irrelevant; each file is copied to its canonical name.
 # That makes browser-deduplicated names ("tokens (1).css") and per-system names
@@ -58,7 +57,7 @@ GRAMMAR=$(expand "${GRAMMAR}")
 TOKENS=$(expand "${TOKENS}")
 [ -n "$ICONS" ] && ICONS=$(expand "$ICONS")
 
-# The design-profile skill is a sibling under the plugin's skills/ directory, so this
+# The use skill is a sibling under the plugin's skills/ directory, so this
 # resolves wherever the plugin is checked out. Parameter expansion rather than
 # $(cd … && pwd): the path is never canonicalised, but it also never passes
 # through a command substitution, which keeps taint analysis clean.
@@ -66,7 +65,7 @@ case "$0" in
   */*) SKILLS=${0%/*}/../.. ;;
   *)   SKILLS=../.. ;;
 esac
-RESOLVER="$SKILLS/design-profile/scripts/profile.sh"
+RESOLVER="$SKILLS/use/scripts/profile.sh"
 PROFILES="$HOME/.claude/artifact-design-profiles"
 DEST="$PROFILES/$PROFILE"
 
@@ -74,7 +73,6 @@ case "$PROFILE" in
   "") echo "missing required --profile NAME — ask which design system this is; there is no default." >&2
       echo >&2; usage >&2; exit 2 ;;
   */*|.|..) echo "invalid profile name: '$PROFILE'" >&2; exit 2 ;;
-  none) echo "'none' is reserved: it means no profile at all, so it cannot be installed." >&2; exit 2 ;;
 esac
 
 # The profile store lives outside the skills, so this is the one place that
@@ -149,8 +147,7 @@ done
 [ -f "$DEST/icons.svg" ] && echo "  ok  profiles/$PROFILE/icons.svg"
 [ "$fail" = 0 ] || { echo; echo "install incomplete — see above." >&2; exit 1; }
 
-# Ask the resolver for this profile by name, so proving it loads never depends
-# on — or disturbs — whichever profile is currently active.
+# Ask the resolver for this profile by name to prove it loads.
 if [ -f "$RESOLVER" ] && sh "$RESOLVER" "$PROFILE" >/dev/null 2>&1; then
   echo "  ok  the resolver loads '$PROFILE'"
 else
@@ -160,26 +157,3 @@ fi
 echo
 echo "profile '$PROFILE' installed at $DEST"
 echo "all installed profiles: $(ls "$PROFILES" | tr '\n' ' ')"
-
-# --- is it the one that will actually be used? -----------------------------
-# Mirrors the resolver: the mode file, else the 'offerup' default.
-MODE_FILE="$HOME/.claude/artifact-design-profile"
-cur=""
-if [ -r "$MODE_FILE" ]; then
-  read -r cur <"$MODE_FILE" 2>/dev/null || :   # non-zero at EOF without a newline; value is set
-  cur=$(printf '%s' "$cur" | tr -d '[:space:]')
-fi
-
-if [ -z "$cur" ]; then
-  if [ "$PROFILE" = offerup ]; then
-    echo "no profile is selected, so the 'offerup' default means this profile is active."
-  else
-    echo "no profile is selected, so the default 'offerup' is active — NOT '$PROFILE'."
-    echo "to use it, run the switch-design-profile skill with '$PROFILE'."
-  fi
-elif [ "$cur" != "$PROFILE" ]; then
-  echo "the active profile is '$cur', so '$PROFILE' will NOT be used until you switch."
-  echo "run the switch-design-profile skill with '$PROFILE'."
-else
-  echo "the active profile is '$cur', so this profile is the one in use."
-fi

@@ -11,6 +11,11 @@
       "name": "skills",
       "source": "./",
       "description": "skills for coding agents"
+    },
+    {
+      "name": "design-profile",
+      "source": "./skills/tools/design-profile",
+      "description": "create, install, and use design profiles for html pages"
     }
   ]
 }

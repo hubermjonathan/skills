@@ -1,3 +1,0 @@
-interface:
-  display_name: "create ticket"
-  short_description: "draft and file jira tickets"

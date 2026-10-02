@@ -1,5 +1,5 @@
 ---
-name: create-design-profile
+name: create
 description: Build a new design profile by mining a design system for its real values.
 disable-model-invocation: true
 ---
@@ -111,18 +111,17 @@ mkdir -p ~/.claude/artifact-design-profiles/<name>
   icons.svg     (omit entirely if the design system has no set worth carrying)
 ```
 
-`none` is a reserved name and cannot be used. **Check whether the directory already exists first** —
+**Check whether the directory already exists first** —
 if it does, you are overwriting someone's profile, so say so and confirm before you do.
 
-Then prove it loads, using the resolver in the sibling design-profile skill:
+Then prove it loads, using the resolver in the sibling `use` skill:
 
 ```sh
-sh ../design-profile/scripts/profile.sh <name>
+sh ../use/scripts/profile.sh <name>
 ```
 
-Passing the name asks about that profile specifically, without disturbing whichever one is currently
-active. Exit 0 with the three paths printed means done. Exit 1 means a file is missing or empty — fix
-it, don't report success. Then tell the person the profile is installed but **not active** until they run
-the `switch-design-profile` skill with the profile name.
+Exit 0 with the three paths printed means done. Exit 1 means a file is missing or empty — fix it, don't
+report success. Then tell the person the profile is ready, and that pages use it by naming it to the
+`use` skill.
 
-the `install-design-profile` skill is for files that already exist somewhere else; you don't need it here.
+The `install` skill is for files that already exist somewhere else; you don't need it here.

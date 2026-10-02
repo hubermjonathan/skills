@@ -1,5 +1,5 @@
 interface:
-  display_name: "install design profile"
+  display_name: "design profile: install"
   short_description: "install or update a design profile"
 policy:
   allow_implicit_invocation: false

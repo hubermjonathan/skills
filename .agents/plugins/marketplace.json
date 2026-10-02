@@ -6,8 +6,20 @@
   "plugins": [
     {
       "name": "skills",
-      "source": { "source": "local", "path": "../.." },
+      "source": {
+        "source": "local",
+        "path": "../.."
+      },
       "description": "skills for coding agents",
+      "category": "Productivity"
+    },
+    {
+      "name": "design-profile",
+      "source": {
+        "source": "local",
+        "path": "../../skills/tools/design-profile"
+      },
+      "description": "create, install, and use design profiles for html pages",
       "category": "Productivity"
     }
   ]

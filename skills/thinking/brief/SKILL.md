@@ -42,6 +42,4 @@ Work these out from the request. Ask only when the source is unclear.
 
 Only the text, ready to paste. No preamble, no "Here's a summary", no headers, no sign-off, and no alternatives unless asked. Use a list only for items that are truly separate, such as steps or a set of links.
 
-If the user said to send or post it: invoke the `slack` skill for Slack, the `create-ticket` skill for a new ticket, or the `comment-pr` skill for a PR. Post a Jira comment with the tracker tools.
-
-The `bro` and `teach` skills in [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack) (MIT, see `LICENSE`) shaped the voice and density rules here.
+If the user said to send or post it: invoke the `slack` skill for Slack, the `create-change-ticket` skill for a change ticket, or the `comment-pr` skill for a PR. Post a Jira comment with the tracker tools.

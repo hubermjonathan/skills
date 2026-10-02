@@ -18,5 +18,3 @@ Six principles for writing code. Read the file for each one that applies to the 
 | Prove it works | before calling any change done | `prove-it-works.md` |
 | Minimize reader load | adding a layer, a wrapper, or a piece of state, or reviewing code that is hard to trace | `minimize-reader-load.md` |
 | Encode lessons in structure | writing the same instruction or fix a second time | `encode-lessons-in-structure.md` |
-
-Adapted from the principle skills in [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack), MIT licensed. See `LICENSE`.

@@ -9,6 +9,11 @@ groups, since the group never shows up in the invocation name.
 claude code does not scan nested folders, so every group folder is listed in the
 `skills` array of `.claude-plugin/plugin.json`. a new group gets a new entry there.
 
+the design profile skills are their own plugin, `design-profile`, at `skills/tools/design-profile/`,
+so they invoke as `design-profile:create`, `design-profile:install`, and `design-profile:use`. it has
+its own manifests and an entry in both marketplace files. its skills sit at
+`skills/tools/design-profile/skills/<name>/`, so their names only need to be unique inside it.
+
 ## agent agnostic
 
 every skill works in any agent that loads `SKILL.md` files. skill text names no agent's tools,

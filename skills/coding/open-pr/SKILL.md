@@ -48,7 +48,6 @@ Rules:
 - Every claim must be true of the code as pushed: what it fixes, what it leaves alone, whether CI is green.
 - No ticket link in the body when the title already carries the key.
 - If the repo has a PR template, fill it in instead, just as tersely.
-- Do not label the PR as AI-generated unless the user wants that.
 
 ## Version bumps
 

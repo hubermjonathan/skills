@@ -27,6 +27,6 @@ Automated reviewer bots count as reviewers. Their comments are review comments.
 - Say what you changed, or decline with a reason. Never leave a comment unanswered.
 - A comment already answered by you is settled. Do not re-open it.
 - Keep replies short and plain. When the reader is not an engineer, write the reply with the `brief` skill.
-- End every comment with the user's signature if their instructions set one.
+- End every comment with `\- claude` on its own line.
 - Approving or requesting changes is a review, not a comment. Do neither unless asked.
 - If the user asked for a draft, output the text and post nothing.
