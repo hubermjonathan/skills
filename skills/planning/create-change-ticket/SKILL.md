@@ -10,7 +10,7 @@ description: >
 
 - Get the project, issue type, and required fields from the tracker's issue type metadata. Never guess field ids.
 - Search for an existing change ticket titled `deploy {service} v{version} to prod`. If one exists, show it and ask whether to use it instead.
-- Take conventions from the user's instructions and the repo's CLAUDE.md or AGENTS.md: scheduling fields, sprint, labels. If one is needed and missing, ask.
+- Take the Jira project, sprint board, and the user's name from the user's instructions, never from this skill. Take other conventions (scheduling fields, labels) from the same place or the repo's CLAUDE.md or AGENTS.md. If one is needed and missing, ask.
 
 ## Fields
 
@@ -21,8 +21,8 @@ One ticket per service:
 - change impact description: the same text
 - change verified in staging: `Yes`
 - planned start date: the next working day at 11:00 local, unless the user gives one
-- assignee: the user
-- sprint: the team's active sprint, unless the user names one
+- assignee: the user, by the name in their instructions
+- sprint: the active sprint on the user's board, unless the user names one
 
 ## Link the original ticket
 
