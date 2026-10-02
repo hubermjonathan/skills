@@ -1,0 +1,3 @@
+interface:
+  display_name: "Create prod PR"
+  short_description: "Open prod promotion PRs per service"

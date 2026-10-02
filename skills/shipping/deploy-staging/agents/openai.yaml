@@ -1,0 +1,3 @@
+interface:
+  display_name: "Deploy staging"
+  short_description: "Drive promotion PRs onto staging"

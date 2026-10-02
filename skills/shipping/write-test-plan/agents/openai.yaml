@@ -1,0 +1,3 @@
+interface:
+  display_name: "Write test plan"
+  short_description: "Staging test plan a session can run"

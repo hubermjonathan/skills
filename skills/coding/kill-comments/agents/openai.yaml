@@ -1,0 +1,3 @@
+interface:
+  display_name: "Kill comments"
+  short_description: "Code is the what, docs are the why"

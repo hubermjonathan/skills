@@ -1,0 +1,3 @@
+interface:
+  display_name: "Brief"
+  short_description: "Short, plain version for Slack, Jira, or a PR"

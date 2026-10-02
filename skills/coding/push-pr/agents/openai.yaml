@@ -1,0 +1,3 @@
+interface:
+  display_name: "Push PR"
+  short_description: "Push to a PR and keep its body true"

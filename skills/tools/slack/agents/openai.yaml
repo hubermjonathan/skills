@@ -1,0 +1,3 @@
+interface:
+  display_name: "Slack"
+  short_description: "Draft and send short Slack messages"
