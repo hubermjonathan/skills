@@ -1,3 +1,3 @@
 interface:
-  display_name: "writing for agents"
-  short_description: "write skills, agent instructions, and prompts"
+  display_name: "Writing for agents"
+  short_description: "Write skills, agent instructions, and prompts"

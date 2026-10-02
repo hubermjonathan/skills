@@ -1,3 +1,3 @@
 interface:
-  display_name: "slack"
-  short_description: "draft and send short slack messages"
+  display_name: "Slack"
+  short_description: "Draft and send short Slack messages"

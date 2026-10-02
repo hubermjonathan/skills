@@ -1,3 +1,3 @@
 interface:
-  display_name: "wizard"
-  short_description: "bash wizard for steps only a human can do"
+  display_name: "Wizard"
+  short_description: "Bash wizard for steps only a human can do"

@@ -11,7 +11,7 @@ The user's instructions on naming win over everything below. These are the defau
 
 - Worktree: `<1-5-word-kebab-task-desc>`.
 - Branch: `jon/<1-5-word-kebab-task-desc>`, or `jon/<worktree-name>` inside a worktree.
-- Commit: `<scope>: <description>`, lowercase, with a subject line of 50 characters at most. The scope is the service, project, or area touched. No body unless the user asks.
+- Commit: `<scope>: <description>`, with a subject line of 50 characters at most. The scope is the service, project, or area touched. No body unless the user asks.
 
 ## Branches and worktrees
 

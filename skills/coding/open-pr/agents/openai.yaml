@@ -1,3 +1,3 @@
 interface:
-  display_name: "open pr"
-  short_description: "open a pr with a short title and body"
+  display_name: "Open PR"
+  short_description: "Open a PR with a short title and body"

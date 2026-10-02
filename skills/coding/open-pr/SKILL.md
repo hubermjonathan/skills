@@ -16,33 +16,33 @@ The user's instructions on titles and bodies win over the defaults below.
 
 ## Title
 
-`<scope>: <description>`, lowercase, 50 characters at most. The scope is the service or project touched. Append the ticket key as `(ABC-123)`, which does not count toward the limit. Omit it if there is no ticket.
+`<scope>: <description>`, 50 characters at most. The scope is the service or project touched. Append the ticket key as `(ABC-123)`, which does not count toward the limit. Omit it if there is no ticket.
 
 ## Body
 
-All lowercase prose, `##` headers in lowercase, sections in this order:
+Sections in this order:
 
-    ## context
-    the problem, what was tried before if relevant, and what this change does about it,
-    written with the `brief` skill for a pm, 1 to 4 sentences.
+    ## Context
+    The problem, what was tried before if relevant, and what this change does about it,
+    written with the `brief` skill for a PM, 1 to 4 sentences.
 
-    ## why
-    the technical reason, short. evidence when it helps: numbers, error text, a linked
-    incident. link related prs as `OfferUp/<repo>#<n>` or `#<n>`.
+    ## Why
+    The technical reason, short. Evidence when it helps: numbers, error text, a linked
+    incident. Link related PRs as `OfferUp/<repo>#<n>` or `#<n>`.
 
-    ## what
-    - one bullet per change, grouped by area of impact, not by file
-    - identifiers in backticks
-    - a version bump is one bullet here: "bump <service> to <version>"
+    ## What
+    - One bullet per change, grouped by area of impact, not by file
+    - Identifiers in backticks
+    - A version bump is one bullet here: "Bump <service> to <version>"
 
-    ## follow up
-    - only when something must happen after merge, such as an apply or a config change
+    ## Follow up
+    - Only when something must happen after merge, such as an apply or a config change
       in another repo
 
 Rules:
 
-- `context` is required when the change touches behavior a non-engineer cares about. Skip it for docs-only or purely internal changes.
-- `follow up` is optional. Leave it out rather than writing "none".
+- `Context` is required when the change touches behavior a non-engineer cares about. Skip it for docs-only or purely internal changes.
+- `Follow up` is optional. Leave it out rather than writing "none".
 - Keep it short. Most bodies fit on one screen. A table or code block goes in only when prose cannot say it as well.
 - No testing section, no versions section, no checklist, no restating the diff line by line.
 - Every claim must be true of the code as pushed: what it fixes, what it leaves alone, whether CI is green.
