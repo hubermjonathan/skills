@@ -28,7 +28,7 @@ Sections in this order:
 
     ## Why
     The technical reason, short. Evidence when it helps: numbers, error text, a linked
-    incident. Link related PRs as `OfferUp/<repo>#<n>` or `#<n>`.
+    incident. Link related PRs as `<org>/<repo>#<n>` or `#<n>`.
 
     ## What
     - One bullet per change, grouped by area of impact, not by file
@@ -53,10 +53,4 @@ Rules:
 
 Bump once per PR, measured against the base branch. If the branch already carries a bump, keep it and never bump again: `1.1.3` becomes `1.2.0` in one PR, never `1.2.1`. Use a minor bump for features and a patch bump for fixes, unless the repo says otherwise.
 
-In `mono-repo-apps`:
-
-- Bump every service the diff touches. The version lives in that service's `terraform/published.json`.
-- The graphql project is the exception: run `yarn changeset` instead of editing `published.json`.
-- Docs-only changes get no bump. Say so in one line of the body.
-
-In any other repo, follow its CLAUDE.md, AGENTS.md, or contributing guide. If it documents no versioning, bump nothing.
+Take the repo's versioning rules from its CLAUDE.md, AGENTS.md, or contributing guide, or from the user's instructions. If none document versioning, bump nothing.

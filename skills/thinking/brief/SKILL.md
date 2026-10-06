@@ -17,7 +17,7 @@ Say it the way one person tells another: the point, in plain words, as short as 
 Work these out from the request. Ask only when the source is unclear.
 
 - **Source.** What to translate. Default: the work so far in this session. It can also be the last reply, a pasted block, or a file.
-- **Reader.** Who reads it. Default: a teammate who was not part of the work and may not be an engineer, such as a PM, an analyst, or a change approver. A named person or channel sets the reader.
+- **Reader.** Who reads it. Default: a teammate who was not part of the work and may not be an engineer, such as a PM or an analyst. A named person or channel sets the reader.
 - **Destination.** Where it goes, which sets the length default below.
 - **Cap.** A limit the user gives ("under 10 words", "one sentence") is hard. Count.
 
@@ -25,7 +25,7 @@ Work these out from the request. Ask only when the source is unclear.
 |---|---|
 | Slack message | 1 to 3 sentences, plus links |
 | Jira comment | 2 to 4 sentences |
-| Jira description or change impact | 1 to 2 sentences |
+| Jira description | 1 to 2 sentences |
 | PR comment | 1 to 2 sentences |
 | Changelog | one line per change |
 | Chat, no destination | as short as the question allows |
@@ -42,4 +42,4 @@ Work these out from the request. Ask only when the source is unclear.
 
 Only the text, ready to paste. No preamble, no "Here's a summary", no headers, no sign-off, and no alternatives unless asked. Use a list only for items that are truly separate, such as steps or a set of links.
 
-If the user said to send or post it: invoke the `slack` skill for Slack, the `create-change-ticket` skill for a change ticket, or the `comment-pr` skill for a PR. Post a Jira comment with the tracker tools.
+If the user said to send or post it, invoke the `slack` skill for Slack or the `comment-pr` skill for a PR. Post to Jira with the tracker tools.
