@@ -24,7 +24,7 @@ Sections in this order:
 
     ## Context
     The problem, what was tried before if relevant, and what this change does about it,
-    written with the `brief` skill for a PM, 1 to 4 sentences.
+    in 1 to 4 plain, non-technical sentences a PM can read.
 
     ## Why
     The technical reason, short. Evidence when it helps: numbers, error text, a linked
