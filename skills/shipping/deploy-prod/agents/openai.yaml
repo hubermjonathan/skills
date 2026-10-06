@@ -1,3 +1,0 @@
-interface:
-  display_name: "Deploy prod"
-  short_description: "Merge a prod PR, watch its actions, then monitor"

@@ -1,3 +1,0 @@
-interface:
-  display_name: "Monitor prod"
-  short_description: "Watch a prod rollout by version, close the ticket"

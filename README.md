@@ -77,8 +77,6 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`push-pr`](skills/coding/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
 | [`review-code`](skills/coding/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
 | [`write-code`](skills/coding/write-code/SKILL.md) | Smallest change that solves the problem, then a simplification pass | No |
-| [`deploy-prod`](skills/shipping/deploy-prod/SKILL.md) | Merges an approved prod PR, watches its actions, then hands off to `monitor-prod` | No |
-| [`monitor-prod`](skills/shipping/monitor-prod/SKILL.md) | Watches a prod rollout in Datadog by version, flags regressions, closes the change ticket after a 30 minute soak. Starts from a PR, a ticket, or a service and version | No |
 | [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | Checks, approves, and merges a build's staging promotion PRs until the change is live | No |
 | [`run-test-plan`](skills/shipping/run-test-plan/SKILL.md) | Runs a test plan against an environment and records evidence for each step | No |
 | [`test-snapshot`](skills/shipping/test-snapshot/SKILL.md) | Deploys a PR's pre-release build to staging, tests before and after, and restores staging | No |
