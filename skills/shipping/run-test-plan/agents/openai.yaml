@@ -1,0 +1,3 @@
+interface:
+  display_name: "Run test plan"
+  short_description: "Run a test plan and record evidence per step"
