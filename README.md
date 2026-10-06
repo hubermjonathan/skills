@@ -67,7 +67,6 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`technical-writing`](skills/thinking/technical-writing/SKILL.md) | Layered writing standard for chat replies, docs, PRs, tickets, and commits | No |
 | [`unslop`](skills/thinking/unslop/SKILL.md) | Rewrites text to strip AI writing tells | No |
 | [`writing-for-agents`](skills/thinking/writing-for-agents/SKILL.md) | Writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions | No |
-| [`create-change-ticket`](skills/planning/create-change-ticket/SKILL.md) | Creates the prod change ticket per service, linked to the original ticket | No |
 | [`refine-ticket`](skills/planning/refine-ticket/SKILL.md) | Turns a ticket into a plan you agree with before any code | No |
 | [`babysit-pr`](skills/coding/babysit-pr/SKILL.md) | Drives a PR to green checks, answered comments, and approval | No |
 | [`comment-pr`](skills/coding/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
@@ -78,7 +77,6 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`push-pr`](skills/coding/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
 | [`review-code`](skills/coding/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
 | [`write-code`](skills/coding/write-code/SKILL.md) | Smallest change that solves the problem, then a simplification pass | No |
-| [`create-prod-pr`](skills/shipping/create-prod-pr/SKILL.md) | Opens a prod promotion PR per service, sets up review and tickets | No |
 | [`deploy-prod`](skills/shipping/deploy-prod/SKILL.md) | Merges an approved prod PR, watches its actions, then hands off to `monitor-prod` | No |
 | [`monitor-prod`](skills/shipping/monitor-prod/SKILL.md) | Watches a prod rollout in Datadog by version, flags regressions, closes the change ticket after a 30 minute soak. Starts from a PR, a ticket, or a service and version | No |
 | [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | Checks, approves, and merges a build's staging promotion PRs until the change is live | No |
