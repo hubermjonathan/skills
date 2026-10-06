@@ -28,7 +28,7 @@ The ticket is fair game. It's the requirement, written before the code.
 
     <this skill's directory>/scripts/gather.sh <pr> [out-dir]
 
-Run it inside a checkout of the PR's repo, because it reads the repo's version files and callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `callers.tsv`, `release-plumbing.txt`, and `commit-subjects.txt`.
+Run it inside a checkout of the PR's repo, because it reads the repo's version files and callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `ticket-key.txt`, `callers.tsv`, `release-plumbing.txt`, and `commit-subjects.txt`.
 
 Read the whole diff. Take `file:line` citations from `pr-numbered.diff`, which numbers each line as it is at the PR's head. If it's too large to hold at once, read it per cohort after step 2, but classify from `files.tsv` plus each file's hunk headers first.
 

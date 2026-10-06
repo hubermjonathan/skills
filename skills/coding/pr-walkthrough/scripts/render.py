@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-"""Render a PR walkthrough page from its data file.
-
-usage: render.py <data.json> <gather-dir> <out.html> [--css <extra.css>]
-
-The data file holds what only the reader of the diff can write (see
-reference/page-data.md). The layout, the progress bar, the collapsible blocks,
-the counts, and the reading checkboxes come from here and from gather.sh's
-meta.json and files.tsv. Errors go to stderr with exit 1. Fix the data and run
-it again.
-"""
 import html
 import json
 import re
@@ -119,7 +109,7 @@ def cohort_section(c, links):
 
 def main(argv):
     if len(argv) < 4:
-        sys.exit(__doc__)
+        sys.exit("usage: render.py <data.json> <gather-dir> <out.html> [--css <extra.css>]")
     data = json.load(open(argv[1]))
     gather, out = argv[2], argv[3]
     extra_css = open(argv[argv.index("--css") + 1]).read() if "--css" in argv else ""

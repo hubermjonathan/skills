@@ -1,11 +1,4 @@
 #!/bin/sh
-# Sends stdin as an iMessage to $IMESSAGE_HANDLE.
-# Usage: send.sh <<'MSG'
-#        <message>
-#        MSG
-#
-# Exit codes: 0 = sent, 1 = Messages refused the send, 2 = bad input or setup.
-
 handle=$(printf '%s' "${IMESSAGE_HANDLE:-}" | tr -d '[:space:]')
 if [ -z "$handle" ]; then
   echo "not sent: IMESSAGE_HANDLE is not set. Set it to a phone number in E.164 form (+11234567890) or an Apple ID email." >&2

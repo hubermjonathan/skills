@@ -1,9 +1,4 @@
 #!/bin/sh
-# Resolves a named design profile and prints the paths to its files.
-#
-#   sh profile.sh <name>
-#
-# Exit codes: 0 = resolved, 1 = not installed or incomplete, 2 = no name given.
 set -u
 
 PROFILES="$HOME/.claude/artifact-design-profiles"
@@ -37,7 +32,7 @@ echo "tokens:  $PROFILES/$P/tokens.css"
 if [ -f "$PROFILES/$P/icons.svg" ]; then
   echo "icons:   $PROFILES/$P/icons.svg"
 else
-  echo "icons:   (none — this profile ships no sprite)"
+  echo "icons:   (none, this profile ships no sprite)"
 fi
 
 for f in grammar.md tokens.css; do

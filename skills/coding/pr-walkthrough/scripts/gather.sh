@@ -1,17 +1,9 @@
 #!/usr/bin/env bash
-# gather everything a pr walkthrough needs, from the diff and repo only.
-#
-# deliberately does NOT fetch the pr body, review comments, or issue comments.
-# the walkthrough describes what the code does, not what the author said it does.
-#
-# usage: gather.sh <pr-number-or-url> [out-dir]
 set -uo pipefail
 
 RAW="${1:?usage: gather.sh <pr-number-or-url> [out-dir]}"
 OUT="${2:-}"
 
-# accept a url, owner/repo#number, a #number, or a bare number. the last two
-# mean the repo checked out in the current directory.
 REPO=""
 if [[ "$RAW" =~ github\.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
   REPO="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
@@ -38,25 +30,20 @@ mkdir -p "$OUT" || exit 1
 
 echo "out: $OUT"
 
-# ---- metadata. no `body`, no comments, on purpose -----------------------
 gh pr view "$PR" $REPO_FLAG --json \
   number,title,url,author,state,isDraft,baseRefName,headRefName,headRefOid,additions,deletions,changedFiles,labels,createdAt \
   > "$OUT/meta.json" || { echo "gh pr view failed" >&2; exit 1; }
 
-# ---- the diff, and a per-file table ------------------------------------
 gh pr diff "$PR" $REPO_FLAG > "$OUT/pr.diff"
 
 BASE=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["baseRefName"])' "$OUT/meta.json")
 HEAD=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["headRefOid"])' "$OUT/meta.json")
 
-# numstat with rename/status, from the diff itself so it works without a fetch
 gh api "repos/$REPO/pulls/$PR/files" --paginate \
   -q '.[] | [.status, .additions, .deletions, .filename] | @tsv' \
   > "$OUT/files.tsv" 2>/dev/null \
   || awk '/^diff --git/{f=$4; sub(/^b\//,"",f); print "modified\t0\t0\t" f}' "$OUT/pr.diff" > "$OUT/files.tsv"
 
-# ---- the diff with the head's line numbers -------------------------------
-# so a file:line citation can be read off the page instead of worked out.
 python3 - "$OUT/pr.diff" > "$OUT/pr-numbered.diff" <<'PY'
 import re, sys
 n = 0
@@ -77,15 +64,9 @@ for line in open(sys.argv[1], errors="replace"):
         print(line)
 PY
 
-# ---- commit subjects -----------------------------------------------------
-# author prose. useful only as a hint about file grouping; never a source of
-# truth for what the code does.
 gh pr view "$PR" $REPO_FLAG --json commits \
   -q '.commits[] | .messageHeadline' > "$OUT/commit-subjects.txt" 2>/dev/null || true
 
-# ---- ticket key, from the title and branch only -------------------------
-# the body is off limits, so the key has to come from somewhere the author
-# could not bury an instruction in.
 python3 - "$OUT/meta.json" > "$OUT/ticket-key.txt" <<'PY'
 import json, re, sys
 m = json.load(open(sys.argv[1]))
@@ -94,18 +75,6 @@ keys = re.findall(r'\b([A-Z][A-Z0-9]{1,9}-\d+)\b', hay.upper())
 print(keys[0] if keys else "")
 PY
 
-# ---- changed symbols -----------------------------------------------------
-# added/removed declarations, for the blast-radius grep below. intentionally
-# crude and language-agnostic: it over-collects, and the caller filters.
-grep -hE '^[+-]' "$OUT/pr.diff" \
-  | grep -vE '^(\+\+\+|---)' \
-  | grep -ohE '\b(function|def|class|interface|type|const|let|var|public|private|protected|static|func|fn)\b[^(){=;]*' \
-  | grep -ohE '[A-Za-z_][A-Za-z0-9_]{2,}' \
-  | sort -u > "$OUT/symbols-raw.txt"
-
-# ---- callers outside the diff, on the base branch -----------------------
-# one git grep for every declaration and call that the diff adds or removes in
-# non-test code, so the walkthrough's blast radius needs no greps of its own.
 if [[ -n "$IN_CHECKOUT" ]]; then
   git -C "$ROOT" fetch -q origin "$BASE" 2>/dev/null || true
   python3 - "$OUT" "origin/$BASE" "$ROOT" > "$OUT/callers.tsv" <<'PY'
@@ -171,10 +140,6 @@ else
   echo "# skipped: run gather.sh inside a checkout of $REPO to list callers" > "$OUT/callers.tsv"
 fi
 
-# ---- release plumbing the repo expects ----------------------------------
-# what sibling commits touching the same directories also changed, so the
-# walkthrough can say whether this pr follows the house convention. this reads
-# the local checkout, so it only runs inside a checkout of the pr's repo.
 {
   if [[ -z "$IN_CHECKOUT" ]]; then
     echo "# skipped: run gather.sh inside a checkout of $REPO to list version files"
@@ -204,7 +169,6 @@ gathered:
   $OUT/files.tsv             status, +, -, path
   $OUT/commit-subjects.txt   author prose, hints only
   $OUT/ticket-key.txt        $(cat "$OUT/ticket-key.txt")
-  $OUT/symbols-raw.txt       candidate changed identifiers
   $OUT/callers.tsv           where the base branch mentions each changed name, outside the diff
   $OUT/release-plumbing.txt  version/changelog files that sit above the changed dirs
 

@@ -1,8 +1,3 @@
-# Sends argv item 1 as an iMessage to the handle in argv item 2.
-#
-# Kept as a fixed script file and invoked with arguments, so message content is
-# never interpolated into this source. No `activate`: sending must not steal focus.
-
 on run argv
   with timeout of 20 seconds
     tell application "Messages"
