@@ -27,6 +27,11 @@ Automated reviewer bots count as reviewers. Their comments are review comments.
 - Say what you changed, or decline with a reason. Never leave a comment unanswered.
 - A comment already answered by you is settled. Do not re-open it.
 - Keep replies short and plain. When the reader is not an engineer, write the reply with the `brief` skill.
-- End every comment with `\- claude` on its own line.
+- Open every comment with a note naming who wrote it and for whom, then a blank line:
+
+      > [!NOTE]
+      > 🤖 **<your model's name> responding on behalf of <the user's first name>**
+
+  Take the name from the user's instructions. Watchers use this note to tell your comments from a human's.
 - Approving or requesting changes is a review, not a comment. Do neither unless asked.
 - If the user asked for a draft, output the text and post nothing.
