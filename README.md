@@ -77,9 +77,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`push-pr`](skills/coding/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
 | [`review-code`](skills/coding/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
 | [`write-code`](skills/coding/write-code/SKILL.md) | Smallest change that solves the problem, then a simplification pass | No |
-| [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | Checks, approves, and merges a build's staging promotion PRs until the change is live | No |
 | [`run-test-plan`](skills/shipping/run-test-plan/SKILL.md) | Runs a test plan against an environment and records evidence for each step | No |
-| [`test-snapshot`](skills/shipping/test-snapshot/SKILL.md) | Deploys a PR's pre-release build to staging, tests before and after, and restores staging | No |
 | [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | Writes a before and after test plan an agent can run | No |
 | [`design-profile:use`](skills/tools/design-profile/skills/use/SKILL.md) | Styles an HTML page with a named design profile | No |
 | [`design-profile:install`](skills/tools/design-profile/skills/install/SKILL.md) | Installs or updates a design profile from local files | Yes |

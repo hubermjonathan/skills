@@ -1,3 +1,0 @@
-interface:
-  display_name: "Test snapshot"
-  short_description: "Test a PR on staging before merge, before and after"
