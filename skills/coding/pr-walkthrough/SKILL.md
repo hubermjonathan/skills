@@ -28,7 +28,7 @@ The ticket is fair game. It's the requirement, written before the code.
 
     <this skill's directory>/scripts/gather.sh <pr> [out-dir]
 
-Run it inside a checkout of the PR's repo, because it lists the repo's version files from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `release-plumbing.txt`, and `commit-subjects.txt`.
+Run it inside a checkout of the PR's repo, because it reads the repo's version files and callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `callers.tsv`, `release-plumbing.txt`, and `commit-subjects.txt`.
 
 Read the whole diff. If it's too large to hold at once, read it per cohort after step 2, but classify from `files.tsv` plus each file's hunk headers first.
 
@@ -83,20 +83,22 @@ Each cohort carries:
 - **What changed:** one or two sentences, from the code.
 - **Depends on:** the earlier cohorts this one builds on, or "nothing".
 - **Behavior delta:** before and after, as two concrete lines. This is the most useful thing on the page. If behavior is unchanged, as in a pure refactor, say so.
-- **Blast radius:** who else touches the changed symbols and is *not* in this diff. Grep the repo for each changed public symbol, and subtract the changed paths. `symbols-raw.txt` only catches declarations, so also take any method whose calls the diff adds or removes. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
+- **Blast radius:** who else touches the changed symbols and is *not* in this diff. Read it from `callers.tsv`, which lists where the base branch mentions each declaration and call the diff adds or removes, outside the diff. Grep yourself only for a name it doesn't list. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
 - **Test coverage:** which behavior in this cohort has a test in this diff, and which doesn't. State the gap as a fact, not a complaint.
 - **Review focus:** 2 to 4 questions, each anchored on a `file:line`. Ask questions a reviewer can answer by reading, not rhetorical or leading ones.
 - **Only the author knows:** up to 3 questions that the diff, the ticket, and the repo can't answer, each anchored on a `file:line`. Examples: where a timeout or limit value came from, why a check was removed with nothing visible replacing it, or why the code does something no ask covers. Say what you looked for and didn't find. These are questions, not findings. Since you didn't read the PR description, it may already answer some of them, and the page says so. Leave the list out when there's nothing to ask.
 
-**A sequence diagram earns its place** when a cohort changes a call order, a fan-out, or who talks to whom. Then draw one mermaid `sequenceDiagram` in a `<pre class="mermaid">` block. Include the mermaid library unless the page's host already renders mermaid. Draw at most one diagram per cohort, and skip it when nothing about the flow changed.
+**A sequence diagram earns its place** when a cohort changes a call order, a fan-out, or who talks to whom. Then write one mermaid `sequenceDiagram` in the cohort's `diagram` field. Draw at most one per cohort, and skip it when nothing about the flow changed.
 
 ## Step 4: build the page
 
-Read `reference/page-spec.md` for the page structure, then build the page as one HTML file, with its styles and scripts inline. The only outside load allowed is the mermaid library, when the page has a diagram. If the user names a design profile, invoke the `design-profile:use` skill with it for the styling.
+Write the page data as JSON, following `reference/page-data.md`, then render it:
 
-Give each cohort, housekeeping included, a checkbox the reader ticks once they've read it, as the spec's reading progress section describes.
+    python3 <this skill's directory>/scripts/render.py <data.json> <gather-out-dir> <page.html>
 
-Give the reader numbers, such as file counts, line counts, and call-site counts, instead of adjectives.
+The renderer checks the data and prints every error. Fix the data and run it again until it writes the page. It adds the layout, the counts, the read times, and the reading checkboxes, and it loads the mermaid library only when a cohort has a diagram.
+
+If the user names a design profile, invoke the `design-profile:use` skill with it. Write a stylesheet that maps the profile's tokens onto the page's CSS variables, and pass it with `--css <file>`.
 
 Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Otherwise, write it to a working file.
 

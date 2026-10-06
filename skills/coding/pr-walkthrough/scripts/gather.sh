@@ -27,6 +27,9 @@ HERE=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)
 REPO="${REPO:-$HERE}"
 [[ -n "$REPO" ]] || { echo "no repo: pass a pr url or owner/repo#number, or run inside the pr's repo" >&2; exit 1; }
 REPO_FLAG="--repo $REPO"
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+IN_CHECKOUT=""
+[[ -n "$ROOT" && "$HERE" == "$REPO" ]] && IN_CHECKOUT=1
 
 if [[ -z "$OUT" ]]; then
   OUT="${TMPDIR:-/tmp}/pr-walkthrough-$PR"
@@ -78,13 +81,73 @@ grep -hE '^[+-]' "$OUT/pr.diff" \
   | grep -ohE '[A-Za-z_][A-Za-z0-9_]{2,}' \
   | sort -u > "$OUT/symbols-raw.txt"
 
+# ---- callers outside the diff, on the base branch -----------------------
+# one git grep for every declaration and call that the diff adds or removes in
+# non-test code, so the walkthrough's blast radius needs no greps of its own.
+if [[ -n "$IN_CHECKOUT" ]]; then
+  git -C "$ROOT" fetch -q origin "$BASE" 2>/dev/null || true
+  python3 - "$OUT" "origin/$BASE" "$ROOT" > "$OUT/callers.tsv" <<'PY'
+import collections, re, subprocess, sys
+out, ref, root = sys.argv[1:4]
+changed = [l.rstrip("\n").split("\t")[3] for l in open(f"{out}/files.tsv") if l.count("\t") == 3]
+skip = set("""if for while switch return function catch typeof new super await async yield import require
+print assert expect describe test it public private protected static final const let var class interface type
+export default void string number boolean String int long Integer Long Boolean Object List Map Set Optional
+null true false this self def fn func extends implements readonly abstract override val""".split())
+test_path = re.compile(r"(^|/)(tests?|__tests__|spec)/|\.(test|spec)\.[jt]sx?$|Tests?\.(java|kt)$|_test\.(go|py)$")
+decl_span = re.compile(r"\b(function|def|class|interface|type|const|let|var|public|private|protected|static|func|fn)\b[^(){=;]*")
+ident = re.compile(r"[A-Za-z_][A-Za-z0-9_]{2,}")
+call = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]{2,})\s*\(")
+decl = set()
+plus, minus = collections.Counter(), collections.Counter()
+path = ""
+for l in open(f"{out}/pr.diff", errors="replace"):
+    if l.startswith("diff --git"):
+        path = l.split(" b/", 1)[-1].strip()
+        continue
+    if l.startswith(("+++", "---")) or not l.startswith(("+", "-")) or test_path.search(path):
+        continue
+    text = l[1:].strip()
+    if text.startswith(("import ", "package ", "from ", "#include", "using ")):
+        continue
+    for span in decl_span.finditer(text):
+        decl.update(ident.findall(span.group(0)))
+    (plus if l.startswith("+") else minus).update(call.findall(text))
+decl -= skip
+calls = {s for s in set(plus) | set(minus) if plus[s] != minus[s]} - skip
+syms = sorted(decl | calls, key=lambda s: (-len(s), s))[:80]
+print("# symbol\tkind\thits\twhere\ttext")
+if not syms:
+    sys.exit()
+cmd = ["git", "-C", root, "grep", "-n", "-I", "-w", "-F"] + sum((["-e", s] for s in syms), []) + [ref, "--", "."] + [f":(exclude){p}" for p in changed]
+lines = subprocess.run(cmd, capture_output=True, text=True, errors="replace").stdout.splitlines()
+word = re.compile(r"\b(" + "|".join(map(re.escape, syms)) + r")\b")
+hits = collections.defaultdict(list)
+for line in lines:
+    path, num, text = line[len(ref) + 1:].split(":", 2)
+    for s in set(word.findall(text)):
+        hits[s].append(f"{path}:{num}\t{text.strip()[:120]}")
+for s in syms:
+    kind = "both" if s in decl and s in calls else "declaration" if s in decl else "call"
+    found = hits.get(s, [])
+    if not found:
+        print(f"{s}\t{kind}\t0\t-\tnothing outside the diff mentions it")
+    elif len(found) > 150:
+        print(f"{s}\t{kind}\t{len(found)}\t-\ttoo common to list")
+    else:
+        for h in found[:10]:
+            print(f"{s}\t{kind}\t{len(found)}\t{h}")
+PY
+else
+  echo "# skipped: run gather.sh inside a checkout of $REPO to list callers" > "$OUT/callers.tsv"
+fi
+
 # ---- release plumbing the repo expects ----------------------------------
 # what sibling commits touching the same directories also changed, so the
 # walkthrough can say whether this pr follows the house convention. this reads
 # the local checkout, so it only runs inside a checkout of the pr's repo.
-ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 {
-  if [[ -z "$ROOT" || "$HERE" != "$REPO" ]]; then
+  if [[ -z "$IN_CHECKOUT" ]]; then
     echo "# skipped: run gather.sh inside a checkout of $REPO to list version files"
   else
     echo "# version manifests / changelogs / changesets present near the changed files"
@@ -108,7 +171,8 @@ gathered:
   $OUT/files.tsv             status, +, -, path
   $OUT/commit-subjects.txt   author prose, hints only
   $OUT/ticket-key.txt        $(cat "$OUT/ticket-key.txt")
-  $OUT/symbols-raw.txt       candidate changed identifiers, for a blast-radius grep
+  $OUT/symbols-raw.txt       candidate changed identifiers
+  $OUT/callers.tsv           where the base branch mentions each changed name, outside the diff
   $OUT/release-plumbing.txt  version/changelog files that sit above the changed dirs
 
 base: $BASE   head: $HEAD
