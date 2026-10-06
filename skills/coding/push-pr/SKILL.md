@@ -10,7 +10,7 @@ description: >
 ## Before pushing
 
 1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,isDraft,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name, such as a promotion PR's branch in an infra repo.
-2. Update from the base when it conflicts or the repo requires an up-to-date branch: `git fetch`, then `git merge origin/<base>`. Merge rather than rebase, so no force-push is needed on a reviewed PR. Rebase only when the user asks. Invoke the `git` skill first. Resolve conflicts by keeping both sides' intent, and never abort.
+2. Update from the base when it conflicts or the repo requires an up-to-date branch: `git fetch`, then `git merge origin/<base>`. Merge rather than rebase, so no force-push is needed on a reviewed PR. Rebase only when the user asks. Resolve conflicts by keeping both sides' intent, and never abort.
 3. Recheck the version bump. If the base has moved past the branch's version, or a conflict landed in a version file, re-bump once relative to the new base. Invoke the `open-pr` skill for the bump rules.
 4. If this push answers review comments, reply to them first. Invoke the `comment-pr` skill.
 5. Remove debug output and stray files the new commits added. For comments and docs, invoke the `kill-comments` skill.

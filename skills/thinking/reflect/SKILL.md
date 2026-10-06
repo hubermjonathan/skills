@@ -53,9 +53,9 @@ Find the real file before editing anything:
 
 Then follow each approved row's routing:
 
-- `edit skill: <skill> <section>`: a one-line bullet or a corrected fact is edited directly. Anything bigger, invoke the `writing-for-agents` skill first.
-- `tune description: <skill>`: the skill existed and did not fire when it should have. Rewrite its description's triggers. Invoke the `writing-for-agents` skill first.
-- `new skill: <name>`: invoke the `writing-for-agents` skill, and a skill-authoring skill if one is installed.
+- `edit skill: <skill> <section>`: make the edit.
+- `tune description: <skill>`: the skill existed and did not fire when it should have. Rewrite its description's triggers.
+- `new skill: <name>`: create the skill.
 - `instructions: <file> <section>`: add or tighten a line in the agent instruction file the routing names (global, machine-local, or project: CLAUDE.md, AGENTS.md, or your agent's equivalent). One rule, one place. Replace a weaker existing line instead of adding a second.
 - `settings: <file>`: a hook, permission, or env change in your agent's config file. Read the agent's docs for the format before editing.
 - `structural: <mechanism>`: a script, lint rule, or check. Build it if small, otherwise it goes to Backlog.

@@ -17,5 +17,3 @@ Core principle: as little code as required to solve the problem.
 7. Simplification pass. Read your complete diff against the base branch in one go. Remove accidental complexity, dead code, and anything the ask does not require. Report what you removed.
 
 If the plan turns out to be wrong, stop and say so. Do not quietly redesign it and carry on.
-
-When the user wants it committed, invoke the `git` skill.

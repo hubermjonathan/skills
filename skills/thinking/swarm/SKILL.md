@@ -30,7 +30,7 @@ Track one todo per phase before launching anything: Frame, Fan out, Aggregate, R
 
 Spawn all N workers at once as background subagents, in one batch, so they run in parallel. Writing workers each get their own git worktree. If your agent cannot run subagents in parallel, run them one after another, each in a fresh context, and note that in the report.
 
-Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Invoke the `writing-for-agents` skill when writing the briefs. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence. A worker that can prove a defect reports `ISSUES` and lists every issue it can prove, not only the first.
+Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence. A worker that can prove a defect reports `ISSUES` and lists every issue it can prove, not only the first.
 
 In a race, briefs are identical and blind: no worker sees another's output or the parent's theory.
 

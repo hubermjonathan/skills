@@ -29,6 +29,5 @@ Only when the user asks, or when the PR is the user's own and they want it fixed
 
 - Fix what is worth fixing with the smallest change. Decline the rest with a reason.
 - Write every finding and its outcome to a working file named `<pr-number>-review.md`.
-- Before committing and pushing, invoke the `git` skill.
 
 Never post review comments, approve, or request changes unless the user asks.
