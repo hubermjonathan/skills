@@ -26,7 +26,7 @@ description: >
 - `pr_merged` or `pr_closed`: stop.
 - `watcher_died`: restart it once and say so. If it dies again, stop and report.
 
-Keep a record in `.scratch/<pr-number>-comments.md`, append-only, one section per round: every comment, and whether it was addressed (with what changed) or declined (with why).
+Keep a record in a working file named `<pr-number>-comments.md`, append-only, one section per round: every comment, and whether it was addressed (with what changed) or declined (with why).
 
 ## Done
 

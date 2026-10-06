@@ -56,6 +56,6 @@ A prompt for another session, one the user will drive, carries extra duties:
 
 When the user asks for a prompt for a new session:
 
-1. Write it to `.scratch/<slug>-prompt.md` at the repo root.
+1. Write it to a working file named `<slug>-prompt.md`.
 2. No frontmatter and no preamble about what the file is. The first line is the first instruction.
 3. Reply with the file path only, so the user can start the new session with "follow the instructions in <path>".

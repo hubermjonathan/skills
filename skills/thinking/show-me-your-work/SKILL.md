@@ -46,7 +46,7 @@ A run is one agent conversation, including its later turns and any summary of it
 
 ## Where it lives
 
-By default the log is a working artifact, not committed. Keep it at `.scratch/decisions.tsv`, or `.scratch/<task-slug>-decisions.tsv` when several efforts run at once.
+By default the log is a working file, not committed. Name it `decisions.tsv`, or `<task-slug>-decisions.tsv` when several efforts run at once.
 
 Commit it only when the work is ambitious enough that a reviewer needs the trail to trust the result.
 

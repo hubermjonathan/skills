@@ -15,7 +15,7 @@ Write the plan for the code as it stands now, after any review fixes, not as the
    - **After:** what it does with the change deployed.
 
    Running the plan before and after the deploy then shows the change and nothing else.
-4. Write it to `.scratch/<ticket-key>-test-plan.md` with these sections:
+4. Write it to a working file named `<ticket-key>-test-plan.md`, with these sections:
    - **Setup:** accounts, data, config, and ids to prepare, with exact commands and queries. List what only the user can do, such as a login, first.
    - **Preconditions:** what must be true before step 1, and how to check each one.
    - **Steps:** numbered. Each has the action, the before and after expectations, and the evidence to capture.

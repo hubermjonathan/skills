@@ -14,7 +14,7 @@ You refine one ticket into a plan. You do not write code here.
 4. Record what the grilling settles in two places:
    - Answers to requirements questions go on the ticket as comments, because the PM and the reporter read the ticket, not your files. Post them once the user approves the plan.
    - Every decision goes in the plan as a question and its answer.
-5. Write the plan to `.scratch/<ticket-key>-plan.md` at the repo root, with these sections: Problem, Approach, Files and surfaces, Out of scope, Open questions resolved.
+5. Write the plan to a working file named `<ticket-key>-plan.md`, with these sections: Problem, Approach, Files and surfaces, Out of scope, Open questions resolved.
 
 Then stop and wait for the user to approve it. Do not start implementing.
 

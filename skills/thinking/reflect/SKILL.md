@@ -68,7 +68,7 @@ Short list, no preamble:
 
 - Applied: `<file>`, what changed, one line each.
 - New skills: `<path>`, one line each.
-- Backlog: one line each. Offer to append them to `.scratch/reflect-backlog.md`.
+- Backlog: one line each. Offer to append them to a working file named `reflect-backlog.md`.
 - Dropped: one line per rejected finding, with the synthesizer's reason.
 
 Then pick the interrupted task back up where it stopped.
