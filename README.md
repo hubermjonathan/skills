@@ -81,7 +81,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`create-prod-pr`](skills/shipping/create-prod-pr/SKILL.md) | Opens a prod promotion PR per service, sets up review and tickets | No |
 | [`deploy-prod`](skills/shipping/deploy-prod/SKILL.md) | Merges an approved prod PR, watches its actions, then hands off to `monitor-prod` | No |
 | [`monitor-prod`](skills/shipping/monitor-prod/SKILL.md) | Watches a prod rollout in Datadog by version, flags regressions, closes the change ticket after a 30 minute soak. Starts from a PR, a ticket, or a service and version | No |
-| [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | Follows CI promotion PRs until the change is on staging | No |
+| [`deploy-staging`](skills/shipping/deploy-staging/SKILL.md) | Checks, approves, and merges a build's staging promotion PRs until the change is live | No |
 | [`walk-test-plan`](skills/shipping/walk-test-plan/SKILL.md) | Walks a test plan one step at a time, recording each result | No |
 | [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | Writes a staging test plan a later session can run | No |
 | [`design-profile:use`](skills/tools/design-profile/skills/use/SKILL.md) | Styles an HTML page with a named design profile | No |
