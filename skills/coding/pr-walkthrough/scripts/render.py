@@ -147,9 +147,12 @@ def main(argv):
         hn, hadd, hdel, _ = counts(hk_files)
         rows.append(f"<tr><td><a href=\"#housekeeping\">Housekeeping</a></td><td>{len(housekeeping)} files</td><td>–</td><td>{hn}</td><td>+{hadd} / -{hdel}</td><td>–</td><td>–</td></tr>")
         nav.append('<a href="#housekeeping" data-nav="housekeeping">Housekeeping</a>')
-        bump = data.get("version_bump")
-        bump_html = (f"<p>Version bump: <code>{esc(bump.get('from'))}</code> to <code>{esc(bump.get('to'))}</code>. {esc(bump.get('convention'))}</p>"
-                     if bump else "")
+        bumps = data.get("version_bump") or []
+        bumps = [bumps] if isinstance(bumps, dict) else bumps
+        bump_html = "".join(
+            f"<p>Version bump{' for <code>' + esc(b['package']) + '</code>' if b.get('package') else ''}: "
+            f"<code>{esc(b.get('from'))}</code> to <code>{esc(b.get('to'))}</code>. {esc(b.get('convention'))}</p>"
+            for b in bumps)
         sections.append(f"""
 <section id="housekeeping">
   <h2>Housekeeping <label class="check"><input type="checkbox" data-cohort="housekeeping"> I've read this</label></h2>
@@ -162,8 +165,10 @@ def main(argv):
         asks = "".join(f"<tr><td>{esc(a.get('ask'))}</td><td>{esc(a.get('status'))}</td><td><code>{esc(a.get('where'))}</code> {esc(a.get('note'))}</td></tr>"
                        for a in ticket.get("asks") or [])
         unasked = "".join(f"<li>{esc(x)}</li>" for x in ticket.get("unasked") or [])
+        asks_table = (f"<table><tr><th>Ask</th><th>In this diff</th><th>Where</th></tr>{asks}</table>" if asks
+                      else "<p>The ticket lists no asks.</p>")
         ticket_html = (f'<p><a href="{html.escape(ticket.get("url", ""))}">{esc(ticket.get("key"))}</a>: {esc(ticket.get("summary"))}</p>'
-                       f"<table><tr><th>Ask</th><th>In this diff</th><th>Where</th></tr>{asks}</table>"
+                       f"{asks_table}"
                        + (f"<p>Changes no ask covers:</p><ul>{unasked}</ul>" if unasked else ""))
     else:
         ticket_html = "<p>The PR title and branch carry no ticket key.</p>"

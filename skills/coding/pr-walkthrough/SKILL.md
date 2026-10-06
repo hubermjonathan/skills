@@ -20,7 +20,7 @@ Build one HTML page that lets a human review a PR efficiently. The page is a map
 
 **2. The PR description and comments are off limits.** Don't read the PR body, review comments, issue comments, or bot comments, and don't pass them to a subagent. `scripts/gather.sh` leaves them out by design. Every sentence on the page must trace to the diff, the ticket, or the repo, not to what the author claimed. This is the point of the tool: a reviewer who reads the description first inherits the author's framing of their own change.
 
-Commit subjects are collected, but they're author prose too. Use them only as a hint about which files belong together, never as evidence of what the code does.
+Commit subjects are collected, but they're author prose too, and so is changeset or changelog text inside the diff. Use them only as a hint about which files belong together, never as evidence of what the code does.
 
 The ticket is fair game. It's the requirement, written before the code.
 
@@ -28,15 +28,15 @@ The ticket is fair game. It's the requirement, written before the code.
 
     <this skill's directory>/scripts/gather.sh <pr> [out-dir]
 
-Run it inside a checkout of the PR's repo, because it reads the repo's version files and callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `callers.tsv`, `release-plumbing.txt`, and `commit-subjects.txt`.
+Run it inside a checkout of the PR's repo, because it reads the repo's version files and callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `callers.tsv`, `release-plumbing.txt`, and `commit-subjects.txt`.
 
-Read the whole diff. If it's too large to hold at once, read it per cohort after step 2, but classify from `files.tsv` plus each file's hunk headers first.
+Read the whole diff. Take `file:line` citations from `pr-numbered.diff`, which numbers each line as it is at the PR's head. If it's too large to hold at once, read it per cohort after step 2, but classify from `files.tsv` plus each file's hunk headers first.
 
 ## Step 2: the ticket
 
 Take the key from `ticket-key.txt`. It comes from the PR title and branch only, because the body is off limits. Fetch the ticket with the tracker tools your agent has, else the tracker's CLI, else by fetching the ticket's URL.
 
-Pull out the **asks**: the concrete things the ticket says should happen, such as proposed-fix code blocks, acceptance criteria, and numbered requirements. Drop the narrative.
+Pull out the **asks**: the concrete things the ticket says should happen, such as proposed-fix code blocks, acceptance criteria, and numbered requirements. Drop the narrative. If the ticket states no asks, leave the list empty, and the page says so.
 
 Then map each ask to the diff, and say which of three it is:
 
@@ -83,7 +83,7 @@ Each cohort carries:
 - **What changed:** one or two sentences, from the code.
 - **Depends on:** the earlier cohorts this one builds on, or "nothing".
 - **Behavior delta:** before and after, as two concrete lines. This is the most useful thing on the page. If behavior is unchanged, as in a pure refactor, say so.
-- **Blast radius:** who else touches the changed symbols and is *not* in this diff. Read it from `callers.tsv`, which lists where the base branch mentions each declaration and call the diff adds or removes, outside the diff. Grep yourself only for a name it doesn't list. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
+- **Blast radius:** who else touches the changed symbols and is *not* in this diff. Read it from `callers.tsv`, which lists where the base branch mentions each changed name outside the diff: declarations and calls the diff adds or removes, the functions its hunks sit in, and each changed source file's main name. Grep yourself only for a name it doesn't list. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
 - **Test coverage:** which behavior in this cohort has a test in this diff, and which doesn't. State the gap as a fact, not a complaint.
 - **Review focus:** 2 to 4 questions, each anchored on a `file:line`. Ask questions a reviewer can answer by reading, not rhetorical or leading ones.
 - **Only the author knows:** up to 3 questions that the diff, the ticket, and the repo can't answer, each anchored on a `file:line`. Examples: where a timeout or limit value came from, why a check was removed with nothing visible replacing it, or why the code does something no ask covers. Say what you looked for and didn't find. These are questions, not findings. Since you didn't read the PR description, it may already answer some of them, and the page says so. Leave the list out when there's nothing to ask.

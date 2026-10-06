@@ -55,6 +55,28 @@ gh api "repos/$REPO/pulls/$PR/files" --paginate \
   > "$OUT/files.tsv" 2>/dev/null \
   || awk '/^diff --git/{f=$4; sub(/^b\//,"",f); print "modified\t0\t0\t" f}' "$OUT/pr.diff" > "$OUT/files.tsv"
 
+# ---- the diff with the head's line numbers -------------------------------
+# so a file:line citation can be read off the page instead of worked out.
+python3 - "$OUT/pr.diff" > "$OUT/pr-numbered.diff" <<'PY'
+import re, sys
+n = 0
+for line in open(sys.argv[1], errors="replace"):
+    line = line.rstrip("\n")
+    m = re.match(r"@@ -\d+(?:,\d+)? \+(\d+)", line)
+    if m:
+        n = int(m.group(1))
+        print(line)
+    elif line.startswith(("diff --git", "index ", "--- ", "+++ ", "new file", "deleted file", "similarity", "rename ", "Binary")):
+        print(line)
+    elif line.startswith("-"):
+        print(f"{'':>6} {line}")
+    elif line.startswith(("+", " ")):
+        print(f"{n:>6} {line}")
+        n += 1
+    else:
+        print(line)
+PY
+
 # ---- commit subjects -----------------------------------------------------
 # author prose. useful only as a hint about file grouping; never a source of
 # truth for what the code does.
@@ -104,6 +126,13 @@ path = ""
 for l in open(f"{out}/pr.diff", errors="replace"):
     if l.startswith("diff --git"):
         path = l.split(" b/", 1)[-1].strip()
+        base = path.rsplit("/", 1)[-1].split(".")[0]
+        if not test_path.search(path) and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{2,}", base) and base not in ("index", "main", "package"):
+            decl.add(base)
+        continue
+    if l.startswith("@@") and not test_path.search(path):
+        for span in decl_span.finditer(l.split("@@", 2)[-1]):
+            decl.update(ident.findall(span.group(0)))
         continue
     if l.startswith(("+++", "---")) or not l.startswith(("+", "-")) or test_path.search(path):
         continue
@@ -160,6 +189,9 @@ fi
             d=$(dirname "$d")
           done
         done | sort -u
+    for candidate in CHANGELOG.md package.json .changeset; do
+      [[ -e "$ROOT/$candidate" ]] && echo "$candidate"
+    done
   fi
 } > "$OUT/release-plumbing.txt" 2>/dev/null
 
@@ -168,6 +200,7 @@ cat <<EOF
 gathered:
   $OUT/meta.json             title, author, refs, counts, labels (no body)
   $OUT/pr.diff               the full unified diff
+  $OUT/pr-numbered.diff      the same diff with the head's line numbers
   $OUT/files.tsv             status, +, -, path
   $OUT/commit-subjects.txt   author prose, hints only
   $OUT/ticket-key.txt        $(cat "$OUT/ticket-key.txt")
