@@ -1,6 +1,6 @@
 # Page data
 
-`scripts/render.py` builds the page from one JSON file you write. It takes the layout, the counts, the read times, the dependency links, and the reading checkboxes from its template and from `gather.sh`'s output. You write only what takes reading the diff. Text fields allow `backtick` spans for code. Every sentence must trace to the diff, the ticket, or the repo, never to the PR description.
+`scripts/render.py` builds the page from one JSON file you write. The page format is fixed: the renderer supplies the layout, the counts, the dependency links, and the reading checkboxes, using `gather.sh`'s output. You write only what takes reading the diff. Text fields allow `backtick` spans for code. Every sentence must trace to the diff, the ticket, or the repo, never to the PR description.
 
 ```json
 {
@@ -39,7 +39,7 @@
 
 - **`ticket`:** `null` when the PR title and branch carry no ticket key. `asks` is empty when the ticket states none. `status` is `addressed`, `partial`, or `not in this diff`. `where` is the `file:line` that does it, and `note` says which part is missing for `partial`. `unasked` lists substantial changes no ask covers.
 - **`cohorts`:** in reading order. `id` is kebab-case. `depends_on` lists only ids of earlier cohorts.
-- **`files`:** every path in `files.tsv` belongs to exactly one cohort or to `housekeeping`, with a role: `behavior`, `contract`, `test`, `config`, `release`, `docs`, or `generated`. A manifest change that only adds dependencies is `config`. The renderer computes file counts, line counts, and read times from these.
+- **`files`:** every path in `files.tsv` belongs to exactly one cohort or to `housekeeping`, with a role: `behavior`, `contract`, `test`, `config`, `release`, `docs`, or `generated`. A manifest change that only adds dependencies is `config`. The renderer uses these to check that every changed file is covered.
 - **`behavior`:** two concrete lines, or `null` for a pure refactor, which renders as "Behavior is unchanged."
 - **`layers`:** contract, implementation, call sites, tests, then config. `code` holds only the lines that carry the change. Give a mechanical change repeated across many files one layer with a `count`.
 - **`diagram`:** mermaid `sequenceDiagram` source, only when the call order, a fan-out, or who talks to whom changed. Otherwise `null`.

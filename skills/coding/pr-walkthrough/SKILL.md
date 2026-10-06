@@ -96,7 +96,7 @@ Write the page data as JSON, following `reference/page-data.md`, then render it:
 
     python3 <this skill's directory>/scripts/render.py <data.json> <gather-out-dir> <page.html>
 
-The renderer checks the data and prints every error. Fix the data and run it again until it writes the page. It adds the layout, the counts, the read times, and the reading checkboxes, and it loads the mermaid library only when a cohort has a diagram.
+The renderer checks the data and prints every error. Fix the data and run it again until it writes the page. Every page comes out in the same format: a sticky reading-progress bar, a header with the PR's facts, an orientation table, the ticket, and one card per cohort. A card opens with its behavior delta, review focus, and author questions, keeps its layers, blast radius, and test coverage collapsed, and folds away once the reader ticks "I've read this". The page loads the Lato font, plus the mermaid library when a cohort has a diagram.
 
 If the user names a design profile, invoke the `design-profile:use` skill with it. Write a stylesheet that maps the profile's tokens onto the page's CSS variables, and pass it with `--css <file>`.
 
