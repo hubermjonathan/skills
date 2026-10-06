@@ -59,6 +59,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
+| [`audit-skills`](skills/thinking/audit-skills/SKILL.md) | Measures from past session transcripts how often each skill loads when it should, and proposes fixes for the misses | Yes |
 | [`brief`](skills/thinking/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for Slack, Jira, or a PR | No |
 | [`grill-me`](skills/thinking/grill-me/SKILL.md) | Interviews you round by round to stress-test a plan, decision, or idea | No |
 | [`reflect`](skills/thinking/reflect/SKILL.md) | Mines the session so far and turns learnings into skill, instruction file, or settings edits | Yes |
