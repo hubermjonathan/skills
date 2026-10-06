@@ -88,6 +88,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`design-profile:use`](skills/tools/design-profile/skills/use/SKILL.md) | Styles an HTML page with a named design profile | No |
 | [`design-profile:install`](skills/tools/design-profile/skills/install/SKILL.md) | Installs or updates a design profile from local files | Yes |
 | [`design-profile:create`](skills/tools/design-profile/skills/create/SKILL.md) | Mines a design system into a new profile | Yes |
+| [`imessage`](skills/tools/imessage/SKILL.md) | Texts you an iMessage from a Mac, for example when a long task finishes or needs you | No |
 | [`slack`](skills/tools/slack/SKILL.md) | Drafts and sends short Slack messages | No |
 | [`wizard`](skills/tools/wizard/SKILL.md) | Writes a bash wizard that walks you through steps only a human can do | No |
 
