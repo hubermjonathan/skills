@@ -73,7 +73,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`git`](skills/coding/git/SKILL.md) | Branch, worktree, commit, and cleanup conventions | No |
 | [`kill-comments`](skills/coding/kill-comments/SKILL.md) | Deletes code comments and "what" docs so code is the what and docs are the why | No |
 | [`open-pr`](skills/coding/open-pr/SKILL.md) | Opens a draft PR with a fixed title and body format | No |
-| [`pr-walkthrough`](skills/coding/pr-walkthrough/SKILL.md) | Builds a reading map of a PR for a human reviewer: changes grouped by area of impact, in reading order, with the ticket's asks mapped to the diff | No |
+| [`pr-walkthrough`](skills/coding/pr-walkthrough/SKILL.md) | Builds a CodeRabbit-style change stack page for a human reviewer: changes grouped by area of impact in reading order, what each group depends on, the ticket's asks mapped to the diff, questions only the author can answer, and reading checkboxes | No |
 | [`principles`](skills/coding/principles/SKILL.md) | Six code-level principles `write-code` reads before building | No |
 | [`push-pr`](skills/coding/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
 | [`review-code`](skills/coding/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |

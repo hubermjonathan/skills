@@ -1,9 +1,10 @@
 ---
 name: pr-walkthrough
 description: >
-  Turn a GitHub PR into a CodeRabbit-style walkthrough page that orients a human
+  Turn a GitHub PR into a CodeRabbit-style change stack page that orients a human
   reviewer: changes grouped by area of impact rather than by file, in reading order,
-  with the linked ticket's asks mapped to where the diff addresses them. Use when
+  with what each group depends on, the linked ticket's asks mapped to the diff, and
+  questions only the author can answer. Use when
   someone wants to review a PR and needs a map of it first, or wants a PR summary,
   a walkthrough, or review prep. It doesn't review or judge the PR, and it never
   posts anything.
@@ -25,9 +26,9 @@ The ticket is fair game. It's the requirement, written before the code.
 
 ## Step 1: gather
 
-    <this skill's directory>/scripts/gather.sh <pr-number-or-url>
+    <this skill's directory>/scripts/gather.sh <pr> [out-dir]
 
-It prints an output directory holding `meta.json`, `pr.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `release-plumbing.txt`, and `commit-subjects.txt`.
+Run it inside a checkout of the PR's repo, because it lists the repo's version files from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `files.tsv`, `ticket-key.txt`, `symbols-raw.txt`, `release-plumbing.txt`, and `commit-subjects.txt`.
 
 Read the whole diff. If it's too large to hold at once, read it per cohort after step 2, but classify from `files.tsv` plus each file's hunk headers first.
 
@@ -69,25 +70,31 @@ This is the whole value of the page. A flat file list is what GitHub already giv
 - the behavior: two files that together move one flag's effect are one cohort, even in different modules
 - the surface: an API contract change and the clients updated for it are one cohort
 
-Files that fit no behavioral cohort go in a final **housekeeping** cohort: release plumbing, docs, and generated files. Name it plainly, and keep it last and short.
+Files that fit no behavioral cohort go in a final **housekeeping** cohort: release plumbing, docs, and generated files only. A config change with an effect of its own, such as a scanner's ignore list, is a cohort of its own. Name housekeeping plainly, and keep it last and short.
 
 **Order cohorts by what the reviewer should read first:** the contract or the core behavior change first, then what follows from it, then housekeeping. Don't order them alphabetically or by size.
 
 **Inside a cohort, order the layers the way a senior engineer would walk someone through it:** contract, implementation, call sites, tests, then config. Each layer names its `file:line` range.
 
+**Record what each cohort depends on.** Cohort B depends on cohort A when B's code calls, implements, or consumes something A changes. Read this from the symbol graph, not from file paths. Every dependency must point at an earlier cohort, so if one points forward, reorder the cohorts. If two cohorts depend on each other, they're one cohort.
+
 Each cohort carries:
 
 - **What changed:** one or two sentences, from the code.
+- **Depends on:** the earlier cohorts this one builds on, or "nothing".
 - **Behavior delta:** before and after, as two concrete lines. This is the most useful thing on the page. If behavior is unchanged, as in a pure refactor, say so.
-- **Blast radius:** who else touches the changed symbols and is *not* in this diff. Grep the repo for each changed public symbol from `symbols-raw.txt`, and subtract the changed paths. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
+- **Blast radius:** who else touches the changed symbols and is *not* in this diff. Grep the repo for each changed public symbol, and subtract the changed paths. `symbols-raw.txt` only catches declarations, so also take any method whose calls the diff adds or removes. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
 - **Test coverage:** which behavior in this cohort has a test in this diff, and which doesn't. State the gap as a fact, not a complaint.
 - **Review focus:** 2 to 4 questions, each anchored on a `file:line`. Ask questions a reviewer can answer by reading, not rhetorical or leading ones.
+- **Only the author knows:** up to 3 questions that the diff, the ticket, and the repo can't answer, each anchored on a `file:line`. Examples: where a timeout or limit value came from, why a check was removed with nothing visible replacing it, or why the code does something no ask covers. Say what you looked for and didn't find. These are questions, not findings. Since you didn't read the PR description, it may already answer some of them, and the page says so. Leave the list out when there's nothing to ask.
 
 **A sequence diagram earns its place** when a cohort changes a call order, a fan-out, or who talks to whom. Then draw one mermaid `sequenceDiagram` in a `<pre class="mermaid">` block. Include the mermaid library unless the page's host already renders mermaid. Draw at most one diagram per cohort, and skip it when nothing about the flow changed.
 
 ## Step 4: build the page
 
-Read `reference/page-spec.md` for the page structure, then build the page as one self-contained HTML file. If the user names a design profile, invoke the `design-profile:use` skill with it for the styling.
+Read `reference/page-spec.md` for the page structure, then build the page as one HTML file, with its styles and scripts inline. The only outside load allowed is the mermaid library, when the page has a diagram. If the user names a design profile, invoke the `design-profile:use` skill with it for the styling.
+
+Give each cohort, housekeeping included, a checkbox the reader ticks once they've read it, as the spec's reading progress section describes.
 
 Give the reader numbers, such as file counts, line counts, and call-site counts, instead of adjectives.
 
@@ -95,4 +102,4 @@ Publish the page as an artifact if your agent can, with a one-sentence descripti
 
 ## Step 5: hand off
 
-Reply with the page's link or path, the cohort names in reading order, and one line on the ticket mapping: how many asks are addressed, partial, and not in this diff. Say that nothing was posted to the PR, and that the description and comments weren't read.
+Reply with the page's link or path, the cohort names in reading order, one line on the ticket mapping (how many asks are addressed, partial, and not in this diff), and how many questions only the author can answer. Say that nothing was posted to the PR, and that the description and comments weren't read.

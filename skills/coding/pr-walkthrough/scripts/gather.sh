@@ -10,15 +10,23 @@ set -uo pipefail
 RAW="${1:?usage: gather.sh <pr-number-or-url> [out-dir]}"
 OUT="${2:-}"
 
-# accept a url, a #number, or a bare number
-REPO_FLAG=""
+# accept a url, owner/repo#number, a #number, or a bare number. the last two
+# mean the repo checked out in the current directory.
+REPO=""
 if [[ "$RAW" =~ github\.com/([^/]+)/([^/]+)/pull/([0-9]+) ]]; then
-  REPO_FLAG="--repo ${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+  REPO="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
   PR="${BASH_REMATCH[3]}"
+elif [[ "$RAW" =~ ^([^/#[:space:]]+/[^/#[:space:]]+)#([0-9]+)$ ]]; then
+  REPO="${BASH_REMATCH[1]}"
+  PR="${BASH_REMATCH[2]}"
 else
   PR="${RAW#\#}"
 fi
 [[ "$PR" =~ ^[0-9]+$ ]] || { echo "could not parse a pr number from: $RAW" >&2; exit 1; }
+HERE=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)
+REPO="${REPO:-$HERE}"
+[[ -n "$REPO" ]] || { echo "no repo: pass a pr url or owner/repo#number, or run inside the pr's repo" >&2; exit 1; }
+REPO_FLAG="--repo $REPO"
 
 if [[ -z "$OUT" ]]; then
   OUT="${TMPDIR:-/tmp}/pr-walkthrough-$PR"
@@ -39,7 +47,7 @@ BASE=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["baseRefNa
 HEAD=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["headRefOid"])' "$OUT/meta.json")
 
 # numstat with rename/status, from the diff itself so it works without a fetch
-gh api "repos/{owner}/{repo}/pulls/$PR/files" --paginate \
+gh api "repos/$REPO/pulls/$PR/files" --paginate \
   -q '.[] | [.status, .additions, .deletions, .filename] | @tsv' \
   > "$OUT/files.tsv" 2>/dev/null \
   || awk '/^diff --git/{f=$4; sub(/^b\//,"",f); print "modified\t0\t0\t" f}' "$OUT/pr.diff" > "$OUT/files.tsv"
@@ -72,18 +80,24 @@ grep -hE '^[+-]' "$OUT/pr.diff" \
 
 # ---- release plumbing the repo expects ----------------------------------
 # what sibling commits touching the same directories also changed, so the
-# walkthrough can say whether this pr follows the house convention.
+# walkthrough can say whether this pr follows the house convention. this reads
+# the local checkout, so it only runs inside a checkout of the pr's repo.
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 {
-  echo "# version manifests / changelogs / changesets present near the changed files"
-  cut -f4 "$OUT/files.tsv" | while read -r f; do dirname "$f"; done | sort -u \
-    | while read -r d; do
-        while [[ "$d" != "." && "$d" != "/" ]]; do
-          for candidate in terraform/published.json CHANGELOG.md package.json .changeset; do
-            [[ -e "$d/$candidate" ]] && echo "$d/$candidate"
+  if [[ -z "$ROOT" || "$HERE" != "$REPO" ]]; then
+    echo "# skipped: run gather.sh inside a checkout of $REPO to list version files"
+  else
+    echo "# version manifests / changelogs / changesets present near the changed files"
+    cut -f4 "$OUT/files.tsv" | while read -r f; do dirname "$f"; done | sort -u \
+      | while read -r d; do
+          while [[ "$d" != "." && "$d" != "/" ]]; do
+            for candidate in terraform/published.json CHANGELOG.md package.json .changeset; do
+              [[ -e "$ROOT/$d/$candidate" ]] && echo "$d/$candidate"
+            done
+            d=$(dirname "$d")
           done
-          d=$(dirname "$d")
-        done
-      done | sort -u
+        done | sort -u
+  fi
 } > "$OUT/release-plumbing.txt" 2>/dev/null
 
 cat <<EOF
