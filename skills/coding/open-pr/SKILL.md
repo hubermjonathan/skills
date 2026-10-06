@@ -6,7 +6,7 @@ description: >
   needs review, or when another skill needs the PR title and body format.
 ---
 
-The user's instructions on titles and bodies win over the defaults below.
+Invoke the `company-conventions` skill first, if one is installed, for the company's pull request conventions, such as version bumps. Those conventions and the user's instructions win over the defaults below.
 
 1. Bump versions (see below), then commit and push. Invoke the `git` skill before committing.
 2. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
@@ -53,4 +53,4 @@ Rules:
 
 Bump once per PR, measured against the base branch. If the branch already carries a bump, keep it and never bump again: `1.1.3` becomes `1.2.0` in one PR, never `1.2.1`. Use a minor bump for features and a patch bump for fixes, unless the repo says otherwise.
 
-Take the repo's versioning rules from its CLAUDE.md, AGENTS.md, or contributing guide, or from the user's instructions. If none document versioning, bump nothing.
+Take the repo's versioning rules from the company conventions, the repo's CLAUDE.md, AGENTS.md, or contributing guide, or the user's instructions. If none document versioning, bump nothing.
