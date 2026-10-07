@@ -12,7 +12,7 @@ description: >
 
        <this skill's directory>/scripts/pr-watch.sh <pr> [--repo <owner/name>]
 
-   It prints one JSON line per change and never a heartbeat. Handle each line as it arrives. The first poll seeds its memory and reports nothing, so history reaches you only through step 2. Set `WATCH_INTERVAL` to change the 60 second poll.
+   It prints one JSON line per change and never a heartbeat. Handle each line as it arrives. The first poll reports the current check results but no comments, so comment history reaches you only through step 2. Set `WATCH_INTERVAL` to change the 60 second poll.
 2. Right after, sweep what is already on the PR: invoke the `comment-pr` skill. Treat anything unanswered as work. Start the watcher before the sweep so there is no gap between them.
 3. If the PR conflicts with its base, merge the latest base in (`git fetch`, then `git merge origin/<base>`, usually `master` or `main`), resolve the conflicts, and push. Invoke the `push-pr` skill for the push.
 

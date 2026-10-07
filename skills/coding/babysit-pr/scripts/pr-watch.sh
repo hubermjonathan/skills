@@ -10,9 +10,9 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 GHARGS=(); [[ -n "$GHREPO" ]] && GHARGS=(--repo "$GHREPO")
-REPO_SLUG="${GHREPO:-$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)}"
 INTERVAL="${WATCH_INTERVAL:-60}"
-AGENT_NOTE='responding on behalf of'
+AGENT_NOTE='\A> \[!NOTE\]\r?\n> [^\n]*responding on behalf of'
+PR_NUM="$PR"; REPO_SLUG="$GHREPO"
 
 PREV="$(mktemp)"; SEEN="$(mktemp)"
 trap 'rm -f "$PREV" "$SEEN"' EXIT
@@ -20,15 +20,18 @@ trap 'rm -f "$PREV" "$SEEN"' EXIT
 now() { date -u +%FT%TZ; }
 emit() {
   printf '{"type":"%s","at":"%s","repo":"%s","pr":"%s"%s}\n' \
-    "$1" "$(now)" "$GHREPO" "$PR" "${2:+,$2}"
+    "$1" "$(now)" "$REPO_SLUG" "$PR_NUM" "${2:+,$2}"
 }
 die()  { emit watcher_died "\"reason\":$(jq -Rn --arg v "$1" '$v')"; exit 1; }
 seen() { grep -qxF "$1" "$SEEN" 2>/dev/null; }
 mark() { echo "$1" >> "$SEEN"; }
 p()    { jq -r "$1 // empty" <<<"$2"; }
 
-FIELDS='state,isDraft,mergeStateStatus,reviewDecision,autoMergeRequest,statusCheckRollup,comments,reviews,mergeCommit'
-WRITER='if ((.body // "") | .[0:300] | test($note)) then "agent" else "human" end'
+FIELDS='state,isDraft,mergeStateStatus,reviewDecision,autoMergeRequest,statusCheckRollup,comments,reviews,mergeCommit,headRefOid'
+WRITER='if ((.body // "") | test($note)) then "agent" else "human" end'
+
+read -r PR_NUM REPO_SLUG < <(gh pr view "$PR" "${GHARGS[@]}" --json number,url -q '"\(.number) \(.url | split("/")[3:5] | join("/"))"' 2>/dev/null)
+[[ -n "$REPO_SLUG" ]] || die "could not resolve pr $PR"
 
 while :; do
   if ! snap="$(gh pr view "$PR" "${GHARGS[@]}" --json "$FIELDS" 2>&1)"; then die "$snap"; fi
@@ -45,7 +48,7 @@ while :; do
     emit review_decision "\"decision\":$(jq -Rn --arg v "$rd" '$v')"
   fi
 
-  inline="$(gh api "/repos/$REPO_SLUG/pulls/$PR/comments" --paginate 2>/dev/null \
+  inline="$(gh api "/repos/$REPO_SLUG/pulls/$PR_NUM/comments" --paginate 2>/dev/null \
     | jq -r --arg note "$AGENT_NOTE" ".[]? | \"r\(.id) \(.user.login//\"\") \($WRITER) \(.path//\"?\"):\(.line // .original_line // 0) \(.body // \"\" | gsub(\"[\r\n]+\"; \" \"))\"")"
 
   while read -r id author writer body; do
@@ -62,15 +65,14 @@ while :; do
             printf '%s\n' "$inline"; } )
 
   if [[ "$MERGE_ONLY" == 0 ]]; then
-    while read -r cid name url; do
+    while IFS=$'\t' read -r cid name url; do
       [[ -z "$cid" ]] && continue
       seen "f$cid" && continue
       mark "f$cid"
       emit check_failed "\"check\":$(jq -Rn --arg v "$name" '$v'),\"url\":$(jq -Rn --arg v "$url" '$v')"
-    done < <(jq -r '(.statusCheckRollup // [])[]
+    done < <(jq -r '.headRefOid as $sha | (.statusCheckRollup // [])[]
                      | select((.conclusion // .state // "") | test("FAILURE|TIMED_OUT|CANCELLED|ERROR|ACTION_REQUIRED"))
-                     | "\(.name // .context)@\(.completedAt // "")|\(.name // .context)|\(.detailsUrl // .targetUrl // "")"' <<<"$snap" \
-             | tr '|' ' ')
+                     | "\(.name // .context)@\($sha)@\(.completedAt // "")\t\(.name // .context)\t\(.detailsUrl // .targetUrl // "")"' <<<"$snap")
 
     allgreen="$(jq -r '((.statusCheckRollup // []) | length) as $n
                        | if $n == 0 then "no" else
@@ -82,7 +84,7 @@ while :; do
     if [[ "$am" != null && "$prev_am" == null && -s "$PREV" ]]; then emit automerge_enabled; fi
   fi
 
-  if [[ -s "$PREV" ]]; then
+  if [[ -s "$PREV" && "$state" == OPEN ]]; then
     stall=""
     if   [[ "$msj" == DIRTY  ]]; then stall=conflict
     elif [[ "$msj" == BEHIND ]]; then stall=behind_base
