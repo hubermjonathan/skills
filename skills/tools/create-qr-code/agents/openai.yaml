@@ -1,0 +1,3 @@
+interface:
+  display_name: "Create QR code"
+  short_description: "QR code for a link, shown in the reply"
