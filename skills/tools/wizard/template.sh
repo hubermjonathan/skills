@@ -51,7 +51,7 @@ open_url() {
     elif command -v explorer.exe >/dev/null 2>&1; then explorer.exe "$url"
     elif command -v xdg-open    >/dev/null 2>&1; then xdg-open "$url"
     elif command -v open        >/dev/null 2>&1; then open "$url"
-    else warn "couldn't open a browser; visit it manually: $url"; fi
+    else false; fi
   } >/dev/null 2>&1 || warn "couldn't open a browser, so visit it manually: $url"
 }
 
