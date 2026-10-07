@@ -91,9 +91,9 @@ Source: asd-ste100.org (Issue 9, 2025), fetched 2026-07-18. The numbered rules a
 - Keep the small words that show structure. "Ensure that the switch is off" keeps "that" because it makes the sentence parse one way. Never trade clarity for word count.
 - Repeat the article in a series when it prevents a misread: "the client and the host", not "the client and host", when they are two things.
 - Say which parts "and" or "or" joins when a sentence can group two ways. "Both...and", "either...or", and "if...then" are free disambiguators.
-- Use periods, not semicolons. Replace an em dash with a new sentence.
+- Use periods, not semicolons. Replace an em dash with a new sentence. Use a colon only before a list or an example, never to join two clauses.
 - Make text in parentheses a full grammatical unit or its own sentence. Never form plurals with "(s)".
-- No slashes: write "a, b, or both" instead of "a/b" or "and/or".
+- No slashes or arrows: write "a, b, or both" instead of "a/b" or "and/or", and "returns" or "becomes" instead of "→".
 - Call each thing by one name, everywhere. A doc that says "the gate", "the ratchet", and "the budget check" for one thing teaches three things. Rewording an unchanged sentence between edits costs the same way. Don't churn what didn't change.
 - Skip idioms, colloquialisms, Latin abbreviations, and metaphors. A non-native reader, a translator, and an agent all parse plain constructions best.
 
@@ -101,7 +101,7 @@ Source: Kohl, The Global English Style Guide (SAS Press). Guideline text fetched
 
 ## Voice and repo specifics
 
-- Invoke the `unslop` skill for everything this skill touches, chat replies included. That skill owns the slop-pattern catalog: AI vocabulary, filler, hedging, formatting tells.
+- Invoke the `unslop` skill as a last pass on prose a person outside the session reads: PR bodies, tickets, Slack messages, and docs. That skill holds the catalog of AI writing tells this skill doesn't cover.
 - PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them. A PR body is a briefing that a reviewer can read in under a minute. Do not paste swarm logs, SHA lists, or metric tables. Link them.
 - Product UI strings are not documentation. Use your product's copy guidelines for those.
 - Match the repo's indentation in code snippets. Write real paths and real symbols. Make every count or tree claim true at the commit that lands it, and include the command that regenerates it.

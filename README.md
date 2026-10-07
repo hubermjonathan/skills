@@ -67,7 +67,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`show-me-your-work`](skills/thinking/show-me-your-work/SKILL.md) | Keeps a TSV decision log for long or unattended runs | No |
 | [`swarm`](skills/thinking/swarm/SKILL.md) | Fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs | No |
 | [`technical-writing`](skills/thinking/technical-writing/SKILL.md) | Layered writing standard for chat replies, docs, PRs, tickets, and commits | No |
-| [`unslop`](skills/thinking/unslop/SKILL.md) | Rewrites text to strip AI writing tells | No |
+| [`unslop`](skills/thinking/unslop/SKILL.md) | Strips AI writing tells from PR bodies, tickets, Slack, and docs, as a last pass after `technical-writing` | No |
 | [`writing-for-agents`](skills/thinking/writing-for-agents/SKILL.md) | Writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions | No |
 | [`refine-ticket`](skills/planning/refine-ticket/SKILL.md) | Turns a ticket into a plan you agree with before any code | No |
 | [`babysit-pr`](skills/coding/babysit-pr/SKILL.md) | Drives a PR to green checks, answered comments, and approval | No |
