@@ -20,7 +20,12 @@ Invoke the `company-conventions` skill first, if one is installed, for the compa
 
 ## Body
 
-Sections in this order:
+Open the body with a note naming who wrote it and for whom, then a blank line:
+
+    > [!NOTE]
+    > 🤖 **<your model's name> opened this on behalf of <the user's first name>**
+
+Take the name from the user's instructions. Then the sections, in this order:
 
     ## Context
     The problem, what was tried before if relevant, and what this change does about it,
