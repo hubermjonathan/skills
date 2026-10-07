@@ -55,12 +55,12 @@ while :; do
     [[ -z "$id" ]] && continue
     seen "$id" && continue
     mark "$id"
-    [[ -s "$PREV" ]] || continue
+    [[ -s "$PREV" && "$writer" == human ]] || continue
     if [[ "$MERGE_ONLY" == 0 ]]; then
-      emit review_comment "\"author\":$(jq -Rn --arg v "$author" '$v'),\"agent\":$([[ "$writer" == agent ]] && echo true || echo false),\"id\":\"$id\",\"body_preview\":$(jq -Rn --arg v "${body:0:160}" '$v')"
+      emit review_comment "\"author\":$(jq -Rn --arg v "$author" '$v'),\"id\":\"$id\",\"body_preview\":$(jq -Rn --arg v "${body:0:160}" '$v')"
     fi
   done < <( { jq -r --arg note "$AGENT_NOTE" "([(.comments // [])[] | {id:(\"c\"+(.id|tostring)),author:(.author.login//\"\"),writer:($WRITER),body:(.body//\"\")}]
-                    + [(.reviews  // [])[] | {id:(\"v\"+(.id|tostring)),author:(.author.login//\"\"),writer:\"human\",body:(((.state//\"\") + \" \" + (.body//\"\"))|ltrimstr(\" \"))}])
+                    + [(.reviews  // [])[] | select((.body // \"\") != \"\") | {id:(\"v\"+(.id|tostring)),author:(.author.login//\"\"),writer:($WRITER),body:(((.state//\"\") + \" \" + .body)|ltrimstr(\" \"))}])
                     | .[] | \"\(.id) \(.author) \(.writer) \(.body | gsub(\"[\r\n]+\"; \" \"))\"" <<<"$snap"
             printf '%s\n' "$inline"; } )
 
