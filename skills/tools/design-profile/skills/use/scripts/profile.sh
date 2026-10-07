@@ -1,7 +1,7 @@
 #!/bin/sh
 set -u
 
-PROFILES="${DESIGN_PROFILES_DIR:-$HOME/.claude/artifact-design-profiles}"
+PROFILES="${DESIGN_PROFILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/design-profiles}"
 
 installed() {
   names=$(ls "$PROFILES" 2>/dev/null)
