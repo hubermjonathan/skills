@@ -18,8 +18,9 @@ Apply each criterion to every finding:
 - Right layer: a rule that applies to every session belongs in an agent instruction file. A procedure for one kind of task belongs in a skill. Something a machine can enforce belongs in settings, a hook, or a script.
 - Convergence: findings echoed by 2+ reviewers carry higher confidence. Singletons must clear a higher bar on the other criteria.
 - Decision-changing: a future agent does something different because of the edit, not just reads more text.
-- Structural-mechanism check: route to Backlog when a lint rule, script, metadata flag, or runtime check already enforces the rule or could enforce it cheaply. Skill prose is for things mechanisms cannot enforce.
+- Structural-mechanism check: when a lint rule, script, metadata flag, or runtime check already enforces the rule, reject it as `structural`. When one could enforce it cheaply, accept it as a `structural:` row instead of a prose edit. Route to Backlog only a mechanism too large to build now. Skill prose is for things mechanisms cannot enforce.
 - Skill-was-used: only accept skill findings that route to a skill the parent invoked or was shown in the transcript. If the skill wasn't used but should have been, route to `tune description: <skill>` so it triggers next time. If neither, reject as `skill-not-used`.
+- Repo rules: read the agent instruction file (AGENTS.md, CLAUDE.md, or the like) of the repo that holds each target file. Reframe a proposal that breaks its rules so it follows them, or reject it as `repo-rule`.
 - Already-covered: read the target skill or instruction file before accepting any body-edit row. If the proposal duplicates clear, well-placed existing guidance, reject as `already-covered`. The issue is execution, not the skill. If the existing guidance is buried, weak, or easy to skip past, accept the row but reframe the proposal as a wording / placement improvement to make it fire (not a duplicate addition).
 
 Drop (implementation details that drift):
@@ -30,9 +31,9 @@ Drop (implementation details that drift):
 
 Keep (durable patterns):
 - "closed regex enums for trigger detection are brittle. Prefer schema-validated structures"
-- "skill descriptions front-load trigger keywords (60/40 trigger-vs-action)"
-- "skill-bundled scripts run under bun with own lockfile, not pnpm workspace"
-- "path-shaped triggers belong in `paths:`, not description prose"
+- "a skill's description says when to use it, as cases, not phrases to match"
+- "a step that depends on another skill invokes it by name. A hint in passing does not load it"
+- "a script that needs an agent's paths takes an env var override, so the skill text stays generic"
 
 Output exactly the format below. No preamble, no narration. One sentence per cell. A reviewer should read each Problem/Proposal pair in 5 seconds.
 
@@ -41,8 +42,9 @@ Output exactly the format below. No preamble, no narration. One sentence per cel
 | Problem | Proposal | Routing |
 |---|---|---|
 | <failure mode in a skill the parent used> | <change to that skill's body> | edit skill: <skill> <section> |
-| <skill existed but didn't trigger> | <tune the skill's description so it fires next time> | tune description: <skill> |
-| <a rule the user had to repeat> | <one line in the right CLAUDE.md> | instructions: <file> <section> |
+| <skill existed but didn't trigger> | <add the case it missed to its description, as a situation> | tune description: <skill> |
+| <a rule the user had to repeat> | <one line in the right agent instruction file> | instructions: <file> <section> |
+| <a rule a script, hook, or check could enforce cheaply> | <the mechanism and what it checks> | structural: <mechanism> |
 | <a prompt, hook, or setting that cost time> | <the settings change> | settings: <file> |
 | <new pattern, no existing home> | <draft a new skill> | new skill: <kebab-name> |
 
@@ -52,7 +54,7 @@ One row per finding. The user approves row by row.
 
 For each rejected finding:
 - Principle: <one sentence>
-- Reason: <durability | specificity | existing-skill-first | convergence | decision-changing | structural | duplicate | skill-not-used | already-covered>
+- Reason: <durability | specificity | existing-skill-first | convergence | decision-changing | structural | duplicate | skill-not-used | already-covered | repo-rule>
 
 ## Backlog
 

@@ -54,7 +54,7 @@ Find the real file before editing anything:
 Then follow each approved row's routing:
 
 - `edit skill: <skill> <section>`: make the edit.
-- `tune description: <skill>`: the skill existed and did not fire when it should have. Rewrite its description's triggers.
+- `tune description: <skill>`: the skill existed and did not fire when it should have. Add the case it missed to its description, as a situation, not a phrase to match.
 - `new skill: <name>`: create the skill.
 - `instructions: <file> <section>`: add or tighten a line in the agent instruction file the routing names (global, machine-local, or project: CLAUDE.md, AGENTS.md, or your agent's equivalent). One rule, one place. Replace a weaker existing line instead of adding a second.
 - `settings: <file>`: a hook, permission, or env change in your agent's config file. Read the agent's docs for the format before editing.
