@@ -3,8 +3,8 @@ name: push-pr
 description: >
   Push new commits to an open pull request and keep the PR honest: base up to date,
   version bump still right, title and body still true. Use when pushing to a branch
-  that has an open PR, updating a PR, or getting a PR ready to merge again after new
-  commits or a base change.
+  that has an open PR, or when a PR's title, body, or version bump needs to catch up
+  with new commits or a base change.
 ---
 
 ## Before pushing
