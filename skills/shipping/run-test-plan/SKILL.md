@@ -8,7 +8,7 @@ description: >
 
 You run the plan. The user does only what you can't, such as a login or a check on a physical device.
 
-1. Read the plan and do its setup. Collect every step that needs the user, ask for all of them at once, and wait for their word. Never assume an earlier session did the setup.
+1. With no plan, invoke the `write-test-plan` skill first. Read the plan and do its setup. Collect every step that needs the user, ask for all of them at once, and wait for their word. Never assume an earlier session did the setup.
 2. Check each precondition. Read the version the environment runs from the live deploy target, not only from config, and record it.
 3. Run the steps in order. For each step, run it, capture the evidence (the command and the part of its output that proves the result), and compare the result with the expectation. Append the result to `<plan-name>-results.md` next to the plan as soon as you have it, with the phase and the version. The file is append-only across runs, so an interrupted run loses nothing.
 4. The caller names the phase:
