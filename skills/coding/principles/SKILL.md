@@ -1,14 +1,15 @@
 ---
 name: principles
 description: >
-  Code-level engineering principles: smallest change, subtract first, fix root
-  causes, prove it works, low reader load, encode repeated fixes in tooling. Use
-  when writing, refactoring, or debugging code, or when another skill needs them.
+  Code-level detail for six engineering principles: call depth and small leaks,
+  speculative guards, symptom guards and stale state, direct checks, layers and
+  state scope, and the strength order of enforcement mechanisms. Use when writing,
+  refactoring, or debugging code, or when another skill needs them.
 ---
 
 # Principles
 
-Six principles for writing code. Read the file for each one that applies to the change in front of you, before you write it.
+Code-level detail for six principles. Read the file for each one that applies to the change in front of you, before you write it.
 
 | Principle | Read it when | File |
 |---|---|---|
