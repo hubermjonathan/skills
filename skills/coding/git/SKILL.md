@@ -33,6 +33,5 @@ The user's instructions on naming win over everything below. These are the defau
 2. List worktrees and local branches. Mark for removal: branches merged or gone upstream, and worktrees whose branch is merged.
 3. Anything with uncommitted changes or unpushed commits is listed, not removed.
 4. Show the list and remove after the user confirms, or directly if they said to clean up everything: `git worktree remove`, then `git branch -D`.
-5. Never delete remote branches.
 
 After a PR merges, remove its worktree and local branch the same way.
