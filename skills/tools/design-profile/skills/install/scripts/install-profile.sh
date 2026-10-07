@@ -48,7 +48,7 @@ case "$0" in
   *)   SKILLS=../.. ;;
 esac
 RESOLVER="$SKILLS/use/scripts/profile.sh"
-PROFILES="$HOME/.claude/artifact-design-profiles"
+PROFILES=$(sh "$RESOLVER" --store)
 DEST="$PROFILES/$PROFILE"
 
 case "$PROFILE" in

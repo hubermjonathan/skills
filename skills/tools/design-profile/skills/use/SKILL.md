@@ -8,68 +8,30 @@ description: >
 
 # Use a design profile
 
-Applies a real, mined design system to a self-contained HTML page. Profiles are self-contained, so this
-skill is design-system-agnostic: the profile is named on every use, never assumed.
+A profile is a mined design system: usage rules, design tokens, and an optional icon sprite. Resolve it before writing markup, so the tokens shape the page instead of being added after.
 
-Resolve the profile *before* writing markup, so the tokens shape the page rather than getting
-retrofitted onto it.
+## 1. Resolve the profile
 
-## Step 1 — resolve the profile
+Take the profile name from the request. If there is none, list the installed profiles and ask which to use. Never pick one yourself.
 
-A profile name is required. Take it from the skill's argument or from the request ("in the offerup
-profile"). If none was given, list the installed profiles and ask which to use. Never pick one yourself.
+    sh scripts/profile.sh <name>
 
-```sh
-sh scripts/profile.sh <name>
-```
+It prints the paths to the profile's files. Act on its exit code:
 
-It prints absolute paths to that profile's files. Act on its exit code:
+- **0**: resolved. Go on to step 2.
+- **1**: not installed, or a file is missing. It lists what is installed. Say which profile was asked for and stop. Never fall back to another profile. The user adds one with `design-profile:install`, or builds one with `design-profile:create`.
+- **2**: no name given. It lists what is installed. Ask which to use.
 
-- **0** — the profile resolved; continue to step 2.
-- **1** — the profile isn't installed, or a file is missing; it lists what is installed. Say which one
-  was requested and stop. Never fall back to a different profile.
-- **2** — no name was given; it lists what is installed. Ask which to use.
+## 2. Build the page
 
-## Step 2 — read and apply
+1. Read the profile's `grammar.md`. It is the rule set, and it wins over this skill. It is large, so jump by its headings.
+2. Inline `tokens.css` in full in a `<style>` tag. Never retype or summarize its values, and never write a raw value where a token exists.
+3. Add the light and dark toggle the tokens file defines, if it has one, starting in the mode it specifies.
+4. Add a page container. Component libraries rarely define one.
+5. Paste `icons.svg` only if the page earns an icon. The default is none: before adding one, delete it, and if nothing is lost, keep it deleted.
+6. Check the page against the grammar's do-not list. Respect `prefers-reduced-motion` and keep keyboard focus visible.
 
-1. **Read the profile's `grammar.md`.** It is the rule set. Profiles are large, so jump by its own
-   headings rather than reading top to bottom.
-2. **Inline the profile's `tokens.css`** in full inside a `<style>` tag. Never retype values from it,
-   never summarise it, and never write a raw hex where a token exists.
-3. **Add the theme toggle** the profile's tokens file defines, if it has one.
-4. **Paste the profile's `icons.svg`** only if the page has actually earned an icon. Default is none.
-   Some profiles ship no sprite; that is normal.
-5. **Build**, then check the page against the profile's do-not list.
+## When the grammar is silent
 
-## Non-negotiables that hold across profiles
-
-A profile's own `grammar.md` always wins over this list. These are the defaults when it is silent:
-
-- **Style only through tokens.** If a value has a token, use the token.
-- **Ship the light/dark toggle** the profile defines, defaulting to whichever mode it specifies.
-- **Supply a page container.** Component libraries rarely define one, so an artifact must add it.
-- **Never use a token or icon that asserts a claim** — paid tier, verified, promoted, certified,
-  rating. Those state something about the reader or the subject that a decorative page has no
-  standing to state. A word is honest; a borrowed badge is not.
-- **The default is no icon.** Before adding one, delete it — if nothing is lost, keep it deleted.
-- **Respect `prefers-reduced-motion`** and keep keyboard focus visible.
-
-## Profile layout
-
-Profiles are data, not part of this skill. Each is a directory under `~/.claude/artifact-design-profiles/`:
-
-```
-~/.claude/artifact-design-profiles/<name>/
-  grammar.md    usage rules — read into context, jump by heading
-  tokens.css    values — inlined verbatim into the page
-  icons.svg     optional sprite — pasted only when an icon is earned
-```
-
-Adding a design system means adding a sibling directory with those filenames. Nothing in this file
-needs to change. The `install` skill creates the store on first install; use it rather than writing to
-the store directly.
-
-## Honest limits
-
-A profile's grammar ends with the claims that could not be verified when it was mined. Don't present
-inferred values as confirmed.
+- Never use a token or icon that asserts a claim: paid tier, verified, promoted, certified, or rating. A decorative page has no standing to state those. A word is honest, a borrowed badge is not.
+- A grammar ends with what couldn't be verified when it was mined. Don't present those values as confirmed.

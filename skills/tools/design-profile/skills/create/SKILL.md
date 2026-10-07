@@ -8,120 +8,81 @@ disable-model-invocation: true
 
 A profile is three files that let an HTML page carry a design system honestly:
 
-| file | what it holds |
+| File | What it holds |
 |---|---|
-| `grammar.md` | usage rules — how the design system applies color, type, geometry, motion, state, voice, icons |
-| `tokens.css` | values only — CSS custom properties covering both themes |
+| `grammar.md` | usage rules: how the design system applies color, type, geometry, motion, state, voice, and icons |
+| `tokens.css` | values only: CSS custom properties for both themes |
 | `icons.svg` | optional `<symbol>` sprite, referenced with `<use href="#id">` |
 
-Your job is to **mine** those from a real source of truth, not to invent them. A profile whose values
-came from taste is worse than no profile, because it looks authoritative while being wrong.
+Mine them from a real source of truth. Never invent them: a profile built on taste looks authoritative while being wrong, which is worse than no profile.
 
-## Step 1 — ask where to mine. Do not skip this.
+## 1. Ask where to mine
 
-You cannot guess a design system's source of truth. Ask, and wait for an answer:
+You can't guess a design system's source of truth, so ask and wait:
 
 > Where should I mine this profile from? Useful sources, best first:
-> - a **theme/design-token package** in a local repo (`~/Code/<repo>/packages/theme`, `tokens/`, `themes/`)
-> - a **component library** whose components hardcode the real defaults
-> - a **design-tool export** — Figma variables/styles as JSON or CSS
-> - **design-system documentation** — a PDF, Confluence page, or style guide
-> - a **live site**, as a last resort: its stylesheet gives colors but not intent
+> - a theme or design-token package in a local repo (`packages/theme`, `tokens/`, `themes/`)
+> - a component library whose components hardcode the real defaults
+> - a design-tool export, such as Figma variables or styles as JSON or CSS
+> - design-system documentation: a PDF, a wiki page, or a style guide
+> - a live site, as a last resort: its stylesheet gives colors but not intent
 >
-> Also: what should the profile be **named**, and does the design system ship an **icon set** worth including?
+> Also, what should the profile be named, and does the design system ship an icon set worth including?
 
-Ask which of several candidates is canonical when more than one exists — a legacy native theme and a
-current web theme will disagree, and picking the deprecated one silently poisons everything downstream.
-If they point at a repo they haven't cloned, or a Figma file you cannot read, say so and ask for a path
-or an export rather than substituting a guess.
+When several candidates exist, ask which is canonical. A legacy native theme and a current web theme disagree, and mining the deprecated one poisons everything after it. If the source is a repo that isn't cloned or a file you can't read, ask for a path or an export instead of guessing.
 
-## Step 2 — mine with subagents, one per domain
+## 2. Mine with one subagent per domain
 
-A design system is too large to read into one context, and the domains are independent. Fan out
-**parallel subagents in a single message**, each read-only, each owning one domain of the source the
-person named:
+A design system is too large for one context, and its domains are independent. Spawn read-only subagents in parallel, one per domain of the named source:
 
-| agent | comes back with |
+| Domain | Comes back with |
 |---|---|
-| color | the palette; *semantic* assignments (accent, danger, surface, border, text) and which raw hue backs each; contrast results for text pairs, failures included |
-| themes | light **and** dark values for the same token names; how the system switches; whether dark genuinely exists |
-| geometry | radii, border widths, the spacing scale, shadow/elevation steps |
-| typography | families with real fallbacks, and the size/weight/line-height ramp |
-| motion | durations and easings as constants, plus reduced-motion handling |
-| components | the defaults that give the design system its feel: button heights, form field anatomy, dialog and card treatment, table density, empty/loading states, and hover/focus/active/disabled |
-| voice + icons | sentence vs title case, how errors are phrased, punctuation habits; whether a real icon set exists and how it is referenced |
+| color | the palette, the semantic roles (accent, danger, surface, border, text) and the raw hue behind each, and contrast results for text pairs, failures included |
+| themes | light and dark values for the same token names, how the system switches, and whether dark really exists |
+| geometry | radii, border widths, the spacing scale, and shadow or elevation steps |
+| typography | families with real fallbacks, and the size, weight, and line-height ramp |
+| motion | durations and easings as constants, and reduced-motion handling |
+| components | the defaults that give the system its feel: button heights, form fields, dialogs and cards, table density, empty and loading states, and hover, focus, active, and disabled states |
+| voice and icons | sentence or title case, how errors are phrased, punctuation habits, and whether a real icon set exists and how it is referenced |
 
-Brief every agent identically on the non-negotiables:
+Give every subagent the same rules:
 
-- **report file path and line for every value.** A value without a citation is a guess.
-- **count usages** — `grep -rn "#[0-9a-fA-F]\{6\}" <src> | sort | uniq -c | sort -rn` — but prefer what
-  the theme package *exports* over what is hardcoded most often. A hex in eleven files may still not be
-  the canonical color; those near-misses are traps worth reporting by name.
-- **when sources disagree**, report both and say which looks canonical and why.
-- **report gaps as gaps.** Never interpolate a missing scale step or infer a radius.
-- return findings as data, not prose — you are assembling files from them.
+- Cite a file path and line for every value. A value without a citation is a guess.
+- Count usages (`grep -rn "#[0-9a-fA-F]\{6\}" <src> | sort | uniq -c | sort -rn`), but prefer what the theme package exports over what is hardcoded most often. Report near-miss values by name: a hex in eleven files may still not be the canonical color.
+- When sources disagree, report both and say which looks canonical and why.
+- Report gaps as gaps. Never interpolate a missing scale step or infer a radius.
+- Return findings as data, not prose.
 
-Read the returned findings yourself before writing anything. If two agents contradict each other, or one
-reports a source you didn't expect to be authoritative, resolve it — go look — rather than averaging.
-Spawn a follow-up agent for a domain that came back thin.
+Read the findings yourself before writing anything. When two subagents contradict each other, or one cites a source you didn't expect, go look instead of averaging. Spawn a follow-up for a domain that came back thin.
 
-## Step 3 — write the three files
+## 3. Write the three files
 
-**`tokens.css`** — values only, no usage prose. Open with a comment block citing the exact source paths
-and the date mined, so the next person can re-derive it. Carry both themes through the custom properties
-alone (`:root` for light, redefined under `@media (prefers-color-scheme: dark)` and `[data-theme=…]`), so
-a page never needs a per-theme rule of its own. Namespace the properties (`--<profile>-…`).
+Write them to a working directory, not into the profile store.
 
-**`grammar.md`** — the rule set, written to be *jumped through by heading*, not read start to finish.
-Include, and separate clearly:
+**`tokens.css`**: values only, no usage prose. Open with a comment that cites the source paths and the date mined, so the next person can re-derive it. Carry both themes in the custom properties alone (`:root` for light, redefined under `@media (prefers-color-scheme: dark)` and `[data-theme=...]`), so a page never needs a per-theme rule. Namespace the properties as `--<profile>-...`.
 
-- the invariants — the few properties that make the design system recognisable
-- per-area rules: color, geometry, typography, motion, state, components, voice, icons
-- **where sources disagree**, and which one wins
-- **platform-only rules** that must not be generalised to a web page
-- **bugs in the source** — things that ship but should not be copied
-- **tokens the system is missing**, so a gap isn't mistaken for an oversight
-- a **do-not list** — the short, blunt version
-- **genuinely unverified** — end here, always. Anything inferred rather than read goes in this section.
+**`grammar.md`**: the rule set, written to be jumped through by heading. Cite the sources at the top. Keep these sections separate:
 
-**`icons.svg`** — only if the design system has a real set worth carrying. `<symbol>` elements with stable ids,
-`currentColor` for fills so tokens drive them. A profile with no sprite is fully supported; ship none
-rather than a weak one.
+- the invariants: the few properties that make the system recognizable
+- rules per area: color, geometry, typography, motion, state, components, voice, and icons
+- where sources disagree, and which one wins
+- platform-only rules that must not carry over to a web page
+- bugs in the source: things that ship but shouldn't be copied
+- tokens the system is missing, so a gap isn't mistaken for an oversight
+- a do-not list: the short, blunt version
+- unverified: always last. Anything inferred rather than read goes here.
 
-## Step 4 — honesty rules that outrank completeness
+**`icons.svg`**: only if the system has a real set worth carrying. Use `<symbol>` elements with stable ids and `currentColor` fills, so tokens drive them. Ship no sprite rather than a weak one.
 
-- **Never write a value you did not read.** No interpolated scale steps, no "probably" radii.
-- **Cite sources** in `tokens.css` and at the top of `grammar.md`.
-- **Never include a token or icon that asserts a claim** — verified, paid tier, promoted, certified,
-  rating. A decorative page has no standing to state those about anyone.
-- **Say what you could not check.** The unverified section is the feature that makes the rest trustworthy.
+Two rules outrank completeness:
 
-## Step 5 — write into the profile store, then verify
+- Never write a value you didn't read.
+- Never include a token or icon that asserts a claim: verified, paid tier, promoted, certified, or rating. A decorative page has no standing to state those about anyone.
 
-Write the files straight to their destination, using the name agreed in step 1:
+## 4. Install it
 
-```sh
-mkdir -p ~/.claude/artifact-design-profiles/<name>
-```
+Check whether the name is taken: `sh ../use/scripts/profile.sh <name>` exits 0 when it is. If it is, say so and confirm before overwriting. Then install the files with the install script, relative to this skill's directory:
 
-```
-~/.claude/artifact-design-profiles/<name>/
-  grammar.md
-  tokens.css
-  icons.svg     (omit entirely if the design system has no set worth carrying)
-```
+    sh ../install/scripts/install-profile.sh --profile <name> --grammar <dir>/grammar.md --tokens <dir>/tokens.css [--icons <dir>/icons.svg]
 
-**Check whether the directory already exists first** —
-if it does, you are overwriting someone's profile, so say so and confirm before you do.
-
-Then prove it loads, using the resolver in the sibling `use` skill:
-
-```sh
-sh ../use/scripts/profile.sh <name>
-```
-
-Exit 0 with the three paths printed means done. Exit 1 means a file is missing or empty — fix it, don't
-report success. Then tell the person the profile is ready, and that pages use it by naming it to the
-`use` skill.
-
-The `install` skill is for files that already exist somewhere else; you don't need it here.
+It validates the files and checks that the profile loads. Then tell the user the profile is ready, and that pages use it by naming it to the `use` skill.

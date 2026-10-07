@@ -1,9 +1,14 @@
 #!/bin/sh
 set -u
 
-PROFILES="$HOME/.claude/artifact-design-profiles"
+PROFILES="${DESIGN_PROFILES_DIR:-$HOME/.claude/artifact-design-profiles}"
 
-installed() { ls "$PROFILES" 2>/dev/null | sed 's/^/  /' || echo "  (none)"; }
+installed() {
+  names=$(ls "$PROFILES" 2>/dev/null)
+  if [ -n "$names" ]; then printf '%s\n' "$names" | sed 's/^/  /'; else echo "  (none)"; fi
+}
+
+[ "${1:-}" = --store ] && { echo "$PROFILES"; exit 0; }
 
 if [ $# -ne 1 ] || [ -z "$1" ]; then
   echo "usage: profile.sh <name>   a profile name is required" >&2
@@ -22,7 +27,7 @@ if [ ! -d "$PROFILES/$P" ]; then
   echo "installed profiles:"
   installed
   echo
-  echo "install it with the install skill, or build it with the create skill."
+  echo "the user can install it with design-profile:install, or build it with design-profile:create."
   exit 1
 fi
 
