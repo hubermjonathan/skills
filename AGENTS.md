@@ -56,9 +56,6 @@ so nothing else belongs there.
 - Add or update the row in the skills table in `README.md`, linking the name to its `SKILL.md`
   and filling the `user invoked` column with `Yes` or `No`
 - Add or update `agents/openai.yaml` for the skill, with the `policy` block if user-invoked
-- Bump `version` in both `plugin.json` and `.claude-plugin/plugin.json`, keeping them identical,
-  so installed copies refresh. Once per PR, not per commit: if the branch already carries a
-  bump, amend that value instead of bumping again
 
 ## Manifests
 
@@ -69,7 +66,9 @@ so nothing else belongs there.
 | `.claude-plugin/marketplace.json` | Makes the repo its own Claude marketplace |
 | `.agents/plugins/marketplace.json` | Makes the repo its own Codex marketplace |
 
-Run `claude plugin validate . --strict` after touching either Claude manifest.
+No manifest sets `version`, so each commit counts as a new version and an update always pulls
+it. Run `claude plugin validate .` after touching either Claude manifest. Skip `--strict`, which
+fails on the missing version.
 
 ## Prose
 
