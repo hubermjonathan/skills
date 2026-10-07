@@ -71,7 +71,7 @@ python3 - "$OUT/meta.json" > "$OUT/ticket-key.txt" <<'PY'
 import json, re, sys
 m = json.load(open(sys.argv[1]))
 hay = f"{m.get('title','')} {m.get('headRefName','')}"
-keys = re.findall(r'\b([A-Z][A-Z0-9]{1,9}-\d+)\b', hay.upper())
+keys = re.findall(r'\(([A-Z][A-Z0-9]{1,9}-\d+)\)', hay) + re.findall(r'\b([A-Z][A-Z0-9]{1,9}-\d+)\b', hay)
 print(keys[0] if keys else "")
 PY
 
@@ -118,7 +118,11 @@ print("# symbol\tkind\thits\twhere\ttext")
 if not syms:
     sys.exit()
 cmd = ["git", "-C", root, "grep", "-n", "-I", "-w", "-F"] + sum((["-e", s] for s in syms), []) + [ref, "--", "."] + [f":(exclude){p}" for p in changed]
-lines = subprocess.run(cmd, capture_output=True, text=True, errors="replace").stdout.splitlines()
+grep = subprocess.run(cmd, capture_output=True, text=True, errors="replace")
+if grep.returncode > 1:
+    print(f"# skipped: git grep on {ref} failed: {(grep.stderr.strip().splitlines() or [grep.returncode])[0]}")
+    sys.exit()
+lines = grep.stdout.splitlines()
 word = re.compile(r"\b(" + "|".join(map(re.escape, syms)) + r")\b")
 hits = collections.defaultdict(list)
 for line in lines:
