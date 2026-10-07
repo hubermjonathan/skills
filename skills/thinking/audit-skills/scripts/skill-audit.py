@@ -52,9 +52,9 @@ def events(path):
                 yield session, agent, cwd, ts, "skill", skill_from_path(args), "read"
             continue
         content = (d.get("message") or {}).get("content")
-        if d.get("type") == "user" and isinstance(content, str) and content.startswith("<command-name>/"):
-            name = content.split("</command-name>")[0].removeprefix("<command-name>/")
-            yield session, agent, cwd, ts, "skill", name, "slash"
+        typed = re.search(r"<command-name>/([^<]+)</command-name>", content) if d.get("type") == "user" and isinstance(content, str) else None
+        if typed:
+            yield session, agent, cwd, ts, "skill", typed.group(1), "slash"
         if not isinstance(content, list):
             continue
         for b in content:
@@ -136,6 +136,8 @@ def check(argv):
                     continue
                 if session in listed and not any(pos <= i and same(n, expect) for pos, n in listed[session]):
                     missing += 1
+                    if "after" in rule:
+                        break
                     continue
                 nearby = evs[i:i + window] if "after" in rule else evs[:i + 1]
                 if any(k == "skill" and same(n, expect) for k, n, _, _ in nearby):

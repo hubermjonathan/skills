@@ -16,7 +16,7 @@ Start the window on the day the skills under audit took their current form, such
 
 ## 2. Extract the events
 
-Run `scripts/skill-audit.py extract --since <YYYY-MM-DD> --out <path>/events.tsv`, relative to this skill's directory. It reads the Claude Code and Codex session stores. To read another agent's store, set `TRANSCRIPT_DIRS` to its directories, colon-separated.
+Run `scripts/skill-audit.py extract --since <YYYY-MM-DD> --out <path>/events.tsv`, relative to this skill's directory. It reads the session stores of the agents the script knows. To read another agent's store, set `TRANSCRIPT_DIRS` to its directories, colon-separated.
 
 Each row is one event in one session:
 
@@ -31,10 +31,10 @@ Read every skill under audit and write `expectations.json`, a list of rules of t
 A **tool rule** says a tool call needs a skill loaded first:
 
 ```json
-{"tool": "^Bash$", "match": "git commit", "expect": "git"}
+{"tool": "<shell tool name>", "match": "git commit", "expect": "git"}
 ```
 
-`tool` is a regex on the tool name and `match` a regex on its arguments. The rule hits when `expect` loaded at any point earlier in the session. Write one for each action a skill's description claims, using the tool calls that action leaves behind.
+`tool` is a regex on the tool name and `match` a regex on its arguments. Take the tool names from the `name` column of the `tool` rows in `events.tsv`, since each agent names its tools differently. The rule hits when `expect` loaded at any point earlier in the session. Write one for each action a skill's description claims, using the tool calls that action leaves behind.
 
 A **follow rule** says one skill needs to load another:
 
