@@ -8,8 +8,8 @@ description: >
 
 Invoke the `company-conventions` skill first, if one is installed, for the company's pull request conventions, such as version bumps. Those conventions and the user's instructions win over the defaults below.
 
-1. Bump versions (see below), then commit and push.
-2. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
+1. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
+2. Bump versions (see below), then commit and push.
 3. Write the title and body in the format below.
 4. Open as a draft (`gh pr create --draft`) unless the user says it is ready.
 5. Reply with the PR url.
