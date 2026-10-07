@@ -18,4 +18,6 @@ You refine one ticket into a plan. You do not write code here.
 
 Then stop and wait for the user to approve it. Do not start implementing.
 
+When the user approves, post the requirements answers from step 4 as ticket comments, then stop.
+
 "Open questions resolved" is the only record of why the plan is what it is. A later attempt uses it to tell a wrong fix from a wrong design, so never skip it.
