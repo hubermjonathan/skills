@@ -109,10 +109,9 @@ def cohort_section(c, links):
 
 def main(argv):
     if len(argv) < 4:
-        sys.exit("usage: render.py <data.json> <gather-dir> <out.html> [--css <extra.css>]")
+        sys.exit("usage: render.py <data.json> <gather-dir> <out.html>")
     data = json.load(open(argv[1]))
     gather, out = argv[2], argv[3]
-    extra_css = open(argv[argv.index("--css") + 1]).read() if "--css" in argv else ""
     meta = json.load(open(f"{gather}/meta.json"))
     stats = {}
     for line in open(f"{gather}/files.tsv"):
@@ -182,7 +181,7 @@ def main(argv):
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
 <title>Walkthrough of {html.escape(repo)} #{number}</title>
-<style>{CSS}{extra_css}</style></head>
+<style>{CSS}</style></head>
 <body><div class="progressbar"><div class="progressbar-inner"><span class="progressbar-label" data-progress>0 of {areas} areas read</span><div class="progressbar-track" role="progressbar" aria-label="Review progress" aria-valuemin="0" aria-valuenow="0" aria-valuemax="{areas}"><div class="progressbar-fill" data-progress-fill></div></div></div></div>
 <div class="layout">
 <main>
