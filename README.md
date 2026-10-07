@@ -61,6 +61,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 |-------|--------------|--------------|
 | [`audit-skills`](skills/thinking/audit-skills/SKILL.md) | Measures from past session transcripts how often each skill loads when it should, and proposes fixes for the misses | Yes |
 | [`brief`](skills/thinking/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for Slack, Jira, or a PR | No |
+| [`explain-by-example`](skills/thinking/explain-by-example/SKILL.md) | Explains something in more depth by walking through one concrete example, step by step | No |
 | [`grill-me`](skills/thinking/grill-me/SKILL.md) | Interviews you round by round to stress-test a plan, decision, or idea | No |
 | [`reflect`](skills/thinking/reflect/SKILL.md) | Mines the session so far and turns learnings into skill, instruction file, or settings edits | Yes |
 | [`show-me-your-work`](skills/thinking/show-me-your-work/SKILL.md) | Keeps a TSV decision log for long or unattended runs | No |
@@ -86,7 +87,6 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`design-profile:create`](skills/tools/design-profile/skills/create/SKILL.md) | Mines a design system into a new profile | Yes |
 | [`imessage`](skills/tools/imessage/SKILL.md) | Texts you an iMessage from a Mac, for example when a long task finishes or needs you | No |
 | [`slack`](skills/tools/slack/SKILL.md) | Drafts and sends short Slack messages | No |
-| [`wizard`](skills/tools/wizard/SKILL.md) | Writes a bash wizard that walks you through steps only a human can do | No |
 
 ## Adding a skill
 

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Explain by example"
+  short_description: "Explain in depth by walking through one concrete example"
