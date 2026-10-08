@@ -53,11 +53,3 @@ it, so nothing else goes there.
 No manifest sets `version`, so each commit counts as a new version and an update always pulls
 it. Run `claude plugin validate .` after touching either Claude manifest. Skip `--strict`, which
 fails on the missing version.
-
-## Prose
-
-`README.md`, `AGENTS.md`, and `SKILL.md` bodies are in sentence case. Commit messages follow the
-`git` skill.
-
-Join clauses with a comma, colon, period, or conjunction. Never use an em-dash, or a character
-standing in for one.
