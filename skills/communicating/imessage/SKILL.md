@@ -1,8 +1,7 @@
 ---
 name: imessage
 description: >
-  Text the user with a blue bubble: an iMessage from a Mac. Use when the user asks
-  to be texted.
+  Text the user with a blue bubble. Use when the user asks to be texted.
 ---
 
 # iMessage
