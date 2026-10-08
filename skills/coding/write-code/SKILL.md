@@ -12,7 +12,7 @@ Core principle: as little code as required to solve the problem.
 2. Invoke the `principles` skill and read the files that apply to this change.
 3. Read before writing: the repo's CLAUDE.md or AGENTS.md and the code around the change. The repo's conventions win over habits from another repo.
 4. Build only what was asked. No speculative abstractions, config knobs, flags, or cleanup outside the change.
-5. Add no code comments unless the user asks. The code is the source of truth. When the change is built, invoke the `kill-comments` skill.
+5. When the change is built, invoke the `kill-comments` skill.
 6. Run the narrowest build, lint, and tests that cover the change, and fix what fails.
 7. Simplification pass. Read your complete diff against the base branch in one go. Remove accidental complexity, dead code, and anything the ask does not require. Report what you removed.
 
