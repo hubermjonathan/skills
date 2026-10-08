@@ -16,7 +16,7 @@ Start the window on the day the skills under audit took their current form, such
 
 ## 2. Extract the events
 
-Run `scripts/skill-audit.py extract --since <YYYY-MM-DD> --out <path>/events.tsv`, relative to this skill's directory. It reads the session stores of the agents the script knows. To read another agent's store, set `TRANSCRIPT_DIRS` to its directories, colon-separated.
+Invoke the `find-transcript` skill for the list of session stores. Then run `TRANSCRIPT_DIRS=<that list> scripts/skill-audit.py extract --since <YYYY-MM-DD> --out <path>/events.tsv`, relative to this skill's directory.
 
 Each row is one event in one session:
 

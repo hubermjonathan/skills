@@ -17,7 +17,7 @@ Skip when nothing durable happened. One-offs are not learnings.
 
 ## 1. Locate the transcript
 
-Run `../show-me-your-work/scripts/find-transcript.sh "<a distinctive phrase from this conversation's first user message>"`, relative to this skill's directory. It prints the matching session file and reads nothing from any other session. If it finds nothing, set `TRANSCRIPT_DIRS` to your agent's session store if you know it and retry. If the transcript is still out of reach, write a tight digest of the session and pass that instead.
+Invoke the `find-transcript` skill for this session's transcript. If it's out of reach, write a tight digest of the session and pass that instead.
 
 ## 2. Spawn three reviewers in parallel
 

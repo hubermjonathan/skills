@@ -81,6 +81,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`imessage`](skills/communicating/imessage/SKILL.md) | Texts you an iMessage from a Mac, for example when a long task finishes or needs you | No |
 | [`slack`](skills/communicating/slack/SKILL.md) | Drafts and sends short Slack messages | No |
 | [`audit-skills`](skills/agents/audit-skills/SKILL.md) | Measures from past session transcripts how often each skill loads when it should, and proposes fixes for the misses | Yes |
+| [`find-transcript`](skills/agents/find-transcript/SKILL.md) | Finds this session's transcript, or lists where agents keep session transcripts | No |
 | [`reflect`](skills/agents/reflect/SKILL.md) | Mines the session so far and turns learnings into skill, instruction file, or settings edits | Yes |
 | [`show-me-your-work`](skills/agents/show-me-your-work/SKILL.md) | Keeps a TSV decision log for long or unattended runs | No |
 | [`swarm`](skills/agents/swarm/SKILL.md) | Fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs | No |
