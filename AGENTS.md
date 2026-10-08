@@ -35,8 +35,8 @@ it, so nothing else goes there.
 
 ## When adding or renaming a skill
 
-- Add or update its row in the skills table in `README.md`, linking the name to its `SKILL.md`
-  and filling the `User invoked` column with `Yes` or `No`
+- Add or update its row in its group's table in `README.md`, linking the name to its `SKILL.md`
+  and filling the `User invoked` column with `Yes` or `No`. A new group gets its own section
 - Add or update its `agents/openai.yaml`
 - For a new group, add the group folder to the `skills` array in `.claude-plugin/plugin.json`.
   Claude Code does not scan nested folders
