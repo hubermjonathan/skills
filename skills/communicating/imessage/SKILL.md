@@ -9,7 +9,7 @@ description: >
 A text is one-way. The user reads it on a phone with no other context and can't reply through it.
 
 1. Text only when the user or their instructions asked for it. They decide when and how often.
-2. Write a message that stands alone: what happened, the one link or id they need, and what you need from them, if anything. Keep it to a few lines.
+2. Invoke the `brief` skill for the text, with the user reading on a phone as the reader, capped at a few lines: what happened, the one link or ID they need, and what you need from them, if anything.
 3. Send it with a quoted heredoc, so the shell expands nothing inside the message:
 
        <this skill's directory>/scripts/send.sh <<'MSG'
