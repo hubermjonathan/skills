@@ -1,5 +1,7 @@
 # Repo conventions
 
+Invoke the `writing-for-agents` skill before writing or editing a skill or this file.
+
 Skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill. The first five groups
 follow the steps of a change: `planning`, `coding`, `reviewing`, `pull-requests`, and `testing`.
 The other four cut across them: `writing`, `communicating`, `agents`, and `tools`. Add a group
@@ -7,14 +9,9 @@ only when a skill fits none of these. The skill folder name, the `name` in front
 skill's invocation name all match. Names stay unique across groups, since the group never shows up
 in the invocation name.
 
-Claude Code does not scan nested folders, so every group folder is listed in the
-`skills` array of `.claude-plugin/plugin.json`. A new group gets a new entry there.
-
-The design profile skills are their own plugin, `design-profile`, at
-`skills/tools/design-profile/`, so they invoke as `design-profile:create` and
-`design-profile:use`. It has its own manifests and an entry in both marketplace files. Its skills
-sit at `skills/tools/design-profile/skills/<name>/`, so their names only need to be unique inside
-it.
+`skills/tools/design-profile/` is a second plugin, `design-profile`, with its own manifests and an
+entry in both marketplace files. Its skills sit at `skills/tools/design-profile/skills/<name>/`, so
+their names only need to be unique inside it.
 
 ## Agent agnostic
 
@@ -26,38 +23,25 @@ and the skill text stays generic.
 
 ## Invocation
 
-A skill is either model-invoked or user-invoked, and the setting is mirrored in both harnesses
-so it never differs by agent.
+Choose model-invoked or user-invoked as `writing-for-agents` describes. Mirror the choice in both
+harnesses, so it never differs by agent:
 
-**Model-invoked** is the default: the model can reach for it on its own. Omit
-`disable-model-invocation` from the frontmatter and the `policy` block from `agents/openai.yaml`.
-The `description` is model-facing. It says when to use the skill as cases ("use when asked to
-babysit a PR, get its checks passing, or get it ready to merge"), never as quoted phrases to
-match: the agent infers from the situation rather than matching strings.
+| | `SKILL.md` frontmatter | `agents/openai.yaml` | `description` |
+|---|---|---|---|
+| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, as situations the agent recognizes, such as "use when asked to babysit a PR, get its checks passing, or get it ready to merge" |
+| User-invoked | adds `disable-model-invocation: true` | adds `policy.allow_implicit_invocation: false` | Human-facing: a one-line summary read while browsing slash commands |
 
-**User-invoked** means only the human typing its name can fire it, never the model. Set both:
-
-- `disable-model-invocation: true` in `SKILL.md` frontmatter, for Claude Code
-- `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, for Codex
-
-The `description` is then human-facing, a one-line summary read while browsing slash commands,
-with no trigger list.
-
-## Files
-
-`SKILL.md` frontmatter carries `name`, `description`, and, for user-invoked skills only,
-`disable-model-invocation`.
-
-`agents/openai.yaml`, next to each `SKILL.md`, holds Codex-only presentation metadata
-(`interface.display_name`, `interface.short_description`) and, for user-invoked skills, the
-invocation policy. It is not part of the `SKILL.md` standard and every other agent ignores it,
-so nothing else belongs there.
+`agents/openai.yaml` holds Codex-only presentation metadata, `interface.display_name` and
+`interface.short_description`, plus the policy for a user-invoked skill. Every other agent ignores
+it, so nothing else goes there.
 
 ## When adding or renaming a skill
 
-- Add or update the row in the skills table in `README.md`, linking the name to its `SKILL.md`
-  and filling the `user invoked` column with `Yes` or `No`
-- Add or update `agents/openai.yaml` for the skill, with the `policy` block if user-invoked
+- Add or update its row in the skills table in `README.md`, linking the name to its `SKILL.md`
+  and filling the `User invoked` column with `Yes` or `No`
+- Add or update its `agents/openai.yaml`
+- For a new group, add the group folder to the `skills` array in `.claude-plugin/plugin.json`.
+  Claude Code does not scan nested folders
 
 ## Manifests
 
@@ -74,8 +58,8 @@ fails on the missing version.
 
 ## Prose
 
-All prose uses normal sentence case: `README.md`, `AGENTS.md`, and `SKILL.md` bodies. Commit
-messages follow the `git` skill.
+`README.md`, `AGENTS.md`, and `SKILL.md` bodies are in sentence case. Commit messages follow the
+`git` skill.
 
-No em-dashes anywhere. Rewrite the sentence with a comma, colon, period, or conjunction
-instead of substituting a character.
+Join clauses with a comma, colon, period, or conjunction. Never use an em-dash, or a character
+standing in for one.
