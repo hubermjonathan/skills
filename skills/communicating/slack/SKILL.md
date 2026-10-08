@@ -11,7 +11,5 @@ description: >
 3. Invoke the `brief` skill for the text, capped at 1 to 3 sentences plus links. Then apply the Slack specifics:
    - links over prose: a review ask is the PR or ticket links and one line of ask
    - mention people with `<@user-id>`
-4. Show the draft with its destination (channel or DM, thread or top level). Send only after the user confirms, unless they already said to send it.
+4. Send it. Invoking this skill is the go-ahead. If the user asked only for a draft, show it with its destination (channel or DM, thread or top level) and send nothing.
 5. After sending, reply with the message link.
-
-Editing a sent message counts as sending: show the new text first.
