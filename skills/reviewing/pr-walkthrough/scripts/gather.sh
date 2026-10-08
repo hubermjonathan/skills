@@ -152,7 +152,7 @@ fi
     cut -f4 "$OUT/files.tsv" | while read -r f; do dirname "$f"; done | sort -u \
       | while read -r d; do
           while [[ "$d" != "." && "$d" != "/" ]]; do
-            for candidate in terraform/published.json CHANGELOG.md package.json .changeset; do
+            for candidate in CHANGELOG.md package.json .changeset; do
               [[ -e "$ROOT/$d/$candidate" ]] && echo "$d/$candidate"
             done
             d=$(dirname "$d")

@@ -2,20 +2,20 @@
 name: push-pr
 description: >
   Push new commits to an open pull request and keep the PR honest: base up to date,
-  version bump still right, title and body still true. Use when pushing to a branch
-  that has an open PR, or when a PR's title, body, or version bump needs to catch up
-  with new commits or a base change.
+  title and body still true. Use when pushing to a branch that has an open PR, or
+  when a PR's title or body needs to catch up with new commits or a base change.
 ---
+
+Invoke the `company-conventions` skill first, if one is installed, for the company's pull request conventions, such as version bumps.
 
 ## Before pushing
 
-1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,isDraft,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name, such as a promotion PR's branch in an infra repo.
+1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,isDraft,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name.
 2. Update from the base when it conflicts or the repo requires an up-to-date branch: `git fetch`, then `git merge origin/<base>`. Merge rather than rebase, so no force-push is needed on a reviewed PR. Rebase only when the user asks. Resolve conflicts by keeping both sides' intent, and never abort.
-3. Recheck the version bump. If the base has moved past the branch's version, or a conflict landed in a version file, re-bump once relative to the new base. Invoke the `open-pr` skill for the bump rules.
-4. If this push answers review comments, reply to them first. Invoke the `comment-pr` skill.
-5. Remove debug output and stray files the new commits added. For comments and docs, invoke the `kill-comments` skill.
-6. Run the narrowest build, lint, and tests that cover what changed since the last push.
-7. Check what will ship, not the working tree: `git diff --cached` before committing, and `git diff origin/<head>...HEAD` before pushing. A stray unstaged edit means the commit does not hold what you just checked.
+3. If this push answers review comments, reply to them first. Invoke the `comment-pr` skill.
+4. Remove debug output and stray files the new commits added. For comments and docs, invoke the `kill-comments` skill.
+5. Run the narrowest build, lint, and tests that cover what changed since the last push.
+6. Check what will ship, not the working tree: `git diff --cached` before committing, and `git diff origin/<head>...HEAD` before pushing. A stray unstaged edit means the commit does not hold what you just checked.
 
 ## Pushing
 
