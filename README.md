@@ -115,7 +115,7 @@ Standards for how prose reads, whether a person or an agent reads it.
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
 | [`technical-writing`](skills/writing/technical-writing/SKILL.md) | Layered writing standard for chat replies, docs, PRs, tickets, and commits | No |
-| [`unslop`](skills/writing/unslop/SKILL.md) | Strips AI writing tells from PR bodies, tickets, Slack, and docs, as a last pass after `technical-writing` | No |
+| [`unslop`](skills/writing/unslop/SKILL.md) | Strips AI writing tells from PR bodies, tickets, Slack, and docs | No |
 | [`writing-for-agents`](skills/writing/writing-for-agents/SKILL.md) | Writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions | No |
 
 ### Communicating

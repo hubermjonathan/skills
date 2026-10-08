@@ -2,8 +2,8 @@
 name: unslop
 description: >
   Cut AI writing tells from prose a person outside the session reads: PR bodies,
-  tickets, Slack messages, and docs. Use as the last pass on that prose, or when
-  asked to make text sound less like AI.
+  tickets, Slack messages, and docs. Use on that prose, or when asked to make text
+  sound less like AI.
 ---
 
 # Unslop
