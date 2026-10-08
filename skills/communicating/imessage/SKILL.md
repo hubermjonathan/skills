@@ -1,9 +1,8 @@
 ---
 name: imessage
 description: >
-  Text the user an iMessage from a Mac. Use when the user asked to be texted about
-  something, such as a long task finishing, failing, or needing them while they're
-  away from the session.
+  Text the user with a blue bubble: an iMessage from a Mac. Use when the user asks
+  to be texted.
 ---
 
 # iMessage
