@@ -1,6 +1,6 @@
 ---
 name: create
-description: Build a new design profile by mining a design system for its real values.
+description: Add a design profile, from finished profile files or by mining a design system for its real values.
 disable-model-invocation: true
 ---
 
@@ -14,24 +14,55 @@ A profile is three files that let an HTML page carry a design system honestly:
 | `tokens.css` | values only: CSS custom properties for both themes |
 | `icons.svg` | optional `<symbol>` sprite, referenced with `<use href="#id">` |
 
-Mine them from a real source of truth. Never invent them: a profile built on taste looks authoritative while being wrong, which is worse than no profile.
+They come from one of two places: finished files someone hands you, or a design system you mine for its real values. Never invent them: a profile built on taste looks authoritative while being wrong, which is worse than no profile.
 
-## 1. Ask where to mine
+## 1. Get the name
 
-You can't guess a design system's source of truth, so ask and wait:
+The profile name has no default. If the user didn't name the design system, ask. A filename or a repo name is a hint, not an answer, and a profile installed under the wrong name is never found.
 
-> Where should I mine this profile from? Useful sources, best first:
+Check whether the name is taken: `sh ../use/scripts/profile.sh <name>`, relative to this skill's directory, exits 0 when it is. If it is, say so and confirm before overwriting.
+
+## 2. Pick the path
+
+Look at what the user gave you:
+
+- **Profile files:** paths, a folder holding a markdown rules file and a CSS file of custom properties, or a description such as "the ones I just downloaded". Go to step 3.
+- **A source to mine:** a theme or token package, a component library, a design-tool export, documentation, or a live site. Go to step 4.
+- **Nothing, or a folder that could be either:** ask, and wait:
+
+> Do you have the profile files already, or should I mine them from the design system? Useful sources to mine, best first:
 > - a theme or design-token package in a local repo (`packages/theme`, `tokens/`, `themes/`)
 > - a component library whose components hardcode the real defaults
 > - a design-tool export, such as Figma variables or styles as JSON or CSS
 > - design-system documentation: a PDF, a wiki page, or a style guide
 > - a live site, as a last resort: its stylesheet gives colors but not intent
->
-> Also, what should the profile be named, and does the design system ship an icon set worth including?
 
-When several candidates exist, ask which is canonical. A legacy native theme and a current web theme disagree, and mining the deprecated one poisons everything after it. If the source is a repo that isn't cloned or a file you can't read, ask for a path or an export instead of guessing.
+## 3. Map the files you were given
 
-## 2. Mine with one subagent per domain
+- **A folder:** list it and map each file to a role.
+- **Paths:** pass them through.
+- **A description:** look in the likely places, newest first, and confirm before installing.
+
+      find ~/Downloads ~/Desktop ~/Documents -maxdepth 2 \( -name '*.css' -o -name '*.md' -o -name '*.svg' \) -newermt '-14 days' 2>/dev/null | head -20
+
+Map by content, not name. The tokens file declares custom properties or a `:root` block. The grammar is markdown with `#` headings. The sprite starts with `<svg` and holds `<symbol id=...>` elements. When two files fit one role, or no grammar file is obvious, ask. A wrong file installs cleanly and renders wrong.
+
+Show the mapping before installing, so a bad guess is visible:
+
+    profile -> offerup
+    grammar -> ~/Downloads/offerup-grammar.md
+    tokens  -> ~/Downloads/tokens (1).css
+    icons   -> none found
+
+Then go to step 5.
+
+## 4. Mine a design system
+
+### Pick the source
+
+When several candidates exist, ask which is canonical. A legacy native theme and a current web theme disagree, and mining the deprecated one poisons everything after it. If the source is a repo that isn't cloned or a file you can't read, ask for a path or an export instead of guessing. Ask whether the design system ships an icon set worth including.
+
+### Mine with one subagent per domain
 
 A design system is too large for one context, and its domains are independent. Spawn read-only subagents in parallel, one per domain of the named source:
 
@@ -55,7 +86,7 @@ Give every subagent the same rules:
 
 Read the findings yourself before writing anything. When two subagents contradict each other, or one cites a source you didn't expect, go look instead of averaging. Spawn a follow-up for a domain that came back thin.
 
-## 3. Write the three files
+### Write the three files
 
 Write them to a working directory, not into the profile store.
 
@@ -79,10 +110,12 @@ Two rules outrank completeness:
 - Never write a value you didn't read.
 - Never include a token or icon that asserts a claim: verified, paid tier, promoted, certified, or rating. A decorative page has no standing to state those about anyone.
 
-## 4. Install it
+## 5. Install it
 
-Check whether the name is taken: `sh ../use/scripts/profile.sh <name>` exits 0 when it is. If it is, say so and confirm before overwriting. Then install the files with the install script, relative to this skill's directory:
+Run the install script once, relative to this skill's directory, with explicit paths:
 
-    sh ../install/scripts/install-profile.sh --profile <name> --grammar <dir>/grammar.md --tokens <dir>/tokens.css [--icons <dir>/icons.svg]
+    sh scripts/install-profile.sh --profile <name> --grammar <path> --tokens <path> [--icons <path>]
 
-It validates the files and checks that the profile loads. Then tell the user the profile is ready, and that pages use it by naming it to the `use` skill.
+It copies each file to its canonical name, so source filenames don't matter. It installs nothing when a file is missing, empty, a directory, or looks like the wrong role, such as swapped grammar and tokens. Relay its error instead of working around it. A re-install without `--icons` removes the old sprite. It ends by checking that the profile loads.
+
+Then tell the user the profile is ready, and that pages use it by naming it to the `use` skill. Warn that a re-install overwrites the profile's files, so local edits belong in the profile's source.

@@ -19,7 +19,7 @@ Take the profile name from the request. If there is none, list the installed pro
 It prints the paths to the profile's files. Act on its exit code:
 
 - **0**: resolved. Go on to step 2.
-- **1**: not installed, or a file is missing. It lists what is installed. Say which profile was asked for and stop. Never fall back to another profile. The user adds one with `design-profile:install`, or builds one with `design-profile:create`.
+- **1**: not installed, or a file is missing. It lists what is installed. Say which profile was asked for and stop. Never fall back to another profile. The user adds one with `design-profile:create`, from profile files or a design system to mine.
 - **2**: no name given. It lists what is installed. Ask which to use.
 
 ## 2. Build the page

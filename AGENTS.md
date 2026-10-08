@@ -10,10 +10,11 @@ in the invocation name.
 Claude Code does not scan nested folders, so every group folder is listed in the
 `skills` array of `.claude-plugin/plugin.json`. A new group gets a new entry there.
 
-The design profile skills are their own plugin, `design-profile`, at `skills/tools/design-profile/`,
-so they invoke as `design-profile:create`, `design-profile:install`, and `design-profile:use`. It has
-its own manifests and an entry in both marketplace files. Its skills sit at
-`skills/tools/design-profile/skills/<name>/`, so their names only need to be unique inside it.
+The design profile skills are their own plugin, `design-profile`, at
+`skills/tools/design-profile/`, so they invoke as `design-profile:create` and
+`design-profile:use`. It has its own manifests and an entry in both marketplace files. Its skills
+sit at `skills/tools/design-profile/skills/<name>/`, so their names only need to be unique inside
+it.
 
 ## Agent agnostic
 

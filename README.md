@@ -86,8 +86,7 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 | [`swarm`](skills/agents/swarm/SKILL.md) | Fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs | No |
 | [`create-qr-code`](skills/tools/create-qr-code/SKILL.md) | Makes a QR code for a link and shows it in the reply | No |
 | [`design-profile:use`](skills/tools/design-profile/skills/use/SKILL.md) | Styles an HTML page with a named design profile | No |
-| [`design-profile:install`](skills/tools/design-profile/skills/install/SKILL.md) | Installs or updates a design profile from local files | Yes |
-| [`design-profile:create`](skills/tools/design-profile/skills/create/SKILL.md) | Mines a design system into a new profile | Yes |
+| [`design-profile:create`](skills/tools/design-profile/skills/create/SKILL.md) | Adds a design profile from finished files, or mines one from a design system | Yes |
 
 ## Adding a skill
 
