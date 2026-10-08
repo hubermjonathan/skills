@@ -1,4 +1,4 @@
-# Encode Lessons in Structure
+# Encode lessons in structure
 
 Encode recurring fixes in mechanisms (tools, code, metadata, automation) instead of textual instructions. Every error, human correction, and unexpected outcome is a learning signal. Capture it, route it, and close the loop.
 

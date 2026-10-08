@@ -19,7 +19,7 @@ Three rules sit above the layers:
 
 The codebase is the word list. Write the real symbol, file, flag, or command name, not a synonym or a description of it.
 
-Don't invent jargon. Use the words a developer would say out loud: "move", "delete", "a budget that only decreases", not "evacuate", "ratchet", or "endgame". A named pattern is fine when the doc says what it means the first time. Propose a new offender and its replacement as an addition to `unslop`'s abstract-metaphor rule in your reply, with the diff. Don't edit that skill.
+Don't invent jargon. Use the words a developer would say out loud: "turn off", "split", "a check that blocks the merge", not "sunset", "decompose", or "a quality gate". A named pattern is fine when the doc says what it means the first time.
 
 ## Vary the rhythm
 
@@ -94,15 +94,15 @@ Source: asd-ste100.org (Issue 9, 2025), fetched 2026-07-18. The numbered rules a
 - Use periods, not semicolons. Replace an em dash with a new sentence. Use a colon only before a list or an example, never to join two clauses.
 - Make text in parentheses a full grammatical unit or its own sentence. Never form plurals with "(s)".
 - No slashes or arrows: write "a, b, or both" instead of "a/b" or "and/or", and "returns" or "becomes" instead of "→".
-- Call each thing by one name, everywhere. A doc that says "the gate", "the ratchet", and "the budget check" for one thing teaches three things. Rewording an unchanged sentence between edits costs the same way. Don't churn what didn't change.
+- Call each thing by one name, everywhere. A doc that says "the worker", "the consumer", and "the job runner" for one thing teaches three things. Rewording an unchanged sentence between edits costs the same way. Don't churn what didn't change.
 - Skip idioms, colloquialisms, Latin abbreviations, and metaphors. A non-native reader, a translator, and an agent all parse plain constructions best.
 
 Source: Kohl, The Global English Style Guide (SAS Press). Guideline text fetched from the Internet Archive and the SAS sample chapter, 2026-07-18.
 
 ## Voice and repo specifics
 
-- Invoke the `unslop` skill as a last pass on prose a person outside the session reads: PR bodies, tickets, Slack messages, and docs. That skill holds the catalog of AI writing tells this skill doesn't cover.
-- PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them. A PR body is a briefing that a reviewer can read in under a minute. Do not paste swarm logs, SHA lists, or metric tables. Link them.
+- Invoke the `unslop` skill as a last pass on prose a person outside the session reads: PR bodies, tickets, Slack messages, and docs.
+- PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them. A PR body is a briefing that a reviewer can read in under a minute. Do not paste logs, SHA lists, or metric tables. Link them.
 - Product UI strings are not documentation. Use your product's copy guidelines for those.
 - Match the repo's indentation in code snippets. Write real paths and real symbols. Make every count or tree claim true at the commit that lands it, and include the command that regenerates it.
 

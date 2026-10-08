@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "hubermjonathan",
-  "description": "skills for coding agents",
+  "description": "Skills for coding agents",
   "owner": {
     "name": "Jonathan Huber",
     "url": "https://github.com/hubermjonathan"
@@ -10,12 +10,12 @@
     {
       "name": "skills",
       "source": "./",
-      "description": "skills for coding agents"
+      "description": "Skills for coding agents"
     },
     {
       "name": "design-profile",
       "source": "./skills/tools/design-profile",
-      "description": "create and use design profiles for html pages"
+      "description": "Create and use design profiles for HTML pages"
     }
   ]
 }

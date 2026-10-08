@@ -14,10 +14,10 @@ elif [[ "$RAW" =~ ^([^/#[:space:]]+/[^/#[:space:]]+)#([0-9]+)$ ]]; then
 else
   PR="${RAW#\#}"
 fi
-[[ "$PR" =~ ^[0-9]+$ ]] || { echo "could not parse a pr number from: $RAW" >&2; exit 1; }
+[[ "$PR" =~ ^[0-9]+$ ]] || { echo "could not parse a PR number from: $RAW" >&2; exit 1; }
 HERE=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)
 REPO="${REPO:-$HERE}"
-[[ -n "$REPO" ]] || { echo "no repo: pass a pr url or owner/repo#number, or run inside the pr's repo" >&2; exit 1; }
+[[ -n "$REPO" ]] || { echo "no repo: pass a PR URL or owner/repo#number, or run inside the PR's repo" >&2; exit 1; }
 REPO_FLAG="--repo $REPO"
 ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
 IN_CHECKOUT=""

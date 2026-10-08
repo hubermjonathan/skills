@@ -105,10 +105,7 @@ Write them to a working directory, not into the profile store.
 
 **`icons.svg`**: only if the system has a real set worth carrying. Use `<symbol>` elements with stable ids and `currentColor` fills, so tokens drive them. Ship no sprite rather than a weak one.
 
-Two rules outrank completeness:
-
-- Never write a value you didn't read.
-- Never include a token or icon that asserts a claim: verified, paid tier, promoted, certified, or rating. A decorative page has no standing to state those about anyone.
+One rule outranks completeness: never write a value you didn't read.
 
 ## 5. Install it
 

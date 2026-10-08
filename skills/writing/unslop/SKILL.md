@@ -18,41 +18,39 @@ Edit text to remove AI patterns. Word and sentence rules, such as plain words, a
 
 ## Patterns to detect and fix
 
-Rule numbers are stable ids that other skills cite. A removed rule leaves a gap.
-
 ### Content
 
-5. **Vague attributions.** "Experts believe", "Industry reports suggest", "Some critics argue". Name the source or delete.
+1. **Vague attributions.** "Experts believe", "Industry reports suggest", "Some critics argue". Name the source or delete.
 
 ### Language
 
-7. **AI vocabulary.** Additionally, crucial, delve, enduring, enhance, fostering, garner, interplay, intricate, landscape (abstract), pivotal, showcase, tapestry (abstract), testament, underscore, vibrant. Replace with plain words.
-8. **Fancy ways to say "is".** "serves as", "stands as", "boasts", "features". Just say "is" or "has".
-9. **"Not just X, but Y."** State the point directly instead.
-10. **Rule of three.** Forcing ideas into groups of three. Use the natural number.
-12. **False ranges.** "from X to Y" where X and Y aren't on a meaningful scale. List topics directly.
+2. **AI vocabulary.** Additionally, crucial, delve, enduring, enhance, fostering, garner, interplay, intricate, landscape (abstract), pivotal, showcase, tapestry (abstract), testament, underscore, vibrant. Replace with plain words.
+3. **Fancy ways to say "is".** "serves as", "stands as", "boasts", "features". Just say "is" or "has".
+4. **"Not just X, but Y."** State the point directly instead.
+5. **Rule of three.** Forcing ideas into groups of three. Use the natural number.
+6. **False ranges.** "from X to Y" where X and Y aren't on a meaningful scale. List topics directly.
 
 ### Style
 
-15. **Boldface overuse.** Don't bold every proper noun or acronym.
-16. **Inline-header lists.** The tell is a bold label and colon that restates the line: "**Performance:** Performance improved...". Convert those to prose. A bold lead-in that ends in a period, names the item, and is followed by genuinely new detail ("**Schema in TypeScript.** Tables live in one file.") is fine, not a tell.
-18. **Decorative emojis.** Remove from headings and bullets.
-19. **Curly quotes.** Replace with straight quotes.
+7. **Boldface overuse.** Don't bold every proper noun or acronym.
+8. **Inline-header lists.** The tell is a bold label and colon that restates the line: "**Performance:** Performance improved...". Convert those to prose. A bold lead-in that ends in a period, names the item, and is followed by genuinely new detail ("**Schema in TypeScript.** Tables live in one file.") is fine, not a tell.
+9. **Decorative emojis.** Remove from headings and bullets.
+10. **Curly quotes.** Replace with straight quotes.
 
 ### Communication artifacts
 
-20. **Chatbot phrases.** "I hope this helps!", "Let me know if...", "Of course!", "Certainly!", "Found the smoking gun!" Remove.
-22. **Sycophantic tone.** "Great question! You're absolutely right!" Respond directly.
+11. **Chatbot phrases.** "I hope this helps!", "Let me know if...", "Of course!", "Certainly!", "Found the smoking gun!" Remove.
+12. **Sycophantic tone.** "Great question! You're absolutely right!" Respond directly.
 
 ### Filler
 
-24. **Excessive hedging.** "could potentially possibly be argued that it might" becomes "may".
-25. **Generic conclusions.** "The future looks bright." State specific plans or facts.
+13. **Excessive hedging.** "could potentially possibly be argued that it might" becomes "may".
+14. **Generic conclusions.** "The future looks bright." State specific plans or facts.
 
 ### Jargon
 
-26. **Abstract metaphor nouns.** Substrate, wedge, vector, locus, vantage, nexus, primitive (as noun), harness (as metaphor), surface (as in "API surface"), bedrock, scaffolding (as metaphor), modality, paradigm, gold-plating, ratchet (as metaphor), evacuate (for moving code), endgame, north star, flywheel. These read as technical but usually have a plainer concrete word. "Substrate" becomes "base". "Wedge in" becomes "add". "Vector" becomes "way" or "method". "Gold-plating" becomes "more than the job needs". "Ratchet" becomes the mechanism's real name or "a limit that only tightens". "Evacuate" becomes "move out". "Endgame" becomes "the last phase". Pick the concrete word.
+15. **Abstract metaphor nouns.** Substrate, wedge, vector, locus, vantage, nexus, primitive (as noun), harness (as metaphor), surface (as in "API surface"), bedrock, scaffolding (as metaphor), modality, paradigm, gold-plating, ratchet (as metaphor), evacuate (for moving code), endgame, north star, flywheel. These read as technical but usually have a plainer concrete word. "Substrate" becomes "base". "Wedge in" becomes "add". "Vector" becomes "way" or "method". "Gold-plating" becomes "more than the job needs". "Ratchet" becomes the mechanism's real name or "a limit that only tightens". "Evacuate" becomes "move out". "Endgame" becomes "the last phase". Pick the concrete word.
 
 ### Plain speech
 
-30. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.
+16. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.

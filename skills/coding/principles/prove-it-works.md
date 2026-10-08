@@ -1,4 +1,4 @@
-# Prove It Works
+# Prove it works
 
 Verify every task output by checking the real thing directly. Do not infer from proxies, self-reports, or "it compiles."
 

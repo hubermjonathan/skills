@@ -21,7 +21,7 @@ Findings must point to skills, tools, MCPs, or config this session actually used
 
 - Skill loads: a skill tool call, or a read of any `SKILL.md`
 - Agent prompts that name a skill
-- Tool calls (Bash, MCP, etc.) that match a skill's documented commands
+- Shell or MCP tool calls that match a skill's documented commands
 - The skill list the session was shown, for skills that were available but never called
 
 Two valid finding shapes:

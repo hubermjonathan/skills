@@ -19,17 +19,15 @@ Take the profile name from the request. If there is none, list the installed pro
 It prints the paths to the profile's files. Act on its exit code:
 
 - **0**: resolved. Go on to step 2.
-- **1**: not installed, or a file is missing. It lists what is installed. Say which profile was asked for and stop. Never fall back to another profile. The user adds one with `design-profile:create`, from profile files or a design system to mine.
+- **1**: not installed, or a file is missing. It lists what is installed. Say which profile was asked for and stop. Never fall back to another profile. The user adds one with the `create` skill, from profile files or a design system to mine.
 - **2**: no name given. It lists what is installed. Ask which to use.
 
 ## 2. Build the page
 
 1. Read the profile's `grammar.md`. It is the rule set, and it wins over this skill. It is large, so jump by its headings.
 2. Inline `tokens.css` in full in a `<style>` tag. Never retype or summarize its values, and never write a raw value where a token exists.
-3. Add the light and dark toggle the tokens file defines, if it has one, starting in the mode it specifies.
-4. Add a page container. Component libraries rarely define one.
-5. Paste `icons.svg` only if the page earns an icon. The default is none: before adding one, delete it, and if nothing is lost, keep it deleted.
-6. Check the page against the grammar's do-not list. Respect `prefers-reduced-motion` and keep keyboard focus visible.
+3. To use an icon, paste `icons.svg` once and reference each symbol with `<use href="#id">`.
+4. Check the page against the grammar's do-not list. Respect `prefers-reduced-motion` and keep keyboard focus visible.
 
 ## When the grammar is silent
 

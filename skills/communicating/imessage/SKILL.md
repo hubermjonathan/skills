@@ -24,5 +24,5 @@ A text is one-way. The user reads it on a phone with no other context and can't 
 ## Setup
 
 - macOS, with Messages signed in to iMessage.
-- `IMESSAGE_HANDLE` set in the shell environment: the user's phone number in E.164 form (`+11234567890`) or their Apple ID email. Keep it in a machine-local file, not in a tracked dotfile.
+- `IMESSAGE_HANDLE` set in the shell environment: the user's phone number in E.164 form (`+11234567890`) or their Apple ID email.
 - Automation permission for Messages. macOS asks once, on the first send. Change it later in System Settings > Privacy & Security > Automation.

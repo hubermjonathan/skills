@@ -27,7 +27,7 @@ if [ ! -d "$PROFILES/$P" ]; then
   echo "installed profiles:"
   installed
   echo
-  echo "the user can add it with design-profile:create, from profile files or a design system to mine."
+  echo "the user can add it with the create skill, from profile files or a design system to mine."
   exit 1
 fi
 

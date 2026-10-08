@@ -1,4 +1,4 @@
-# Minimize Reader Load
+# Minimize reader load
 
 Maintainability is the work a reader must do to understand code. Track two axes:
 1. **Layers to trace.** How many indirections sit between the question and the answer.

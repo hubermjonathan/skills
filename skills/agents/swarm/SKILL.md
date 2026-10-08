@@ -10,10 +10,6 @@ description: >
 
 Fan out N parallel workers. They may cover separate slices, race the same brief, or mix both. The parent waits, aggregates, and returns one report.
 
-## Start
-
-Track one todo per phase before launching anything: Frame, Fan out, Aggregate, Report.
-
 ## Phase A: Frame
 
 1. State the done predicate and the artifact or report the swarm must return.

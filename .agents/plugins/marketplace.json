@@ -10,7 +10,7 @@
         "source": "local",
         "path": "../.."
       },
-      "description": "skills for coding agents",
+      "description": "Skills for coding agents",
       "category": "Productivity"
     },
     {
@@ -19,7 +19,7 @@
         "source": "local",
         "path": "../../skills/tools/design-profile"
       },
-      "description": "create and use design profiles for html pages",
+      "description": "Create and use design profiles for HTML pages",
       "category": "Productivity"
     }
   ]

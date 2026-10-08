@@ -1,4 +1,4 @@
-# Laziness Protocol
+# Laziness protocol
 
 Aim for the most result with the least code and complexity.
 

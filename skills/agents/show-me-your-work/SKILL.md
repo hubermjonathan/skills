@@ -20,7 +20,7 @@ Copy `references/decision-log-template.tsv` (the header row) to start a clean lo
 - **ts.** ISO8601 timestamp.
 - **phase.** The phase or workstream.
 - **decision.** What was chosen or done, one line.
-- **why.** The reason in plain words. If a principle drove it, say it plainly, not as a jargon tag.
+- **why.** The reason in plain words.
 - **evidence.** A link or path that proves it: commit SHA, PR number, `file:line`, or an artifact, trace, or screenshot path. Never a paragraph.
 - **result.** The outcome or predicate state: `tests green`, `reverted`, `pixel-diff 0`, `INCONCLUSIVE`, `open`.
 
@@ -36,7 +36,7 @@ ts	phase	decision	why	evidence	result
 
 ## Logging a row
 
-Write each entry the way you'd tell a teammate what you did. Plain words, concrete actions, no AI speak or abstract jargon.
+Write each entry the way you'd tell a teammate what you did.
 
 Use the helper `scripts/log.sh <logfile> <phase> <decision> <why> <evidence> <result>`. It stamps `ts`, writes the header on first use, strips stray tabs and newlines, and prefixes any cell starting with `=`, `+`, `-`, or `@` with a single quote. A bare `printf` appending a row works too, but mind those same bytes if cells come from generated or user-supplied text.
 
@@ -81,7 +81,3 @@ Every reply for a run that produced a trail ends with an "Attention" section. Le
 ## Reviewing the trail
 
 Read top to bottom, follow the evidence pointers, spot-check. GitHub renders a committed TSV as a table. `column -s$'\t' -t decisions.tsv` renders it in a terminal.
-
-## Composing this skill
-
-Other skills route their audit trail here instead of inventing one. Reference it by name and let it own the format. Don't restate the columns.

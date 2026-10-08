@@ -1,4 +1,4 @@
-# Fix Root Causes
+# Fix root causes
 
 When debugging, do not fix symptoms. Trace every problem to its root cause and fix it there.
 

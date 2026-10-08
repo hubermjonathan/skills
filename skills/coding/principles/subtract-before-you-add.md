@@ -1,4 +1,4 @@
-# Subtract Before You Add
+# Subtract before you add
 
 When evolving a system, remove complexity first, then build.
 
@@ -11,5 +11,4 @@ Make simplification a continual investment. Leave the design slightly simpler an
 - Cut before you polish (get to the minimum before investing in quality)
 - Design for observed usage, not speculative edge cases
 - No speculative validators, parsers, or guards beyond what the spec demands
-- Simplify prompts (remove redundant instructions, excessive templates)
 - When a reference has no novel content, delete it rather than leaving a stub
