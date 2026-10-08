@@ -47,7 +47,6 @@ Show the Accepted, Rejected, and Backlog output, numbered, and wait for the user
 
 Find the real file before editing anything:
 
-- Resolve symlinks with `readlink -f`. A symlinked CLAUDE.md or settings file is edited at its target, which usually lives in a dotfiles repo.
 - Never edit an installed copy of a plugin or skill that your agent manages, such as a plugin cache. It is overwritten on update. Find the source checkout of that plugin's repo and edit there.
 - A skill from a repo the user owns is edited in that repo, on a branch, following its own AGENTS.md or CLAUDE.md.
 
