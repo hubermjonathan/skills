@@ -68,7 +68,7 @@ A subagent's session is its own transcript, so a skill its parent loaded does no
 
 For each group of "should have fired" misses, pick a fix, strongest first:
 
-- **Make the call explicit.** The calling skill names the skill as a step: "Invoke the `brief` skill to write the text, with Slack as the destination." A hint, a description match, or a call with an escape clause ("unless...") loads far less often.
+- **Make the call explicit.** The calling skill names the skill as a step: "Invoke the `brief` skill for the text, capped at 1 to 3 sentences plus links." A hint, a description match, or a call with an escape clause ("unless...") loads far less often.
 - **Tune the description.** Add the case the misses share to the expected skill's description, as a situation, not a phrase to match.
 - **Drop the expectation.** When the misses were done right without the skill, the call or the skill can go.
 

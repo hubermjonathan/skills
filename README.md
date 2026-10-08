@@ -124,7 +124,7 @@ Get something to a person.
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
-| [`brief`](skills/communicating/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for Slack, Jira, or a PR | No |
+| [`brief`](skills/communicating/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for someone outside the work | No |
 | [`explain-by-example`](skills/communicating/explain-by-example/SKILL.md) | Explains something in more depth by walking through one concrete example, step by step | No |
 | [`imessage`](skills/communicating/imessage/SKILL.md) | Texts you an iMessage from a Mac, for example when a long task finishes or needs you | No |
 | [`slack`](skills/communicating/slack/SKILL.md) | Drafts and sends short Slack messages | No |

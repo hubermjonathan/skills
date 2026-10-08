@@ -26,7 +26,7 @@ Automated reviewer bots count as reviewers. Their comments are review comments.
 - Reply first, then push the fix. A reviewer who sees a push land before an answer assumes they were ignored.
 - Say what you changed, or decline with a reason. Never leave a comment unanswered.
 - A comment already answered by you is settled. Do not re-open it.
-- Keep replies short and plain, and non-technical when the reader is not an engineer.
+- Invoke the `brief` skill for each reply, with the commenter as the reader, capped at 1 to 2 sentences.
 - Open every comment with a note naming who wrote it and for whom, then a blank line:
 
       > [!NOTE]
