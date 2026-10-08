@@ -1,10 +1,11 @@
 # Repo conventions
 
-Skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill, grouped by area. The
-groups are `thinking`, `planning`, `coding`, `shipping`, and `tools`. Keep groups wide: add a new
-one only when a skill fits none of these. The skill folder name, the
-`name` in frontmatter, and the skill's invocation name all match. Names stay unique across
-groups, since the group never shows up in the invocation name.
+Skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill. The first five groups
+follow the steps of a change: `planning`, `coding`, `reviewing`, `pull-requests`, and `testing`.
+The other four cut across them: `writing`, `communicating`, `agents`, and `tools`. Add a group
+only when a skill fits none of these. The skill folder name, the `name` in frontmatter, and the
+skill's invocation name all match. Names stay unique across groups, since the group never shows up
+in the invocation name.
 
 Claude Code does not scan nested folders, so every group folder is listed in the
 `skills` array of `.claude-plugin/plugin.json`. A new group gets a new entry there.

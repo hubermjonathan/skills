@@ -6,10 +6,14 @@
     "name": "Jonathan Huber"
   },
   "skills": [
-    "./skills/thinking/",
     "./skills/planning/",
     "./skills/coding/",
-    "./skills/shipping/",
+    "./skills/reviewing/",
+    "./skills/pull-requests/",
+    "./skills/testing/",
+    "./skills/writing/",
+    "./skills/communicating/",
+    "./skills/agents/",
     "./skills/tools/"
   ]
 }

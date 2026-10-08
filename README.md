@@ -59,35 +59,35 @@ The repo carries a portable [`plugin.json`](plugin.json) and a Codex marketplace
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
-| [`audit-skills`](skills/thinking/audit-skills/SKILL.md) | Measures from past session transcripts how often each skill loads when it should, and proposes fixes for the misses | Yes |
-| [`brief`](skills/thinking/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for Slack, Jira, or a PR | No |
-| [`explain-by-example`](skills/thinking/explain-by-example/SKILL.md) | Explains something in more depth by walking through one concrete example, step by step | No |
-| [`grill-me`](skills/thinking/grill-me/SKILL.md) | Interviews you round by round to stress-test a plan, decision, or idea | No |
-| [`reflect`](skills/thinking/reflect/SKILL.md) | Mines the session so far and turns learnings into skill, instruction file, or settings edits | Yes |
-| [`show-me-your-work`](skills/thinking/show-me-your-work/SKILL.md) | Keeps a TSV decision log for long or unattended runs | No |
-| [`swarm`](skills/thinking/swarm/SKILL.md) | Fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs | No |
-| [`technical-writing`](skills/thinking/technical-writing/SKILL.md) | Layered writing standard for chat replies, docs, PRs, tickets, and commits | No |
-| [`unslop`](skills/thinking/unslop/SKILL.md) | Strips AI writing tells from PR bodies, tickets, Slack, and docs, as a last pass after `technical-writing` | No |
-| [`writing-for-agents`](skills/thinking/writing-for-agents/SKILL.md) | Writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions | No |
+| [`grill-me`](skills/planning/grill-me/SKILL.md) | Interviews you round by round to stress-test a plan, decision, or idea | No |
 | [`refine-ticket`](skills/planning/refine-ticket/SKILL.md) | Turns a ticket into a plan you agree with before any code | No |
-| [`babysit-pr`](skills/coding/babysit-pr/SKILL.md) | Drives a PR to green checks, answered comments, and approval | No |
-| [`comment-pr`](skills/coding/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
 | [`git`](skills/coding/git/SKILL.md) | Branch, worktree, commit, and cleanup conventions | No |
 | [`kill-comments`](skills/coding/kill-comments/SKILL.md) | Deletes code comments and "what" docs so code is the what and docs are the why | No |
-| [`open-pr`](skills/coding/open-pr/SKILL.md) | Opens a PR, ready for review, with a fixed title and body format | No |
-| [`pr-walkthrough`](skills/coding/pr-walkthrough/SKILL.md) | Builds a CodeRabbit-style change stack page for a human reviewer: changes grouped by area of impact in reading order, what each group depends on, the ticket's asks mapped to the diff, questions only the author can answer, and reading checkboxes | No |
 | [`principles`](skills/coding/principles/SKILL.md) | Six code-level principles `write-code` reads before building | No |
-| [`push-pr`](skills/coding/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
-| [`review-code`](skills/coding/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
 | [`write-code`](skills/coding/write-code/SKILL.md) | Smallest change that solves the problem, then a simplification pass | No |
-| [`run-test-plan`](skills/shipping/run-test-plan/SKILL.md) | Runs a test plan against an environment and records evidence for each step | No |
-| [`write-test-plan`](skills/shipping/write-test-plan/SKILL.md) | Writes a before and after test plan an agent can run | No |
+| [`pr-walkthrough`](skills/reviewing/pr-walkthrough/SKILL.md) | Builds a CodeRabbit-style change stack page for a human reviewer: changes grouped by area of impact in reading order, what each group depends on, the ticket's asks mapped to the diff, questions only the author can answer, and reading checkboxes | No |
+| [`review-code`](skills/reviewing/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
+| [`babysit-pr`](skills/pull-requests/babysit-pr/SKILL.md) | Drives a PR to green checks, answered comments, and approval | No |
+| [`comment-pr`](skills/pull-requests/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
+| [`open-pr`](skills/pull-requests/open-pr/SKILL.md) | Opens a PR, ready for review, with a fixed title and body format | No |
+| [`push-pr`](skills/pull-requests/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
+| [`run-test-plan`](skills/testing/run-test-plan/SKILL.md) | Runs a test plan against an environment and records evidence for each step | No |
+| [`write-test-plan`](skills/testing/write-test-plan/SKILL.md) | Writes a before and after test plan an agent can run | No |
+| [`technical-writing`](skills/writing/technical-writing/SKILL.md) | Layered writing standard for chat replies, docs, PRs, tickets, and commits | No |
+| [`unslop`](skills/writing/unslop/SKILL.md) | Strips AI writing tells from PR bodies, tickets, Slack, and docs, as a last pass after `technical-writing` | No |
+| [`writing-for-agents`](skills/writing/writing-for-agents/SKILL.md) | Writes skills, CLAUDE.md, AGENTS.md, and prompts for subagents and other sessions | No |
+| [`brief`](skills/communicating/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for Slack, Jira, or a PR | No |
+| [`explain-by-example`](skills/communicating/explain-by-example/SKILL.md) | Explains something in more depth by walking through one concrete example, step by step | No |
+| [`imessage`](skills/communicating/imessage/SKILL.md) | Texts you an iMessage from a Mac, for example when a long task finishes or needs you | No |
+| [`slack`](skills/communicating/slack/SKILL.md) | Drafts and sends short Slack messages | No |
+| [`audit-skills`](skills/agents/audit-skills/SKILL.md) | Measures from past session transcripts how often each skill loads when it should, and proposes fixes for the misses | Yes |
+| [`reflect`](skills/agents/reflect/SKILL.md) | Mines the session so far and turns learnings into skill, instruction file, or settings edits | Yes |
+| [`show-me-your-work`](skills/agents/show-me-your-work/SKILL.md) | Keeps a TSV decision log for long or unattended runs | No |
+| [`swarm`](skills/agents/swarm/SKILL.md) | Fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs | No |
 | [`create-qr-code`](skills/tools/create-qr-code/SKILL.md) | Makes a QR code for a link and shows it in the reply | No |
 | [`design-profile:use`](skills/tools/design-profile/skills/use/SKILL.md) | Styles an HTML page with a named design profile | No |
 | [`design-profile:install`](skills/tools/design-profile/skills/install/SKILL.md) | Installs or updates a design profile from local files | Yes |
 | [`design-profile:create`](skills/tools/design-profile/skills/create/SKILL.md) | Mines a design system into a new profile | Yes |
-| [`imessage`](skills/tools/imessage/SKILL.md) | Texts you an iMessage from a Mac, for example when a long task finishes or needs you | No |
-| [`slack`](skills/tools/slack/SKILL.md) | Drafts and sends short Slack messages | No |
 
 ## Adding a skill
 
