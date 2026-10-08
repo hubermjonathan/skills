@@ -1,3 +1,3 @@
 interface:
   display_name: "Unslop"
-  short_description: "Strip AI writing tells from prose"
+  short_description: "Cut AI writing tells from prose that others read"

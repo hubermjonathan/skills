@@ -1,3 +1,3 @@
 interface:
   display_name: "Design profile: use"
-  short_description: "Style a page with a named design profile"
+  short_description: "Style an HTML page with a named design profile"

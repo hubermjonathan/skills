@@ -1,3 +1,3 @@
 interface:
   display_name: "Refine ticket"
-  short_description: "Turn a ticket into an agreed plan"
+  short_description: "Turn a ticket into a plan the user agrees with"

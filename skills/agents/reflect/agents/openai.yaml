@@ -1,5 +1,5 @@
 interface:
   display_name: "Reflect"
-  short_description: "Turn session learnings into config and skill edits"
+  short_description: "Turn session learnings into skill and instruction edits"
 policy:
   allow_implicit_invocation: false

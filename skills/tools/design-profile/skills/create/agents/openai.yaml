@@ -1,5 +1,5 @@
 interface:
   display_name: "Design profile: create"
-  short_description: "Add a profile from files or by mining a design system"
+  short_description: "Add a design profile from files or by mining a design system"
 policy:
   allow_implicit_invocation: false

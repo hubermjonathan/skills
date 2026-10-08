@@ -1,3 +1,3 @@
 interface:
   display_name: "PR walkthrough"
-  short_description: "Reading map of a PR for a human reviewer"
+  short_description: "Turn a PR into a page that orients a human reviewer"
