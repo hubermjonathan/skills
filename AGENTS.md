@@ -1,7 +1,5 @@
 # Repo conventions
 
-Invoke the `writing-for-agents` skill before writing or editing a skill or this file.
-
 Skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill. The first five groups
 follow the steps of a change: `planning`, `coding`, `reviewing`, `pull-requests`, and `testing`.
 The other four cut across them: `writing`, `communicating`, `agents`, and `tools`. Add a group
