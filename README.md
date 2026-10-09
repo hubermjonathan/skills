@@ -105,6 +105,7 @@ Prove a change works on a deployed environment.
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
+| [`verify`](skills/testing/verify/SKILL.md) | Proves a change builds, passes the checks CI will run, and does what it says, in a blind subagent, and writes the PR's evidence | No |
 | [`run-test-plan`](skills/testing/run-test-plan/SKILL.md) | Runs a test plan against an environment and records evidence for each step | No |
 | [`write-test-plan`](skills/testing/write-test-plan/SKILL.md) | Writes a before and after test plan an agent can run | No |
 
