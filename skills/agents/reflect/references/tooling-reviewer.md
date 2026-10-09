@@ -27,6 +27,9 @@ Scan for:
 - Test commands, CI flags, and how to reproduce a failing run locally
 - Debugging entry points: how to capture a trace, where logs land, which RPC to hit
 - Build / package-manager / sandbox surprises that cost minutes the first time
+- Tool economy: expensive tool calls, such as a large output read whole, the same search run again and again, or a slow command a cheaper one replaces, and tools or MCPs that spend many tokens for little
+- Information access: anything the agent needed and couldn't reach at all, such as a private channel, an unauthorized connector, logs nobody keeps, or a missing read-only credential. Route to `settings:` when a config change grants it. Otherwise route to Backlog, naming the exact step the user takes to grant it
+- Navigation: a file or fact that took many steps to find. Propose a pointer in the instruction file or skill where the agent looked first
 
 ## Scope to skills and tools the session actually used
 

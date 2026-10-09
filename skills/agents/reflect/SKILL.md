@@ -1,12 +1,12 @@
 ---
 name: reflect
-description: Mine the session so far for durable learnings and turn each into an edit to a skill, an agent instruction file, a setting, or a new skill. Works mid-session.
+description: Mine a session, this one by default, for durable learnings and turn each into an edit to a skill, an agent instruction file, a setting, or a new skill. Works mid-session.
 disable-model-invocation: true
 ---
 
 # Reflect
 
-Turn what happened in this session into durable changes to the setup that produced it: skills, agent instruction files (CLAUDE.md, AGENTS.md, and the like), settings, and hooks. Runs mid-session, so the work in progress stays where it is and resumes after.
+Turn what happened in a session into durable changes to the setup that produced it: skills, agent instruction files (CLAUDE.md, AGENTS.md, and the like), settings, and hooks. Runs mid-session, so the work in progress stays where it is and resumes after.
 
 Skip when nothing durable happened. One-offs are not learnings.
 
@@ -17,7 +17,7 @@ Skip when nothing durable happened. One-offs are not learnings.
 
 ## 1. Locate the transcript
 
-Invoke the `find-transcript` skill for this session's transcript. If it's out of reach, write a tight digest of the session and pass that instead.
+Invoke the `find-transcript` skill for this session's transcript. When the user names a past session instead, pass it a phrase from that session and enough days to reach it. If the transcript is out of reach, write a tight digest of the session and pass that instead.
 
 ## 2. Spawn three reviewers in parallel
 
@@ -41,11 +41,11 @@ Then check the Accepted list yourself: an item a hook, script, lint rule, or per
 
 ## 4. Present and wait
 
-Show the Accepted, Rejected, and Backlog output, numbered, and wait for the user to pick. They may approve a subset or redirect a routing. Config changes shape every future session, so nothing is applied without a yes.
+Show the Accepted, Rejected, and Backlog output, numbered, with Accepted in the synthesizer's order, highest impact first. Wait for the user to pick. They may approve a subset or redirect a routing. Config changes shape every future session, so nothing is applied without a yes.
 
 ## 5. Apply
 
-Find the real file before editing anything:
+Invoke the `writing-for-agents` skill before editing a skill or an agent instruction file. Then find the real file before editing anything:
 
 - Never edit an installed copy of a plugin or skill that your agent manages, such as a plugin cache. It is overwritten on update. Find the source checkout of that plugin's repo and edit there.
 - A skill from a repo the user owns is edited in that repo, on a branch, following its own AGENTS.md or CLAUDE.md.
@@ -58,6 +58,8 @@ Then follow each approved row's routing:
 - `instructions: <file> <section>`: add or tighten a line in the agent instruction file the routing names (global, machine-local, or project: CLAUDE.md, AGENTS.md, or your agent's equivalent). One rule, one place. Replace a weaker existing line instead of adding a second.
 - `settings: <file>`: a hook, permission, or env change in your agent's config file. Read the agent's docs for the format before editing.
 - `structural: <mechanism>`: a script, lint rule, or check. Build it if small, otherwise it goes to Backlog.
+- `remove: <file> <line>`: delete the line.
+- `move: <file> <line> to <target>`: put the line in the target skill or file, then delete it from the source.
 
 Validate what you touched when the repo has a validator, such as a plugin manifest validator.
 

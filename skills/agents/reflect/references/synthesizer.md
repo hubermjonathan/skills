@@ -19,9 +19,20 @@ Apply each criterion to every finding:
 - Convergence: findings echoed by 2+ reviewers carry higher confidence. Singletons must clear a higher bar on the other criteria.
 - Decision-changing: a future agent does something different because of the edit, not just reads more text.
 - Structural-mechanism check: when a lint rule, script, metadata flag, or runtime check already enforces the rule, reject it as `structural`. When one could enforce it cheaply, accept it as a `structural:` row instead of a prose edit. Route to Backlog only a mechanism too large to build now. Skill prose is for things mechanisms cannot enforce.
+- Existing checks first: before proposing a mechanism, read the repo's own checks: its lint, typecheck, and test commands, its pre-commit hooks, and its CI workflows. A check that exists but isn't wired into a hook or CI, or is silently broken, is the finding, not a new check. A repo with no pre-commit hook and no CI check at all is a finding in itself.
 - Skill-was-used: only accept skill findings that route to a skill the parent invoked or was shown in the transcript. If the skill wasn't used but should have been, route to `tune description: <skill>` so it triggers next time. If neither, reject as `skill-not-used`.
 - Repo rules: read the agent instruction file (AGENTS.md, CLAUDE.md, or the like) of the repo that holds each target file. Reframe a proposal that breaks its rules so it follows them, or reject it as `repo-rule`.
 - Already-covered: read the target skill or instruction file before accepting any body-edit row. If the proposal duplicates clear, well-placed existing guidance, reject as `already-covered`. The issue is execution, not the skill. If the existing guidance is buried, weak, or easy to skip past, accept the row but reframe the proposal as a wording / placement improvement to make it fire (not a duplicate addition).
+
+## Prune
+
+The reviewers find what to add. Also find what to remove. Read every agent instruction file the session loaded (global, machine-local, and repo), and check each line:
+
+- No-op: the agent does it by default, so the line changes nothing. Route `remove:`.
+- Duplicate: another loaded file or a skill says the same thing. Route `remove:` on the weaker copy.
+- Wrong layer: it serves only one kind of task. Route `move:` to that task's skill. A rule a check could enforce routes `structural:`.
+
+Each line that fails becomes an Accepted row. Every line is checked, not only the ones the session touched.
 
 Drop (implementation details that drift):
 - "linter at SHA `bd91aa7` uses chars/4 heuristic"
@@ -47,8 +58,10 @@ Output exactly the format below. No preamble, no narration. One sentence per cel
 | <a rule a script, hook, or check could enforce cheaply> | <the mechanism and what it checks> | structural: <mechanism> |
 | <a prompt, hook, or setting that cost time> | <the settings change> | settings: <file> |
 | <new pattern, no existing home> | <draft a new skill> | new skill: <kebab-name> |
+| <a no-op or duplicate line in an instruction file> | <delete it> | remove: <file> <line> |
+| <a line that serves only one kind of task> | <move it to that task's skill> | move: <file> <line> to <skill> |
 
-One row per finding. The user approves row by row.
+One row per finding, highest impact first: a problem that recurs or cost the most time ranks above a one-time slip. The user approves row by row.
 
 ## Rejected
 
