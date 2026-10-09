@@ -37,6 +37,7 @@ Then the sections, in this order:
     doesn't show, such as a version bump. Identifiers in backticks.
 
     ## Evidence
+    Ran on `<short sha>`.
     - **Before:** the failing test, error output, or screenshot
     - **After:** the passing test, output, or screenshot
 
@@ -53,7 +54,7 @@ Then the sections, in this order:
 Rules:
 
 - For `Change`, invoke the `show-me` skill and pick the smallest visual of the diff, such as a diff-shaped call tree or pseudocode.
-- `Evidence` holds only what was run: a test, a command and its output, or a screenshot. If nothing was run, write "Not run" and why. Link evidence already posted on the PR, such as a snapshot test comment, instead of repeating it.
+- `Evidence` embeds the real output of what was run, in a code block, trimmed to the lines that show the result, and names the commit it ran on. Never restate a result in your own words. A test plan's results can be a table of step, before, after, and result instead of the two bullets. A screenshot goes in only as an image URL you already have, since GitHub's API can't upload one. If nothing was run, write "Not run" and why.
 - For a docs-only change, `Why` is one sentence, and `Evidence` and `Risk` are left out.
 - `Follow up` is optional. Leave it out rather than writing "none".
 - Keep it short. Most bodies fit on one screen. Outside `Change`, a table or code block goes in only when prose cannot say it as well.

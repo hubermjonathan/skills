@@ -18,10 +18,10 @@ description: >
 
 ## Per event
 
-- `check_failed`: confirm it on the current head with `gh pr checks <n>` first, since the watcher can report a superseded run. Then read the failing log (`gh run view <run-id> --log-failed`). Fix it if this diff caused it. If not, say so in a PR comment and keep going.
+- `check_failed`: confirm it on the current head with `gh pr checks <n>` first, since the watcher can report a superseded run. Then read the failing log (`gh run view <run-id> --log-failed`). If this diff caused it, fix it with the `write-code` skill and push with the `push-pr` skill. If not, say so in a PR comment and keep going.
 - `check_passed`: note it.
-- `review_comment`: reply first, then push the smallest fix. Invoke the `comment-pr` skill if it is not loaded yet, and the `push-pr` skill for the push.
-- `review_decision`: `CHANGES_REQUESTED` is work. `APPROVED` satisfies the review requirement.
+- `review_comment`: reply first with the `comment-pr` skill. Then make the smallest fix with the `write-code` skill, and push it with the `push-pr` skill.
+- `review_decision`: `CHANGES_REQUESTED` is work, handled like a `review_comment`. `APPROVED` satisfies the review requirement.
 - `merge_blocked`: on `conflict`, merge the latest base in as in step 3, resolve, and push. On `behind_base`, merge the base in only if branch protection requires an up-to-date branch. Tell the user if a conflict needs their decision.
 - `pr_merged` or `pr_closed`: stop.
 - `watcher_died`: restart it once and say so. If it dies again, stop and report.

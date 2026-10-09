@@ -7,7 +7,7 @@ description: >
   questions only the author can answer. Use when
   someone wants to review a PR and needs a map of it first, or wants a PR summary,
   a walkthrough, or review prep. It doesn't review or judge the PR, and it never
-  posts anything.
+  comments. It only adds its link to the top of the PR description.
 ---
 
 # PR walkthrough
@@ -18,7 +18,7 @@ Build one HTML page that lets a human review a PR efficiently. The page is a map
 
 **1. You are not reviewing.** No findings, no severities, no bugs, no "consider extracting this", and no approve or block. The reviewer forms the opinions. Your job is to make the diff legible so they can. Where you notice something worth a second look, phrase it as a question under **review focus** and point at the `file:line`. Never claim that something is wrong. If the user wants a review, that's the `review-code` skill.
 
-**2. The PR description and comments are off limits.** Don't read the PR body, review comments, issue comments, or bot comments, and don't pass them to a subagent. `scripts/gather.sh` leaves them out by design. Every sentence on the page must trace to the diff, the ticket, or the repo, not to what the author claimed. This is the point of the tool: a reviewer who reads the description first inherits the author's framing of their own change.
+**2. The PR description and comments are off limits.** Don't read the PR body, review comments, issue comments, or bot comments, and don't pass them to a subagent. `scripts/gather.sh` leaves them out by design, and `scripts/attach.sh` edits the description without showing it to you. Every sentence on the page must trace to the diff, the ticket, or the repo, not to what the author claimed. This is the point of the tool: a reviewer who reads the description first inherits the author's framing of their own change.
 
 Commit subjects are collected, but they're author prose too, and so is changeset or changelog text inside the diff. Use them only as a hint about which files belong together, never as evidence of what the code does.
 
@@ -101,4 +101,10 @@ Publish the page as an artifact if your agent can, with a one-sentence descripti
 
 ## Step 5: hand off
 
-Reply with the page's link or path, the cohort names in reading order, one line on the ticket mapping (how many asks are addressed, partial, and not in this diff), and how many questions only the author can answer. Say that nothing was posted to the PR, and that the description and comments weren't read.
+If the page has a link, attach it to the top of the PR description:
+
+    <this skill's directory>/scripts/attach.sh <pr> <url>
+
+It replaces an earlier walkthrough block, names the commit the page was built on, and never prints the description.
+
+Reply with the page's link or path, the cohort names in reading order, one line on the ticket mapping (how many asks are addressed, partial, and not in this diff), and how many questions only the author can answer. Say whether the link was attached, that nothing else was posted, and that the description and comments weren't read.
