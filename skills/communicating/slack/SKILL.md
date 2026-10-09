@@ -10,6 +10,6 @@ description: >
 2. For a thread, read the whole thread first, not just the linked message.
 3. Write the text. When the user or the calling skill gives the exact text, use it word for word. Otherwise, invoke the `brief` skill for it, capped at 1 to 3 sentences plus links. Then apply the Slack specifics:
    - links over prose: a review ask is the PR or ticket links and one line of ask
-   - mention people with `<@user-id>`
+   - mention people with `<@user-id>` and user groups with `<!subteam^group-id>`
 4. Send it. Invoking this skill is the go-ahead. If the user asked only for a draft, show it with its destination (channel or DM, thread or top level) and send nothing.
 5. After sending, reply with the message link.
