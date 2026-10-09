@@ -6,8 +6,6 @@ description: >
   when a PR's title or body needs to catch up with new commits or a base change.
 ---
 
-Invoke the `company-conventions` skill first, if one is installed, for the company's pull request conventions, such as version bumps.
-
 ## Before pushing
 
 1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,isDraft,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name.

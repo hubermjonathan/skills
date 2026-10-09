@@ -6,10 +6,10 @@ description: >
   needs review, or when another skill needs the PR title and body format.
 ---
 
-Invoke the `company-conventions` skill first, if one is installed, for the company's pull request conventions, such as version bumps. Those conventions and the user's instructions win over the defaults below.
+The user's instructions win over the defaults below.
 
 1. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
-2. Bump a version only when the repo or the company conventions say to. Then commit and push.
+2. Bump a version only when the repo, the user, or another skill says to. Then commit and push.
 3. Write the title and body in the format below.
 4. Open it ready for review with `gh pr create`. Never open a draft.
 5. Reply with the PR url.
