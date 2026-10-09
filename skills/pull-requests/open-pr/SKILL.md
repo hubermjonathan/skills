@@ -27,17 +27,24 @@ Open the body with a note naming who wrote it and for whom, then a blank line:
 
 Then the sections, in this order:
 
-    ## Context
-    The problem, what was tried before if relevant, and what this change does about it,
-    in 1 to 4 plain, non-technical sentences a PM can read.
-
     ## Why
-    The technical reason, short. Evidence when it helps: numbers, error text, a linked
-    incident. Link related PRs as `<org>/<repo>#<n>` or `#<n>`.
+    The problem, and what this change does about it, in 1 to 3 plain sentences a PM
+    can read. Evidence when it helps: numbers, error text, a linked incident. Link
+    related PRs as `<org>/<repo>#<n>` or `#<n>`.
 
-    ## What
-    - One bullet per change, grouped by area of impact, not by file
-    - Identifiers in backticks
+    ## Change
+    The smallest visual of the change. Then up to 3 bullets for what the visual
+    doesn't show, such as a version bump. Identifiers in backticks.
+
+    ## Evidence
+    - **Before:** the failing test, error output, or screenshot
+    - **After:** the passing test, output, or screenshot
+
+    ## Risk
+    - **Rollback:** whether a revert undoes it. If not, what a revert can't undo: a
+      migration, a data change, or a published contract
+    - **Blast radius:** who's affected if it's wrong, outside this diff: callers,
+      services, or clients
 
     ## Follow up
     - Only when something must happen after merge, such as a config change in another
@@ -45,10 +52,12 @@ Then the sections, in this order:
 
 Rules:
 
-- `Context` is required when the change touches behavior a non-engineer cares about. Skip it for docs-only or purely internal changes.
+- For `Change`, invoke the `show-me` skill and pick the smallest visual of the diff, such as a diff-shaped call tree or pseudocode.
+- `Evidence` holds only what was run: a test, a command and its output, or a screenshot. If nothing was run, write "Not run" and why. Link evidence already posted on the PR, such as a snapshot test comment, instead of repeating it.
+- For a docs-only change, `Why` is one sentence, and `Evidence` and `Risk` are left out.
 - `Follow up` is optional. Leave it out rather than writing "none".
-- Keep it short. Most bodies fit on one screen. A table or code block goes in only when prose cannot say it as well.
-- No testing section, no checklist, no restating the diff line by line.
+- Keep it short. Most bodies fit on one screen. Outside `Change`, a table or code block goes in only when prose cannot say it as well.
+- No checklist, and no restating the diff line by line.
 - Every claim must be true of the code as pushed: what it fixes, what it leaves alone, whether CI is green.
 - No ticket link in the body when the title already carries the key.
 - If the repo has a PR template, fill it in instead, just as tersely.

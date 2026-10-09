@@ -23,7 +23,7 @@ description: >
 
 ## After pushing
 
-1. Reread the title and body against the full diff, `git diff origin/<base>...HEAD`. Fix anything no longer true without asking: a reverted fix still claimed, a new change not mentioned, a scope that grew or shrank, a stale version in a bullet. Keep the format from the "open-pr" skill, including the note at the top. If the body has no note, add it. Apply with `gh pr edit <n> --title ... --body-file ...`.
+1. Reread the title and body against the full diff, `git diff origin/<base>...HEAD`. Fix anything no longer true without asking: a reverted fix still claimed, a new change not mentioned, a scope that grew or shrank, a stale version in a bullet, evidence a later run replaced. Keep the format from the "open-pr" skill, including the note at the top. If the body has no note, add it. Apply with `gh pr edit <n> --title ... --body-file ...`.
 2. If the PR is a draft, run `gh pr ready <n>`.
 3. Check CI on the new head with `gh pr checks <n>`. A red right after a push or a base move is not real until the per-check query confirms it on the current head.
 4. Report in one or two lines: what was pushed, what changed in the title or body, and check status.
