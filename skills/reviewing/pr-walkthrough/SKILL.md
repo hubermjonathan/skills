@@ -7,7 +7,7 @@ description: >
   questions only the author can answer. Use when
   someone wants to review a PR and needs a map of it first, or wants a PR summary,
   a walkthrough, or review prep. It doesn't review or judge the PR, and it never
-  comments. It only adds its link to the top of the PR description.
+  comments. It only adds its link to the PR description, below the disclosure note.
 ---
 
 # PR walkthrough
@@ -101,10 +101,10 @@ Publish the page as an artifact if your agent can, with a one-sentence descripti
 
 ## Step 5: hand off
 
-If the page has a link, attach it to the top of the PR description:
+If the page has a link, attach it to the PR description:
 
     <this skill's directory>/scripts/attach.sh <pr> <url>
 
-It replaces an earlier walkthrough block, names the commit the page was built on, and never prints the description.
+It puts a `Walkthrough` section right below the description's disclosure note, replacing an earlier one, names the commit the page was built on, and never prints the description.
 
 Reply with the page's link or path, the cohort names in reading order, one line on the ticket mapping (how many asks are addressed, partial, and not in this diff), and how many questions only the author can answer. Say whether the link was attached, that nothing else was posted, and that the description and comments weren't read.
