@@ -23,7 +23,7 @@
       "files": {"src/emitter.ts": "behavior", "src/emitter.test.ts": "test"},
       "behavior": {"before": "No particles render.", "after": "A burst of 40 particles renders for 1.2s."},
       "layers": [{"where": "src/emitter.ts:10-48", "does": "spawns and animates particles", "code": "optional short snippet", "count": "optional, such as: same change in 14 tests"}],
-      "diagram": null,
+      "sketch": {"kind": "diff", "source": " onAccept(offer)\n   saveOffer()\n+  emitConfetti(40)", "where": "src/chat/offer.tsx:40-44"},
       "blast_radius": ["`src/feed/card.tsx:88` calls `emit` and wasn't changed"],
       "tests": {"asserted": ["emits 40 particles"], "gaps": ["no test for reduced motion"]},
       "review_focus": [{"q": "Does the cleanup run if the component unmounts mid-animation?", "where": "src/emitter.ts:51"}],
@@ -42,7 +42,7 @@
 - **`files`:** every path in `files.tsv` belongs to exactly one cohort or to `housekeeping`, with a role: `behavior`, `contract`, `test`, `config`, `release`, `docs`, or `generated`. A manifest change that only adds dependencies is `config`. The renderer uses these to check that every changed file is covered.
 - **`behavior`:** two concrete lines, or `null` for a pure refactor, which renders as "Behavior is unchanged."
 - **`layers`:** contract, implementation, call sites, tests, then config. `code` holds only the lines that carry the change. Give a mechanical change repeated across many files one layer with a `count`.
-- **`diagram`:** mermaid `sequenceDiagram` source, only when the call order, a fan-out, or who talks to whom changed. Otherwise `null`.
+- **`sketch`:** every cohort has one: the smallest visual of its change, from the `show-me` skill's menu. `kind` is `text` for pseudocode or a call, component, or file tree, `diff` for a diff-shaped version of one of those, with each line starting `+`, `-`, or a space, `code` for a whole block, or `mermaid` for mermaid source. `where` is the `file:line` ranges it sketches. The page labels it a sketch, so the literal code stays in `layers`.
 - **`blast_radius`:** callers outside the diff, from `callers.tsv`. An empty list renders as "Nothing outside this diff calls the changed code."
 - **`review_focus`:** 2 to 4 questions a reviewer can answer by reading, each with its `file:line`.
 - **`author_questions`:** up to 3 questions that only the author can answer, with what you looked for and didn't find. Use an empty list when there's nothing to ask.

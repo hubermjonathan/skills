@@ -6,6 +6,7 @@ import sys
 
 ROLES = {"behavior", "contract", "test", "config", "release", "docs", "generated"}
 STATUSES = {"addressed", "partial", "not in this diff"}
+SKETCH_KINDS = {"text", "diff", "code", "mermaid"}
 
 
 def esc(text):
@@ -42,6 +43,11 @@ def validate(data, stats):
             assigned.setdefault(path, []).append(cid)
         if len(c.get("author_questions") or []) > 3:
             errors.append(f"cohort {cid}: more than 3 author questions")
+        sketch = c.get("sketch") or {}
+        if "diagram" in c:
+            errors.append(f"cohort {cid}: diagram is gone. Put a mermaid source in sketch with kind mermaid")
+        if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source") or not sketch.get("where"):
+            errors.append(f"cohort {cid}: sketch needs kind (one of {sorted(SKETCH_KINDS)}), source, and where")
         if not 2 <= len(c.get("review_focus") or []) <= 4:
             warnings.append(f"cohort {cid}: review focus should have 2 to 4 questions")
     for row in data.get("housekeeping") or []:
@@ -60,13 +66,24 @@ def validate(data, stats):
     return errors, warnings
 
 
+def sketch_html(s):
+    caption = f'<p class="note">A sketch of <code>{esc(s["where"])}</code>, not the literal diff. The code is under Layers.</p>'
+    if s["kind"] == "mermaid":
+        return caption + f'<div class="diagram"><pre class="mermaid">{html.escape(s["source"])}</pre></div>'
+    if s["kind"] == "diff":
+        cls = {"+": "add", "-": "del"}
+        lines = "".join(f'<span class="{cls.get(l[:1], "ctx")}">{html.escape(l)}</span>' for l in s["source"].split("\n"))
+        return caption + f'<pre class="sketch-diff"><code>{lines}</code></pre>'
+    return caption + f'<pre><code>{html.escape(s["source"])}</code></pre>'
+
+
 def cohort_section(c, links):
     cid = c["id"]
     b = c.get("behavior")
     behavior = ("<p>Behavior is unchanged.</p>" if not b else
                 f'<table class="delta"><tr class="before"><th>Before</th><td>{esc(b.get("before"))}</td></tr>'
                 f'<tr class="after"><th>After</th><td>{esc(b.get("after"))}</td></tr></table>')
-    diagram = f'<div class="diagram"><pre class="mermaid">{html.escape(c["diagram"])}</pre></div>' if c.get("diagram") else ""
+    sketch = sketch_html(c["sketch"])
     focus = c.get("review_focus") or []
     focus_html = "<ul>" + "".join(f"<li>{esc(q.get('q'))} <code>{esc(q.get('where'))}</code></li>" for q in focus) + "</ul>"
     questions = c.get("author_questions") or []
@@ -98,7 +115,7 @@ def cohort_section(c, links):
   <p class="deps">Depends on: {links(deps) or 'nothing'}</p>
   <p>{esc(c.get('what_changed'))}</p>
   {block("Behavior delta", behavior, is_open=True)}
-  {diagram}
+  {block("Sketch", sketch, is_open=True)}
   {block("Review focus", focus_html, len(focus), "focus", True)}
   {author}
   {block("Layers", "<ol>" + "".join(items) + "</ol>", len(layers))}
@@ -174,7 +191,7 @@ def main(argv):
     first = data.get("open_first") or {}
     order = " → ".join(esc(c["name"]) for c in cohorts)
     mermaid = ('<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad: true});</script>'
-               if any(c.get("diagram") for c in cohorts) else "")
+               if any(c["sketch"]["kind"] == "mermaid" for c in cohorts) else "")
     key = json.dumps(f"pr-walkthrough:{repo}#{number}@{meta['headRefOid']}")
 
     page = f"""<!doctype html>
@@ -294,6 +311,9 @@ code { color: #e2e2e2; }
 a { color: var(--accent); text-decoration-color: rgba(44,195,154,.4); text-underline-offset: 2px; }
 a:hover { color: #fff; text-decoration-color: var(--brand); }
 .diagram { border: 1px solid var(--line); }
+.sketch-diff span { display: block; }
+.sketch-diff .add { background: var(--after); }
+.sketch-diff .del { background: var(--before); }
 ::selection { background: rgba(0,168,126,.4); }
 
 header { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brand); border-radius: 16px; padding: 20px 24px 18px; margin: 20px 0 8px; }

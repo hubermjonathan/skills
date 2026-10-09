@@ -83,12 +83,11 @@ Each cohort carries:
 - **What changed:** one or two sentences, from the code.
 - **Depends on:** the earlier cohorts this one builds on, or "nothing".
 - **Behavior delta:** before and after, as two concrete lines. This is the most useful thing on the page. If behavior is unchanged, as in a pure refactor, say so.
+- **Sketch:** the smallest visual of the cohort's change. Invoke the `show-me` skill and pick from its menu, usually a diff-shaped call tree, file tree, or pseudocode. Use a mermaid `sequenceDiagram` when the call order, a fan-out, or who talks to whom changed. Draw it from the diff, cite the `file:line` ranges it covers, and keep only the calls, files, and states this cohort changes.
 - **Blast radius:** who else touches the changed symbols and is *not* in this diff. Read it from `callers.tsv`, which lists where the base branch mentions each changed name outside the diff: declarations and calls the diff adds or removes, the functions its hunks sit in, and each changed source file's main name. Grep yourself only for a name it doesn't list. A caller that was left alone is the most valuable thing a reviewer can be told about, and "nothing else calls it" is just as worth stating.
 - **Test coverage:** which behavior in this cohort has a test in this diff, and which doesn't. State the gap as a fact, not a complaint.
 - **Review focus:** 2 to 4 questions, each anchored on a `file:line`. Ask questions a reviewer can answer by reading, not rhetorical or leading ones.
 - **Only the author knows:** up to 3 questions that the diff, the ticket, and the repo can't answer, each anchored on a `file:line`. Examples: where a timeout or limit value came from, why a check was removed with nothing visible replacing it, or why the code does something no ask covers. Say what you looked for and didn't find. These are questions, not findings. Since you didn't read the PR description, it may already answer some of them, and the page says so. Leave the list out when there's nothing to ask.
-
-**A sequence diagram earns its place** when a cohort changes a call order, a fan-out, or who talks to whom. Then write one mermaid `sequenceDiagram` in the cohort's `diagram` field. Draw at most one per cohort, and skip it when nothing about the flow changed.
 
 ## Step 4: build the page
 
@@ -96,7 +95,7 @@ Write the page data as JSON, following `reference/page-data.md`, then render it:
 
     python3 <this skill's directory>/scripts/render.py <data.json> <gather-out-dir> <page.html>
 
-The renderer checks the data and prints every error. Fix the data and run it again until it writes the page. Every page comes out in the same format: a sticky reading-progress bar, a header with the PR's facts, an orientation table, the ticket, and one card per cohort. A card opens with its behavior delta, review focus, and author questions, keeps its layers, blast radius, and test coverage collapsed, and folds away once the reader ticks "I've read this". The page loads the Lato font, plus the mermaid library when a cohort has a diagram.
+The renderer checks the data and prints every error. Fix the data and run it again until it writes the page. Every page comes out in the same format: a sticky reading-progress bar, a header with the PR's facts, an orientation table, the ticket, and one card per cohort. A card opens with its behavior delta, sketch, review focus, and author questions, keeps its layers, blast radius, and test coverage collapsed, and folds away once the reader ticks "I've read this". The page loads the Lato font, plus the mermaid library when a sketch uses it.
 
 Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Otherwise, write it to a working file.
 
