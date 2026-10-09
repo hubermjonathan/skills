@@ -32,6 +32,6 @@ Automated reviewer bots count as reviewers. Their comments are review comments.
       > [!NOTE]
       > 🤖 **<your model's name> responding on behalf of <the user's first name>**
 
-  Take the name from the user's instructions. Watchers use this note to tell your comments from a human's.
+  Watchers use this note to tell your comments from a human's.
 - Approving or requesting changes is a review, not a comment. Do neither unless asked.
 - If the user asked for a draft, output the text and post nothing.
