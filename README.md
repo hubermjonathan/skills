@@ -137,6 +137,7 @@ How agents run work, and how the skills improve.
 |-------|--------------|--------------|
 | [`audit-skills`](skills/agents/audit-skills/SKILL.md) | Measures from past session transcripts how often each skill loads when it should, and proposes fixes for the misses | Yes |
 | [`find-transcript`](skills/agents/find-transcript/SKILL.md) | Finds this session's transcript, or lists where agents keep session transcripts | No |
+| [`pause`](skills/agents/pause/SKILL.md) | Holds off on every change while the agent explains or looks things up, until you settle it | Yes |
 | [`reflect`](skills/agents/reflect/SKILL.md) | Mines the session so far and turns learnings into skill, instruction file, or settings edits | Yes |
 | [`show-me-your-work`](skills/agents/show-me-your-work/SKILL.md) | Keeps a TSV decision log for long or unattended runs | No |
 | [`swarm`](skills/agents/swarm/SKILL.md) | Fans out parallel workers (slices or races) and returns one report. `review-code` uses it for multi-reviewer runs | No |
