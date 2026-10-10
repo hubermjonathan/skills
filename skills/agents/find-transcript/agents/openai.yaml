@@ -1,0 +1,3 @@
+interface:
+  display_name: "Find transcript"
+  short_description: "Find this session's transcript, or list where transcripts live"

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Grill me"
+  short_description: "Interview the user to stress-test a plan, decision, or idea"

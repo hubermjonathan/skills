@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "design-profile",
+  "description": "Create and use design profiles for HTML pages",
+  "author": {
+    "name": "Jonathan Huber",
+    "url": "https://github.com/hubermjonathan"
+  },
+  "repository": "https://github.com/hubermjonathan/skills"
+}

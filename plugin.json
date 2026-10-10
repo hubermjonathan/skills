@@ -1,12 +1,14 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "skills",
-  "version": "1.3.1",
-  "description": "skills for coding agents",
+  "description": "Skills for coding agents",
   "author": {
     "name": "Jonathan Huber",
     "url": "https://github.com/hubermjonathan"
   },
   "repository": "https://github.com/hubermjonathan/skills",
-  "keywords": ["skills", "productivity"]
+  "keywords": [
+    "skills",
+    "productivity"
+  ]
 }

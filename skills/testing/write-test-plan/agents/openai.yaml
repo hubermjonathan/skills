@@ -1,0 +1,3 @@
+interface:
+  display_name: "Write test plan"
+  short_description: "Write a before-and-after test plan an agent can run"

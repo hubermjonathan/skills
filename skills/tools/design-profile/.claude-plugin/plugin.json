@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "design-profile",
+  "description": "Create and use design profiles for HTML pages",
+  "author": {
+    "name": "Jonathan Huber"
+  }
+}

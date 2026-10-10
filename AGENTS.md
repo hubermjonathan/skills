@@ -1,60 +1,55 @@
-# repo conventions
+# Repo conventions
 
-skills live at `skills/<name>/SKILL.md`, one folder per skill, flat. the folder name, the
-`name` in frontmatter, and the skill's invocation name all match.
+Skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill. The first five groups
+follow the steps of a change: `planning`, `coding`, `reviewing`, `pull-requests`, and `testing`.
+The other four cut across them: `writing`, `communicating`, `agents`, and `tools`. Add a group
+only when a skill fits none of these. The skill folder name, the `name` in frontmatter, and the
+skill's invocation name all match. Names stay unique across groups, since the group never shows up
+in the invocation name.
 
-## invocation
+`skills/tools/design-profile/` is a second plugin, `design-profile`, with its own manifests and an
+entry in both marketplace files. Its skills sit at `skills/tools/design-profile/skills/<name>/`, so
+their names only need to be unique inside it.
 
-a skill is either model-invoked or user-invoked, and the setting is mirrored in both harnesses
-so it never differs by agent.
+## Agent agnostic
 
-**model-invoked** is the default: the model can reach for it on its own. omit
-`disable-model-invocation` from the frontmatter and the `policy` block from `agents/openai.yaml`.
-the `description` is model-facing, so it keeps trigger phrasing ("use when the user says...")
-that auto-invocation matches against.
+Every skill works in any agent that loads `SKILL.md` files. Skill text names no agent's tools,
+models, or file paths: say "invoke the `x` skill", "spawn a background subagent", "run it as a
+background process", not an agent's tool names. When a script needs to know about specific agents,
+such as where each one stores session logs, the script holds that list with an env var override,
+and the skill text stays generic.
 
-**user-invoked** means only the human typing its name can fire it, never the model. set both:
+## Invocation
 
-- `disable-model-invocation: true` in `SKILL.md` frontmatter, for claude code
-- `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, for codex
+Choose model-invoked or user-invoked as `writing-for-agents` describes. Mirror the choice in both
+harnesses, so it never differs by agent:
 
-the `description` is then human-facing, a one-line summary read while browsing slash commands,
-with no trigger list.
+| | `SKILL.md` frontmatter | `agents/openai.yaml` | `description` |
+|---|---|---|---|
+| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, as situations the agent recognizes, such as "use when asked to babysit a PR, get its checks passing, or get it ready to merge" |
+| User-invoked | adds `disable-model-invocation: true` | adds `policy.allow_implicit_invocation: false` | Human-facing: a one-line summary read while browsing slash commands |
 
-## files
+`agents/openai.yaml` holds Codex-only presentation metadata, `interface.display_name` and
+`interface.short_description`, plus the policy for a user-invoked skill. Every other agent ignores
+it, so nothing else goes there.
 
-`SKILL.md` frontmatter carries `name`, `description`, and, for user-invoked skills only,
-`disable-model-invocation`.
+## When adding or renaming a skill
 
-`skills/<name>/agents/openai.yaml` holds codex-only presentation metadata
-(`interface.display_name`, `interface.short_description`) and, for user-invoked skills, the
-invocation policy. it is not part of the `SKILL.md` standard and every other agent ignores it,
-so nothing else belongs there.
+- Add or update its row in its group's table in `README.md`, linking the name to its `SKILL.md`
+  and filling the `User invoked` column with `Yes` or `No`. A new group gets its own section
+- Add or update its `agents/openai.yaml`
+- For a new group, add the group folder to the `skills` array in `.claude-plugin/plugin.json`.
+  Claude Code does not scan nested folders
 
-## when adding or renaming a skill
+## Manifests
 
-- add or update the row in the skills table in `README.md`, linking the name to its `SKILL.md`
-  and filling the `user invoked` column with `yes` or `no`
-- add or update `agents/openai.yaml` for the skill, with the `policy` block if user-invoked
-- bump `version` in both `plugin.json` and `.claude-plugin/plugin.json`, keeping them identical,
-  so installed copies refresh. once per pr, not per commit: if the branch already carries a
-  bump, amend that value instead of bumping again
-
-## manifests
-
-| file | who reads it |
+| File | Who reads it |
 |------|--------------|
-| `plugin.json` | portable agent-plugins manifest, used by codex |
-| `.claude-plugin/plugin.json` | claude code plugin |
-| `.claude-plugin/marketplace.json` | makes the repo its own single-plugin claude marketplace |
-| `.agents/plugins/marketplace.json` | makes the repo its own single-plugin codex marketplace |
+| `plugin.json` | Portable agent-plugins manifest, used by Codex |
+| `.claude-plugin/plugin.json` | Claude Code plugin |
+| `.claude-plugin/marketplace.json` | Makes the repo its own Claude marketplace |
+| `.agents/plugins/marketplace.json` | Makes the repo its own Codex marketplace |
 
-run `claude plugin validate . --strict` after touching either claude manifest.
-
-## prose
-
-`README.md`, `AGENTS.md`, and commit messages are lowercase. `SKILL.md` bodies are
-instructions an agent reads, so they use normal sentence case.
-
-no em-dashes anywhere. rewrite the sentence with a comma, colon, period, or conjunction
-instead of substituting a character.
+No manifest sets `version`, so each commit counts as a new version and an update always pulls
+it. Run `claude plugin validate .` after touching either Claude manifest. Skip `--strict`, which
+fails on the missing version.

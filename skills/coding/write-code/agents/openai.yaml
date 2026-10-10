@@ -1,0 +1,3 @@
+interface:
+  display_name: "Write code"
+  short_description: "Implement a change with the least code that solves it"
