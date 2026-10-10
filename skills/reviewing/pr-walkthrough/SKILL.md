@@ -97,14 +97,20 @@ Write the page data as JSON, following `reference/page-data.md`, then render it:
 
 The renderer checks the data and prints every error. Fix the data and run it again until it writes the page. Every page comes out in the same format: a sticky reading-progress bar, a header with the PR's facts, an orientation table, the ticket, and one card per cohort. A card opens with its behavior delta, sketch, review focus, and author questions, keeps its layers, blast radius, and test coverage collapsed, and folds away once the reader ticks "I've read this". The page loads the Lato font, plus the mermaid library when a sketch uses it.
 
-Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Otherwise, write it to a working file.
+Then publish it, as the Publishing section below says.
 
 ## Step 5: hand off
 
 If the page has a link, attach it to the PR description:
 
-    <this skill's directory>/scripts/attach.sh <pr> <url>
+    <this skill's directory>/scripts/attach.sh <pr> <url> [--share-note]
 
 It puts a `Walkthrough` section right below the description's disclosure note, replacing an earlier one, names the commit the page was built on, and never prints the description.
 
 Reply with the page's link or path, the cohort names in reading order, one line on the ticket mapping (how many asks are addressed, partial, and not in this diff), and how many questions only the author can answer. Say whether the link was attached, that nothing else was posted, and that the description and comments weren't read.
+
+## Publishing
+
+Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Otherwise, write it to a working file. A working file has no link to attach, so give the user its path.
+
+A published page can start out visible only to its author, and only the author can share it. Don't wait for that. Unless you know the PR's reviewers can open the page, attach it with `--share-note`, which adds a note asking the author to share it. The note appears only on the first attach. Once someone deletes it, it stays gone.
