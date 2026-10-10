@@ -27,7 +27,7 @@ seen() { grep -qxF "$1" "$SEEN" 2>/dev/null; }
 mark() { echo "$1" >> "$SEEN"; }
 p()    { jq -r "$1 // empty" <<<"$2"; }
 
-FIELDS='state,isDraft,mergeStateStatus,reviewDecision,autoMergeRequest,statusCheckRollup,comments,reviews,mergeCommit,headRefOid'
+FIELDS='state,isDraft,labels,mergeStateStatus,reviewDecision,autoMergeRequest,statusCheckRollup,comments,reviews,mergeCommit,headRefOid'
 WRITER='if ((.body // "") | test($note)) then "agent" else "human" end'
 
 read -r PR_NUM REPO_SLUG < <(gh pr view "$PR" "${GHARGS[@]}" --json number,url -q '"\(.number) \(.url | split("/")[3:5] | join("/"))"' 2>/dev/null)
@@ -46,6 +46,12 @@ while :; do
   prev_rd="$(jq -r '.reviewDecision // ""' "$PREV" 2>/dev/null || echo "")"
   if [[ -s "$PREV" && "$rd" != "$prev_rd" ]]; then
     emit review_decision "\"decision\":$(jq -Rn --arg v "$rd" '$v')"
+  fi
+
+  if [[ -s "$PREV" && "$MERGE_ONLY" == 0 ]]; then
+    while read -r label; do
+      [[ -n "$label" ]] && emit labeled "\"label\":$(jq -Rn --arg v "$label" '$v')"
+    done < <(jq -r --slurpfile prev "$PREV" '((.labels // []) | map(.name)) - (($prev[0].labels // []) | map(.name)) | .[]' <<<"$snap")
   fi
 
   inline="$(gh api "/repos/$REPO_SLUG/pulls/$PR_NUM/comments" --paginate 2>/dev/null \

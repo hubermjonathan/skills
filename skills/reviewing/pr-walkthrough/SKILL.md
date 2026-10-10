@@ -113,4 +113,8 @@ Reply with the page's link or path, the cohort names in reading order, one line 
 
 Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Otherwise, write it to a working file. A working file has no link to attach, so give the user its path.
 
-A published page can start out visible only to its author, and only the author can share it. Don't wait for that. Unless you know the PR's reviewers can open the page, attach it with `--share-note`, which adds a note asking the author to share it. The note appears only on the first attach. Once someone deletes it, it stays gone.
+A published page can start out visible only to its author, and only the author can share it. Don't wait for that. Unless you know the PR's reviewers can open the page, attach it with `--share-note`, which adds a note asking the author to share it and then add the `ready-for-review` label. The note appears only on the first attach. When the PR gets that label, delete the note:
+
+    <this skill's directory>/scripts/attach.sh <pr> --shared
+
+Once the note is deleted, by this or by hand, it stays gone.

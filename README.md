@@ -94,6 +94,7 @@ Open a PR and get it merged.
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
+| [`address-feedback`](skills/pull-requests/address-feedback/SKILL.md) | Sorts a PR's review feedback, makes and verifies the changes, pushes, and answers every comment | No |
 | [`babysit-pr`](skills/pull-requests/babysit-pr/SKILL.md) | Drives a PR to green checks, answered comments, and approval | No |
 | [`comment-pr`](skills/pull-requests/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
 | [`open-pr`](skills/pull-requests/open-pr/SKILL.md) | Opens a PR, ready for review, with a fixed title and body format | No |

@@ -2,8 +2,8 @@
 name: comment-pr
 description: >
   Read and reply to pull request comments in the right place. Use when replying to
-  or addressing review comments, posting a comment on a PR, or when another skill
-  needs to read a PR's feedback.
+  a review comment, posting a comment on a PR, or when another skill needs to read
+  or reply to a PR's feedback.
 ---
 
 ## Where comments live
