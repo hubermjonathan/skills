@@ -128,7 +128,7 @@ Get something to a person.
 |-------|--------------|--------------|
 | [`brief`](skills/communicating/brief/SKILL.md) | Turns an investigation, the session, or a block of text into a short, plain, non-technical version for someone outside the work | No |
 | [`explain-by-example`](skills/communicating/explain-by-example/SKILL.md) | Explains something in more depth by walking through one concrete example, step by step | No |
-| [`imessage`](skills/communicating/imessage/SKILL.md) | Texts the user with a blue bubble | No |
+| [`send-blue-bubble`](skills/communicating/send-blue-bubble/SKILL.md) | Texts the user, or people they name, with a blue bubble, one to one or as a group | No |
 | [`show-me`](skills/communicating/show-me/SKILL.md) | Shows a point as the smallest visual that makes it clear: pseudocode, a call or file tree, a diagram, or a diff-shaped sketch | No |
 | [`slack`](skills/communicating/slack/SKILL.md) | Drafts and sends short Slack messages | No |
 
