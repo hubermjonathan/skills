@@ -72,7 +72,8 @@ Run `scripts/sync-plugins.sh` after you edit the marketplace or add, rename, or 
 writes the Codex marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable
 `plugin.json`, the one Codex reads. It reaches dot-work's plugins through a checkout beside this
 repo, or under `REPOS_DIR`. Then it checks every skill and runs `claude plugin validate .`. It fails
-until each skill has its row in its plugin's table in `README.md` and its `agents/openai.yaml`.
+until each skill has its row in its plugin's table in its repo's `README.md`, and its
+`agents/openai.yaml`.
 `scripts/sync-plugins.sh --check` writes nothing and fails on any file out of date.
 
 When you rename a skill, update every "invoke the `x` skill" that names it, in both repos.

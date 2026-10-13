@@ -44,10 +44,12 @@ while read -r plugin; do
   if [ "$(jq -r '.source | type' <<<"$plugin")" = string ]; then
     dir=$(jq -r '.source | ltrimstr("./")' <<<"$plugin")
     repo=https://github.com/hubermjonathan/skills
+    root=.
     [ -d "$dir" ] || { err "$name: $dir is missing"; continue; }
   else
     repo=$(jq -r '.source.url | rtrimstr(".git")' <<<"$plugin")
-    dir="$repos/$(basename "$repo")/$(jq -r .source.path <<<"$plugin")"
+    root="$repos/$(basename "$repo")"
+    dir="$root/$(jq -r .source.path <<<"$plugin")"
     [ -d "$dir" ] || { echo "skipped $name: no checkout at $dir" >&2; continue; }
   fi
 
@@ -70,7 +72,7 @@ while read -r plugin; do
     claude=$([ "$(frontmatter "$md" disable-model-invocation)" = true ] && echo user || echo model)
     codex=$(grep -q 'allow_implicit_invocation: false' "$yaml" && echo user || echo model)
     [ "$claude" = "$codex" ] || err "$skill: SKILL.md says $claude-invoked, agents/openai.yaml says $codex-invoked"
-    case "$dir" in plugins/*) grep -qF "]($md)" README.md || err "$skill: README.md has no row for it" ;; esac
+    grep -qF "](${md#"$root"/})" "$root/README.md" || err "$skill: $root/README.md has no row for it"
   done
 done < <(jq -c '.plugins[]' "$src")
 
