@@ -56,18 +56,18 @@
     {
       "name": "factory",
       "displayName": "Factory",
-      "description": "Ship a change to prod for any service: the software factory's entry point, change tickets, version bump rules, and rollout monitoring",
+      "description": "The software factory's entry point, which hands a change to its repo's factory, and version bump rules",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/hubermjonathan/dot-work.git",
         "path": "plugins/factory"
       },
-      "dependencies": ["engineering", "communication"]
+      "dependencies": ["engineering"]
     },
     {
       "name": "factory-mono-repo-apps",
       "displayName": "Factory: mono-repo-apps",
-      "description": "Take a mono-repo-apps change from ticket to prod: the factory run, snapshot tests, and staging and prod deploys",
+      "description": "Take a mono-repo-apps change from ticket to prod: the factory run, snapshot tests, staging and prod deploys, change tickets, and rollout monitoring",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/hubermjonathan/dot-work.git",
