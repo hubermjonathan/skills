@@ -16,7 +16,7 @@ Feedback is every unanswered comment on the PR, from people and from reviewer bo
 
    Ask the user before acting on a comment that asks for a different design, or that contradicts the ticket or another reviewer.
 2. Make the changes: invoke the `write-code` skill. Commit each logical change on its own.
-3. Invoke the `verify` skill on the new head. When it fails, fix and run it again. Its evidence replaces the PR's `Evidence` section.
+3. Invoke the `verify` skill on the new head. When it fails, fix and run it again. Its evidence replaces its own part of the PR's `Evidence` section.
 4. Reply to every comment: the change with its short sha, the answer, or the reason for declining.
 5. Push: invoke the `push-pr` skill.
 6. Append the round to a working file named `<pr-number>-comments.md`: every comment and what it got, a change with its sha, an answer, or a decline with why.

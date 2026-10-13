@@ -32,18 +32,15 @@ A check that needs CI's own setup, such as its credentials or runner image, and 
 Prove each claim one of these ways:
 
 - **A test that fails on the base and passes on the head.** In a temporary worktree at the base, add only the diff's test files, and run them. They fail there and pass on the head. A test that passes on both proves nothing about the claim.
-- **A step of the change's test plan**, run before and after, if there is a plan.
 - **A probe:** a throwaway script outside the repo that exercises the change and prints the result.
 
 **Done when:** every claim is proven or listed as unproven.
 
-## 3. Works deployed
+Everything here runs locally. Testing the change deployed, such as on staging, is a separate skill, which the caller runs when it needs that proof.
 
-When the repo can deploy a change to a shared test environment before merge, its verify skill says how and when. Run that. Otherwise skip this step and say why.
+## 3. Evidence
 
-## 4. Evidence
-
-When every check passes and every claim is proven, write the PR body's `Evidence` section in the format the `open-pr` skill sets: the commit it ran on, then the real output for each check and claim, trimmed to the lines that show the result. If the PR is open, replace its `Evidence` section with it. Otherwise return it to the caller.
+When every check passes and every claim is proven, write the `Checks and claims` part of the PR body's `Evidence` section, in the format the `open-pr` skill sets: the commit it ran on, then the real output for each check and claim, trimmed to the lines that show the result. If the PR is open, replace only that part. Otherwise return it to the caller.
 
 ## Report
 
