@@ -46,7 +46,7 @@
     {
       "name": "sso",
       "displayName": "SSO",
-      "description": "Log in to AWS and Argo CD with no browser, approved on a phone",
+      "description": "Log in to AWS and Argo CD with no browser, through a sign-in link",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/hubermjonathan/dot-work.git",
