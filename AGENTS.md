@@ -26,6 +26,13 @@ background process", not an agent's tool names. When a script needs to know abou
 such as where each one stores session logs, the script holds that list with an env var override,
 and the skill text stays generic.
 
+## Waiting
+
+When a skill waits on CI, a deploy, or a bot, say how to tell it's done from a signal the agent can
+check, such as a check run, a run's status, or the live version, and what failure looks like. Leave
+out how long it usually takes: CI load and service size change that, so a duration goes stale. A
+polling interval or a soak time the user chose is fine.
+
 ## Invocation
 
 Choose model-invoked or user-invoked as `writing-for-agents` describes. Mirror the choice in both
