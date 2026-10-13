@@ -74,6 +74,6 @@ It fails until each skill has its row in its plugin's table in `README.md`, and 
 date.
 
 To sync another repo with the same layout and check that no skill name repeats across the two, pass
-both, as in `scripts/sync-plugins.sh . ../other-repo`, or list them in `PLUGIN_REPOS`.
+both, as in `scripts/sync-plugins.sh . ../other-repo`.
 
 When you rename a skill, update every "invoke the `x` skill" that names it, in every repo.

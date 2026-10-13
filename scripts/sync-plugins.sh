@@ -2,14 +2,13 @@
 # Usage: sync-plugins.sh [--check] [repo...]
 # For each repo, writes the Codex marketplace and each plugin's plugin.json from the repo's
 # .claude-plugin/marketplace.json, then checks every plugin it lists. Skill names must be unique
-# across all the repos, since their skills install side by side. The repos default to PLUGIN_REPOS,
-# a space-separated list of paths, and then to this repo. With --check, it writes nothing and fails
-# on any file that is out of date.
+# across all the repos, since their skills install side by side. The repos default to this one. With
+# --check, it writes nothing and fails on any file that is out of date.
 set -euo pipefail
 
 check=false
 [ "${1:-}" = --check ] && { check=true; shift; }
-[ $# -gt 0 ] || set -- ${PLUGIN_REPOS:-"$(dirname "$0")/.."}
+[ $# -gt 0 ] || set -- "$(dirname "$0")/.."
 roots=()
 for repo in "$@"; do roots+=("$(cd "$repo" && pwd)"); done
 src=.claude-plugin/marketplace.json
