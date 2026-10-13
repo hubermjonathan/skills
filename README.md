@@ -55,9 +55,6 @@ codex plugin add design-profile@hubermjonathan
 
 Codex has no plugin dependencies, so add each plugin you want.
 
-The marketplace also lists `admin`, `sso`, `factory`, and `factory-mono-repo-apps`, which live in a
-private repo. They install only for someone with read access to it.
-
 ## Skills
 
 Each plugin is a folder under [`plugins/`](plugins), with one folder per skill in its `skills/`.

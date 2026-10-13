@@ -31,49 +31,6 @@
       "displayName": "Design profile",
       "description": "Create and use design profiles for HTML pages",
       "source": "./plugins/design-profile"
-    },
-    {
-      "name": "admin",
-      "displayName": "Admin",
-      "description": "Workplace admin: meetings and Slack conventions",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/hubermjonathan/dot-work.git",
-        "path": "plugins/admin"
-      },
-      "dependencies": ["communication"]
-    },
-    {
-      "name": "sso",
-      "displayName": "SSO",
-      "description": "Log in to AWS and Argo CD with no browser, through a sign-in link",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/hubermjonathan/dot-work.git",
-        "path": "plugins/sso"
-      }
-    },
-    {
-      "name": "factory",
-      "displayName": "Factory",
-      "description": "The software factory's entry point, which hands a change to its repo's factory, and version bump rules",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/hubermjonathan/dot-work.git",
-        "path": "plugins/factory"
-      },
-      "dependencies": ["engineering"]
-    },
-    {
-      "name": "factory-mono-repo-apps",
-      "displayName": "Factory: mono-repo-apps",
-      "description": "Take a mono-repo-apps change from ticket to prod: the factory run, snapshot tests, staging and prod deploys, change tickets, and rollout monitoring",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/hubermjonathan/dot-work.git",
-        "path": "plugins/factory-mono-repo-apps"
-      },
-      "dependencies": ["factory", "engineering", "communication", "sso", "agents"]
     }
   ],
   "renames": {
