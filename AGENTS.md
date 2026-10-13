@@ -5,7 +5,8 @@ Each plugin is a folder at `plugins/<plugin>/`, with one folder per skill at
 them. Add a plugin only when a skill's audience matches none of the existing ones.
 
 This repo hosts the `hubermjonathan` marketplace. It lists every plugin, including `admin`, `sso`,
-and `factory` from the private `hubermjonathan/dot-work` repo, which uses the same layout.
+`factory`, and `factory-mono-repo-apps` from the private `hubermjonathan/dot-work` repo, which uses
+the same layout.
 
 ## Names
 

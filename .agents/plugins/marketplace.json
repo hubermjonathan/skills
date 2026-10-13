@@ -111,6 +111,22 @@
       "interface": {
         "displayName": "Factory"
       }
+    },
+    {
+      "name": "factory-mono-repo-apps",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/hubermjonathan/dot-work.git",
+        "path": "./plugins/factory-mono-repo-apps"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity",
+      "interface": {
+        "displayName": "Factory: mono-repo-apps"
+      }
     }
   ]
 }
