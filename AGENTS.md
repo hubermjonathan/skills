@@ -33,6 +33,13 @@ check, such as a check run, a run's status, or the live version, and what failur
 out how long it usually takes: CI load and service size change that, so a duration goes stale. A
 polling interval or a soak time the user chose is fine.
 
+## Stages
+
+A stage skill, such as `open-pr` or `deploy-prod`, does its one stage, reports what it finished,
+and stops. Only a factory skill, such as dot-work's `run-mono-repo-apps-factory`, starts the next
+stage. A stage skill may still invoke another skill for work its own stage needs, the way `open-pr`
+gets its evidence from `verify`.
+
 ## Invocation
 
 Choose model-invoked or user-invoked as `writing-for-agents` describes. Mirror the choice in both
