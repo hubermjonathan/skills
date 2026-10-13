@@ -8,14 +8,64 @@
   },
   "plugins": [
     {
-      "name": "skills",
-      "source": "./",
-      "description": "Skills for coding agents"
+      "name": "engineering",
+      "displayName": "Engineering",
+      "description": "Take a code change from ticket to merge: plan it, write it, review it, open and push the PR, and test it",
+      "source": "./plugins/engineering",
+      "dependencies": ["communication", "agents"]
+    },
+    {
+      "name": "communication",
+      "displayName": "Communication",
+      "description": "Write for people and reach them: writing standards, briefs, visuals, Slack messages, texts, and QR codes",
+      "source": "./plugins/communication"
+    },
+    {
+      "name": "agents",
+      "displayName": "Agents",
+      "description": "Run agents and improve their skills: parallel workers, decision logs, session transcripts, and skill audits",
+      "source": "./plugins/agents"
     },
     {
       "name": "design-profile",
-      "source": "./skills/tools/design-profile",
-      "description": "Create and use design profiles for HTML pages"
+      "displayName": "Design profile",
+      "description": "Create and use design profiles for HTML pages",
+      "source": "./plugins/design-profile"
+    },
+    {
+      "name": "admin",
+      "displayName": "Admin",
+      "description": "Workplace admin: meetings and Slack conventions",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/hubermjonathan/dot-work.git",
+        "path": "plugins/admin"
+      },
+      "dependencies": ["communication"]
+    },
+    {
+      "name": "sso",
+      "displayName": "SSO",
+      "description": "Log in to AWS and Argo CD with no browser, approved on a phone",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/hubermjonathan/dot-work.git",
+        "path": "plugins/sso"
+      }
+    },
+    {
+      "name": "factory",
+      "displayName": "Factory",
+      "description": "Ship a change through snapshot tests, staging and prod deploys, and change tickets",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/hubermjonathan/dot-work.git",
+        "path": "plugins/factory"
+      },
+      "dependencies": ["engineering", "communication", "sso", "agents"]
     }
-  ]
+  ],
+  "renames": {
+    "skills": "engineering"
+  }
 }

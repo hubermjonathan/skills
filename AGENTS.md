@@ -1,15 +1,21 @@
 # Repo conventions
 
-Skills live at `skills/<group>/<name>/SKILL.md`, one folder per skill. The first five groups
-follow the steps of a change: `planning`, `coding`, `reviewing`, `pull-requests`, and `testing`.
-The other four cut across them: `writing`, `communicating`, `agents`, and `tools`. Add a group
-only when a skill fits none of these. The skill folder name, the `name` in frontmatter, and the
-skill's invocation name all match. Names stay unique across groups, since the group never shows up
-in the invocation name.
+Each plugin is a folder at `plugins/<plugin>/`, with one folder per skill at
+`plugins/<plugin>/skills/<name>/SKILL.md`. Plugins split by audience, the people who would install
+them. Add a plugin only when a skill's audience matches none of the existing ones.
 
-`skills/tools/design-profile/` is a second plugin, `design-profile`, with its own manifests and an
-entry in both marketplace files. Its skills sit at `skills/tools/design-profile/skills/<name>/`, so
-their names only need to be unique inside it.
+This repo hosts the `hubermjonathan` marketplace. It lists every plugin, including `admin`, `sso`,
+and `factory` from the private `hubermjonathan/dot-work` repo, which uses the same layout.
+
+## Names
+
+- Name a skill that does a task by the task, verb first, with no prefix: `open-pr`,
+  `send-slack-message`, `login-aws`. Name a skill that holds a standard by its topic: `principles`,
+  `technical-writing`.
+- The skill folder name and the `name` in frontmatter match.
+- Skill names stay unique across every plugin in the marketplace, in both repos. `npx skills`
+  installs skills flat by name, and a bare `/<name>` runs a skill, so a reused name hides another.
+- Name a plugin for its audience, in kebab-case: `engineering`, `design-profile`.
 
 ## Agent agnostic
 
@@ -33,23 +39,25 @@ harnesses, so it never differs by agent:
 `interface.short_description`, plus the policy for a user-invoked skill. Every other agent ignores
 it, so nothing else goes there.
 
-## When adding or renaming a skill
-
-- Add or update its row in its group's table in `README.md`, linking the name to its `SKILL.md`
-  and filling the `User invoked` column with `Yes` or `No`. A new group gets its own section
-- Add or update its `agents/openai.yaml`
-- For a new group, add the group folder to the `skills` array in `.claude-plugin/plugin.json`.
-  Claude Code does not scan nested folders
-
 ## Manifests
 
-| File | Who reads it |
-|------|--------------|
-| `plugin.json` | Portable agent-plugins manifest, used by Codex |
-| `.claude-plugin/plugin.json` | Claude Code plugin |
-| `.claude-plugin/marketplace.json` | Makes the repo its own Claude marketplace |
-| `.agents/plugins/marketplace.json` | Makes the repo its own Codex marketplace |
+`.claude-plugin/marketplace.json` is the only manifest you edit. It holds each plugin's name,
+display name, description, source, and dependencies. Claude Code reads each entry as that plugin's
+manifest, so no plugin has a `.claude-plugin/plugin.json`.
 
-No manifest sets `version`, so each commit counts as a new version and an update always pulls
-it. Run `claude plugin validate .` after touching either Claude manifest. Skip `--strict`, which
-fails on the missing version.
+- A plugin's `dependencies` list each plugin whose skills it tells the agent to invoke by name,
+  and each plugin whose skill one of its skills overlays, such as `slack-conventions` over
+  `send-slack-message`.
+- No manifest sets `version`, so each commit counts as a new version and an update always pulls it.
+- To rename or remove a plugin, map its old name in `renames`, so existing installs follow it.
+
+## After a change
+
+Run `scripts/sync-plugins.sh` after you edit the marketplace or add, rename, or move a skill. It
+writes the Codex marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable
+`plugin.json`, the one Codex reads. It reaches dot-work's plugins through a checkout beside this
+repo, or under `REPOS_DIR`. Then it checks every skill and runs `claude plugin validate .`. It fails
+until each skill has its row in its plugin's table in `README.md` and its `agents/openai.yaml`.
+`scripts/sync-plugins.sh --check` writes nothing and fails on any file out of date.
+
+When you rename a skill, update every "invoke the `x` skill" that names it, in both repos.
