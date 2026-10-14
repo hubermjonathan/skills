@@ -1,0 +1,3 @@
+interface:
+  display_name: "Plan implementation"
+  short_description: "Plan how to build a ready ticket before any code"

@@ -65,7 +65,8 @@ Take a code change from ticket to merge. Rows follow the steps of a change. Its 
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
-| [`refine-ticket`](plugins/engineering/skills/refine-ticket/SKILL.md) | Turns a ticket into a plan you agree with before any code | No |
+| [`refine-ticket`](plugins/engineering/skills/refine-ticket/SKILL.md) | Gets a ticket ready to build: requirements, acceptance criteria, technical facts, and a bug's reproduction | No |
+| [`plan-implementation`](plugins/engineering/skills/plan-implementation/SKILL.md) | Plans how to build a ready ticket, and how to prove each acceptance criterion, before any code | No |
 | [`principles`](plugins/engineering/skills/principles/SKILL.md) | Six code-level principles `write-code` reads before building | No |
 | [`write-code`](plugins/engineering/skills/write-code/SKILL.md) | Smallest change that solves the problem, then a simplification pass | No |
 | [`kill-comments`](plugins/engineering/skills/kill-comments/SKILL.md) | Deletes code comments and "what" docs so code is the what and docs are the why | No |
