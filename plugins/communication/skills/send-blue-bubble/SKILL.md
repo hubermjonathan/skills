@@ -2,9 +2,9 @@
 name: send-blue-bubble
 description: >
   Text the user, or people or group chats they name, with a blue bubble
-  (iMessage). Use when asked to text, message, or iMessage me, someone, or a
-  group, such as "text me when you finish", "text me and Jac the budget
-  update", or "text the budget updates group".
+  (iMessage). Use when asked to text or iMessage me, someone, or a group, such
+  as "text me when you finish", "text me and Jac the budget update", or "text
+  the budget updates group".
 ---
 
 # Send a blue bubble
