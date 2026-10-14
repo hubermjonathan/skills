@@ -25,7 +25,7 @@ Findings ranked most severe first. Each one: `file:line`, what is wrong, a concr
 
 ## Addressing findings
 
-Only when the user asks, or when the PR is the user's own and they want it fixed:
+Only when the user asks:
 
 - Fix what is worth fixing with the smallest change. Decline the rest with a reason.
 - Write every finding and its outcome to a working file named `<pr-number>-review.md`.
