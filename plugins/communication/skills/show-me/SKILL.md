@@ -3,9 +3,9 @@ name: show-me
 description: >
   Show a point as the smallest visual that makes it clear: pseudocode, a call
   tree, a component or file tree, a Mermaid diagram, a diff-shaped sketch, or a
-  focused HTML page. Use when explaining how code works or what a change does,
-  when the user asks to see something, and when another skill needs a visual of
-  a change, such as a PR body or walkthrough.
+  focused HTML page. Use when a point about code or a change is clearer drawn
+  than told, when the user asks to see something, and when another skill needs a
+  visual of a change, such as a PR body or walkthrough.
 ---
 
 Show the current point visually: the topic of the conversation, or the change a calling skill hands you. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
