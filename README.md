@@ -61,7 +61,7 @@ Each plugin is a folder under [`plugins/`](plugins), with one folder per skill i
 
 ### Engineering
 
-Take a code change from ticket to merge. Rows follow the steps of a change. Its skills call skills in Communication and Agents, so installing it installs those too in Claude Code.
+Take a code change from ticket to merge.
 
 | Skill | What it does | User invoked |
 |-------|--------------|--------------|
