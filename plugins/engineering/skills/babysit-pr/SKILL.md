@@ -13,7 +13,7 @@ description: >
        <this skill's directory>/scripts/pr-watch.sh <pr> [--repo <owner/name>]
 
    It prints one JSON line per change and never a heartbeat. Handle each line as it arrives. The first poll reports the current check results but no comments, so comment history reaches you only through step 2. Set `WATCH_INTERVAL` to change the 60 second poll.
-2. Right after, handle what is already on the PR: invoke the `address-feedback` skill. Start the watcher before it so there is no gap between them.
+2. Right after, handle what is already on the PR: invoke the `address-feedback` skill.
 3. If the PR conflicts with its base, merge the base in the way the `git` skill says, resolve the conflicts, and push. Invoke the `push-pr` skill for the push.
 
 ## Per event
