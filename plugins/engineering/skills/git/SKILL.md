@@ -25,7 +25,7 @@ The user's instructions on naming win over everything below. These are the defau
 - Check `git status` and stage explicit paths. Never commit working files, local settings, or build output.
 - If a pre-commit hook fails, such as a secret scanner, fix the cause. Never pass `--no-verify`.
 - Push only when the user asks or the calling skill needs it.
-- Once a PR is open, add commits instead of rewriting history, and bring in the base with `git merge origin/<base>` rather than a rebase. Rebase only when the user asks, then push with `--force-with-lease`, never `--force`.
+- Once a PR is open, add commits instead of rewriting history, and bring in the base with `git fetch` and `git merge origin/<base>` rather than a rebase. Rebase only when the user asks, then push with `--force-with-lease`, never `--force`.
 
 ## Cleanup
 

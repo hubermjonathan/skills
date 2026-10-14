@@ -9,7 +9,7 @@ description: >
 ## Before pushing
 
 1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,isDraft,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name.
-2. Update from the base when it conflicts or the repo requires an up-to-date branch: `git fetch`, then `git merge origin/<base>`. Merge rather than rebase, so no force-push is needed on a reviewed PR. Rebase only when the user asks. Resolve conflicts by keeping both sides' intent, and never abort.
+2. Update from the base when it conflicts or the repo requires an up-to-date branch. Invoke the `git` skill for how. Resolve conflicts by keeping both sides' intent, and never abort.
 3. If this push answers review comments, reply to them first. Invoke the `comment-pr` skill.
 4. Remove debug output and stray files the new commits added. For comments and docs, invoke the `kill-comments` skill.
 5. Run the narrowest build, lint, and tests that cover what changed since the last push.
@@ -17,8 +17,7 @@ description: >
 
 ## Pushing
 
-- Add commits once anyone has reviewed. Rewrite history only when the user asks.
-- After a rebase the user asked for, push with `git push --force-with-lease`, never `--force`.
+- Push the way the `git` skill says.
 - If the PR was approved, tell the user a new push may dismiss the approval.
 
 ## After pushing
