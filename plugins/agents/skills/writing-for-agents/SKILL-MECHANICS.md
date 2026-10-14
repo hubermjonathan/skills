@@ -27,6 +27,7 @@ A skill chains to another by telling the agent to invoke it, never by inlining i
 
 > Invoke the `{skill-name}` skill.
 
+- Make the call a step of its own: "Invoke the `brief` skill for the text, capped at 1 to 3 sentences plus links." A hint, a description match, or a call with an escape clause ("unless...") loads the skill far less often.
 - One line per handoff, with the exact skill name in backticks. The wording names no agent's tool, so the handoff works in any agent that loads skills.
 - Say when to call it, not what it does. The called skill is the single source of truth for its own steps.
 - Never duplicate the other skill's instructions. A copy goes stale the moment the original changes.

@@ -23,6 +23,7 @@ A pointer does two jobs: state what the material is, and list the **branches** t
 - **Front-load the leading word**: the pointer is where it does its triggering work.
 - **One trigger per branch.** Synonyms that rename a single branch are one branch written twice. Collapse them, and keep only genuinely distinct branches.
 - **Cut identity the body already carries.**
+- **Name situations, not phrases.** Write each branch as a situation the agent recognizes, such as "asked to babysit a PR, get its checks passing, or get it ready to merge", not as words to match. The agent matches the work in front of it, so a list of phrases misses every rewording.
 
 ## The two loads
 

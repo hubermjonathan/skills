@@ -66,10 +66,10 @@ A subagent's session is its own transcript, so a skill its parent loaded does no
 
 ## 6. Test the fixes
 
-For each group of "should have fired" misses, pick a fix, strongest first:
+For each group of "should have fired" misses, pick a fix, strongest first. Invoke the `writing-for-agents` skill for how to word it:
 
-- **Make the call explicit.** The calling skill names the skill as a step: "Invoke the `brief` skill for the text, capped at 1 to 3 sentences plus links." A hint, a description match, or a call with an escape clause ("unless...") loads far less often.
-- **Tune the description.** Add the case the misses share to the expected skill's description, as a situation, not a phrase to match.
+- **Make the call explicit.** The calling skill names the skill as a step.
+- **Tune the description.** Add the case the misses share to the expected skill's description.
 - **Drop the expectation.** When the misses were done right without the skill, the call or the skill can go.
 
 Test each wording before proposing it. Copy the skills, make the edit in the copy, and run your agent non-interactively with the copy loaded, on a prompt like the misses, at least three times per wording. Count the loads from each run's output. Test the current wording the same way, so the two counts compare.

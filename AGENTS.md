@@ -45,7 +45,7 @@ harnesses, so it never differs by agent:
 
 | | `SKILL.md` frontmatter | `agents/openai.yaml` | `description` |
 |---|---|---|---|
-| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, as situations the agent recognizes, such as "use when asked to babysit a PR, get its checks passing, or get it ready to merge" |
+| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, written as `writing-for-agents` describes |
 | User-invoked | adds `disable-model-invocation: true` | adds `policy.allow_implicit_invocation: false` | Human-facing: a one-line summary read while browsing slash commands |
 
 `agents/openai.yaml` holds Codex-only presentation metadata, `interface.display_name` and
