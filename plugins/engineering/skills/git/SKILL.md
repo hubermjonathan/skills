@@ -17,7 +17,7 @@ The user's instructions on naming win over everything below. These are the defau
 
 - Never commit on the default branch. Branch first.
 - Base new work on a fresh default branch: `git fetch` first and branch from `origin/<default>`, not a stale local copy.
-- Do not set the default branch as the new branch's upstream. Set upstream on the first push with `git push -u origin <branch>`.
+- Create the branch with `--no-track`, as in `git switch -c <branch> --no-track origin/<default>`, and set its upstream on the first push with `git push -u origin <branch>`.
 
 ## Commits
 
