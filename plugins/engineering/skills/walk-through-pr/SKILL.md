@@ -1,13 +1,10 @@
 ---
 name: walk-through-pr
 description: >
-  Turn a GitHub PR into a CodeRabbit-style change stack page that orients a human
-  reviewer: changes grouped by area of impact rather than by file, in reading order,
-  with what each group depends on, the linked ticket's asks mapped to the diff, and
-  questions only the author can answer. Use when
-  someone wants to review a PR and needs a map of it first, or wants a PR summary,
-  a walkthrough, or review prep. It doesn't review or judge the PR, and it never
-  comments. It only adds its link to the PR description, below the disclosure note.
+  Build a page that maps a GitHub PR for a human reviewer: its changes grouped by
+  area of impact, in reading order, with the ticket's asks mapped to the diff. Use
+  when someone wants a map of a PR before reviewing it, or asks for a PR
+  walkthrough, summary, or review prep.
 ---
 
 # PR walkthrough
