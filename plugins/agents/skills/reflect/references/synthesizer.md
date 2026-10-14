@@ -42,7 +42,6 @@ Drop (implementation details that drift):
 
 Keep (durable patterns):
 - "closed regex enums for trigger detection are brittle. Prefer schema-validated structures"
-- "a skill's description says when to use it, as cases, not phrases to match"
 - "a step that depends on another skill invokes it by name. A hint in passing does not load it"
 - "a script that needs an agent's paths takes an env var override, so the skill text stays generic"
 
@@ -53,7 +52,7 @@ Output exactly the format below. No preamble, no narration. One sentence per cel
 | Problem | Proposal | Routing |
 |---|---|---|
 | <failure mode in a skill the parent used> | <change to that skill's body> | edit skill: <skill> <section> |
-| <skill existed but didn't trigger> | <add the case it missed to its description, as a situation> | tune description: <skill> |
+| <skill existed but didn't trigger> | <add the case it missed to its description> | tune description: <skill> |
 | <a rule the user had to repeat> | <one line in the right agent instruction file> | instructions: <file> <section> |
 | <a rule a script, hook, or check could enforce cheaply> | <the mechanism and what it checks> | structural: <mechanism> |
 | <a prompt, hook, or setting that cost time> | <the settings change> | settings: <file> |
@@ -67,7 +66,7 @@ One row per finding, highest impact first: a problem that recurs or cost the mos
 
 For each rejected finding:
 - Principle: <one sentence>
-- Reason: <durability | specificity | existing-skill-first | convergence | decision-changing | structural | duplicate | skill-not-used | already-covered | repo-rule>
+- Reason: <durability | specificity | existing-home-first | convergence | decision-changing | structural | skill-not-used | repo-rule | already-covered>
 
 ## Backlog
 

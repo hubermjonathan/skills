@@ -13,8 +13,8 @@ description: >
        <this skill's directory>/scripts/pr-watch.sh <pr> [--repo <owner/name>]
 
    It prints one JSON line per change and never a heartbeat. Handle each line as it arrives. The first poll reports the current check results but no comments, so comment history reaches you only through step 2. Set `WATCH_INTERVAL` to change the 60 second poll.
-2. Right after, handle what is already on the PR: invoke the `address-feedback` skill. Start the watcher before it so there is no gap between them.
-3. If the PR conflicts with its base, merge the latest base in (`git fetch`, then `git merge origin/<base>`, usually `master` or `main`), resolve the conflicts, and push. Invoke the `push-pr` skill for the push.
+2. Right after, handle what is already on the PR: invoke the `address-feedback` skill.
+3. If the PR conflicts with its base, merge the base in the way the `git` skill says, resolve the conflicts, and push. Invoke the `push-pr` skill for the push.
 
 ## Per event
 
@@ -35,4 +35,4 @@ Tell the user the PR is ready when all of these hold:
 2. every comment answered or declined, and recorded in `<pr-number>-comments.md`
 3. `reviewDecision` is `APPROVED`, or the base branch requires no review (empty decision and `mergeStateStatus` not `BLOCKED`)
 
-Then keep watching for new comments until the user says to stop. Never merge, enable auto-merge, or force-push unless the user asks.
+Then keep watching for new comments until the user says to stop. Never merge or enable auto-merge unless the user asks.

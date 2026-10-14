@@ -21,7 +21,7 @@ Invoke the `find-transcript` skill for this session's transcript. When the user 
 
 ## 2. Spawn three reviewers in parallel
 
-Spawn three background subagents in one batch, one per lens. Pass each template verbatim with the transcript path or digest substituted where marked.
+Spawn three background subagents in one batch, one per lens. Give each its lens template followed by `references/reviewer-common.md`, both verbatim, with the transcript path or digest substituted where marked.
 
 | Lens | Prompt template |
 |---|---|
@@ -47,13 +47,13 @@ Show the Accepted, Rejected, and Backlog output, numbered, with Accepted in the 
 
 Invoke the `writing-for-agents` skill before editing a skill or an agent instruction file. Then find the real file before editing anything:
 
-- Never edit an installed copy of a plugin or skill that your agent manages, such as a plugin cache. It is overwritten on update. Find the source checkout of that plugin's repo and edit there.
+- Edit a plugin or skill in the source checkout of its repo. An installed copy that your agent manages, such as a plugin cache, is overwritten on update.
 - A skill from a repo the user owns is edited in that repo, on a branch, following its own AGENTS.md or CLAUDE.md.
 
 Then follow each approved row's routing:
 
 - `edit skill: <skill> <section>`: make the edit.
-- `tune description: <skill>`: the skill existed and did not fire when it should have. Add the case it missed to its description, as a situation, not a phrase to match.
+- `tune description: <skill>`: the skill existed and did not fire when it should have. Add the case it missed to its description.
 - `new skill: <name>`: create the skill.
 - `instructions: <file> <section>`: add or tighten a line in the agent instruction file the routing names (global, machine-local, or project: CLAUDE.md, AGENTS.md, or your agent's equivalent). One rule, one place. Replace a weaker existing line instead of adding a second.
 - `settings: <file>`: a hook, permission, or env change in your agent's config file. Read the agent's docs for the format before editing.

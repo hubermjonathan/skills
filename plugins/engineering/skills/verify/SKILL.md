@@ -21,7 +21,7 @@ Verify a commit, not a working tree. If there are uncommitted changes, stop and 
 
 ## 1. Builds and passes CI
 
-Run locally every check CI will run on this diff. Find them in the repo's CI config: the workflows and commands that trigger on a PR touching these files. A repo can have its own verify skill that says exactly how.
+Run locally every check CI will run on this diff. Find them in the repo's CI config: the workflows and commands that trigger on a PR touching these files. When the repo has its own skill for verifying it, invoke that skill too. It names the checks and how to run them locally.
 
 A check that needs CI's own setup, such as its credentials or runner image, and can't run here is "couldn't run", with its error. That isn't a failure of the change.
 
@@ -40,7 +40,7 @@ Everything here runs locally. Testing the change deployed, such as on staging, i
 
 ## 3. Evidence
 
-When every check passes and every claim is proven, write the `Checks and claims` part of the PR body's `Evidence` section, in the format the `open-pr` skill sets: the commit it ran on, then the real output for each check and claim, trimmed to the lines that show the result. If the PR is open, replace only that part. Otherwise return it to the caller.
+When no check failed and every claim is proven, write the `Checks and claims` part of the PR body's `Evidence` section, in the format the `open-pr` skill sets: the commit it ran on, the real output for each check and claim, trimmed to the lines that show the result, and each check that couldn't run, with its error. If the PR is open, replace only that part. Otherwise return it to the caller.
 
 ## Report
 

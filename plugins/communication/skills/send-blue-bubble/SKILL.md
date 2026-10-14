@@ -2,9 +2,9 @@
 name: send-blue-bubble
 description: >
   Text the user, or people or group chats they name, with a blue bubble
-  (iMessage). Use when asked to text, message, or iMessage me, someone, or a
-  group, such as "text me when you finish", "text me and Jac the budget
-  update", or "text the budget updates group".
+  (iMessage). Use when asked to text or iMessage me, someone, or a group, such
+  as "text me when you finish", "text me and Jac the budget update", or "text
+  the budget updates group".
 ---
 
 # Send a blue bubble
@@ -33,10 +33,8 @@ Texts come from the agent's own iMessage account. People read them on a phone wi
        Budget update: Q3 spend is 4% under plan. Details: https://example.com/budget
        MSG
 
-   It prints `sent`. On failure it prints the reason to stderr and exits nonzero.
-
-   Messages can't start a group from a script. Several names go to the group chat that has exactly those people, and `--group` goes to the one with that name. If there's no such chat, the script exits 3 and sends nothing. Ask the user to start the group from their phone, with the agent's account and those people, and to name it if they'll text it by name. Then send again.
-6. If the send fails, tell the user why in the session. Don't retry in a loop.
+   It prints `sent`. On failure it prints the reason to stderr, with the fix when the user has to make one, and exits nonzero.
+6. If the send fails, tell the user the script's reason in the session. When it names a fix for the user, send again once they've made it.
 
 ## Setup
 

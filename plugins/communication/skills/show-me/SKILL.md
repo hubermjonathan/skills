@@ -3,9 +3,9 @@ name: show-me
 description: >
   Show a point as the smallest visual that makes it clear: pseudocode, a call
   tree, a component or file tree, a Mermaid diagram, a diff-shaped sketch, or a
-  focused HTML page. Use when explaining how code works or what a change does,
-  when the user asks to see something, and when another skill needs a visual of
-  a change, such as a PR body or walkthrough.
+  focused HTML page. Use when a point about code or a change is clearer drawn
+  than told, when the user asks to see something, and when another skill needs a
+  visual of a change, such as a PR body or walkthrough.
 ---
 
 Show the current point visually: the topic of the conversation, or the change a calling skill hands you. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
@@ -94,8 +94,7 @@ For a call-tree or call-stack change:
      persistPrompt
 +    expandSkillMention
      launchAgent
--  navigateToSession
-+  navigateToSession
+   navigateToSession
 +    subscribeToEvents
 ```
 
@@ -123,6 +122,4 @@ function expandSkill(command: string): string {
 
 ## Guidance
 
-Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
-
-You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries the point needs.

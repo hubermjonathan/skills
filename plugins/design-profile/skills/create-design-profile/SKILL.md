@@ -20,7 +20,7 @@ They come from one of two places: finished files someone hands you, or a design 
 
 The profile name has no default. If the user didn't name the design system, ask. A filename or a repo name is a hint, not an answer, and a profile installed under the wrong name is never found.
 
-Check whether the name is taken: `sh ../use/scripts/profile.sh <name>`, relative to this skill's directory, exits 0 when it is. If it is, say so and confirm before overwriting.
+Check whether the name is taken: `sh ../use-design-profile/scripts/profile.sh <name>`, relative to this skill's directory, exits 0 when it is. If it is, say so and confirm before overwriting.
 
 ## 2. Pick the path
 

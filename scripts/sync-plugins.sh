@@ -2,8 +2,9 @@
 # Usage: sync-plugins.sh [--check] [repo...]
 # For each repo, writes the Codex marketplace and each plugin's plugin.json from the repo's
 # .claude-plugin/marketplace.json, then checks every plugin it lists. Skill names must be unique
-# across all the repos, since their skills install side by side. The repos default to this one. With
-# --check, it writes nothing and fails on any file that is out of date.
+# across all the repos, since their skills install side by side, and every skill a plugin file names
+# as "`<name>` skill" or as a "../<name>/" path must exist in one of them. The repos default to this
+# one. With --check, it writes nothing and fails on any file that is out of date.
 set -euo pipefail
 
 check=false
@@ -68,7 +69,14 @@ for root in "${roots[@]}"; do
       claude=$([ "$(frontmatter "$md" disable-model-invocation)" = true ] && echo user || echo model)
       codex=$(grep -q 'allow_implicit_invocation: false' "$yaml" && echo user || echo model)
       [ "$claude" = "$codex" ] || err "$skill: SKILL.md says $claude-invoked, agents/openai.yaml says $codex-invoked"
-      grep -qF "]($md)" README.md || err "$skill: README.md has no row for it"
+      row=$(grep -F "]($md)" README.md | head -1)
+      if [ -z "$row" ]; then
+        err "$skill: README.md has no row for it"
+      else
+        cell=$(awk -F'|' '{ gsub(/^ +| +$/, "", $(NF-1)); print $(NF-1) }' <<<"$row")
+        [ "$cell" = "$([ "$claude" = user ] && echo Yes || echo No)" ] ||
+          err "$skill: README.md says User invoked is '$cell', but SKILL.md makes it $claude-invoked"
+      fi
     done
   done < <(jq -c '.plugins[]' "$src")
 
@@ -79,6 +87,14 @@ for root in "${roots[@]}"; do
   if command -v claude >/dev/null; then
     claude plugin validate . >/dev/null || err "claude plugin validate . failed"
   fi
+done
+
+for root in "${roots[@]}"; do
+  cd "$root"
+  while IFS=: read -r file line name; do
+    case "$names" in *" $name "*) ;; *) err "$file:$line names a skill no repo has: $name" ;; esac
+  done < <(grep -rnoE '`[a-z0-9]+(-[a-z0-9]+)*` skill|\.\./[a-z0-9]+(-[a-z0-9]+)*/' plugins |
+    sed -E 's/`(.*)` skill$/\1/; s#\.\./(.*)/$#\1#')
 done
 
 exit "$fail"

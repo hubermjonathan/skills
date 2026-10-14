@@ -9,16 +9,20 @@ description: >
 The user's instructions win over the defaults below.
 
 1. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
-2. Bump a version only when the repo, the user, or another skill says to. Then commit and push.
-3. Write the title and body in the format below.
-4. Open it ready for review with `gh pr create`. Never open a draft.
-5. Reply with the PR url.
+2. Bump a version only when the repo, the user, or another skill says to.
+3. Commit and push.
+4. Invoke the `verify` skill for the `Checks and claims` evidence, unless the caller already has evidence for the head commit.
+5. Write the title and body in the format below.
+6. Open it ready for review with `gh pr create`. Never open a draft.
+7. Reply with the PR url.
 
 ## Title
 
-`<scope>: <description>`, 50 characters at most. The scope is the service or project touched. Append the ticket key as `(ABC-123)`, which does not count toward the limit. Omit it if there is no ticket.
+`<scope>: <description>`, 50 characters at most. The scope is the service, project, or area touched. Append the ticket key as `(ABC-123)`, which doesn't count toward the 50. Omit it if there is no ticket.
 
 ## Body
+
+If the repo has a PR template, fill it in place of the sections below, just as tersely.
 
 Open the body with a note naming who wrote it and for whom, then a blank line:
 
@@ -55,7 +59,7 @@ Then the sections, in this order:
 Rules:
 
 - For `Change`, invoke the `show-me` skill and pick the smallest visual of the diff, such as a diff-shaped call tree or pseudocode.
-- `Checks and claims` under `Evidence` comes from the `verify` skill. Invoke it unless the caller already has evidence for the head commit. A skill that tests the change deployed adds its own part below it, such as `Staging`, with its own `Ran on` line. Each skill replaces only its own part. It embeds the real output of what was run, in a code block, trimmed to the lines that show the result, and names the commit it ran on. Never restate a result in your own words. A test plan's results can be a table of step, before, after, and result instead of the two bullets. A screenshot goes in only as an image URL you already have, since GitHub's API can't upload one. If nothing was run, write "Not run" and why.
+- `Checks and claims` under `Evidence` comes from step 4. A skill that tests the change deployed adds its own part below it, such as `Staging`, with its own `Ran on` line. Each skill replaces only its own part. It embeds the real output of what was run, in a code block, trimmed to the lines that show the result, and names the commit it ran on. Never restate a result in your own words. A test plan's results can be a table of step, before, after, and result instead of the two bullets. A screenshot goes in only as an image URL you already have, since GitHub's API can't upload one. If nothing was run, write "Not run" and why.
 - For a docs-only change, `Why` is one sentence, and `Evidence` and `Risk` are left out.
 - `Follow up` is optional. Leave it out rather than writing "none".
 - The `walk-through-pr` skill adds a `Walkthrough` section right below the note later. Other skills leave it there.
@@ -63,4 +67,3 @@ Rules:
 - No checklist, and no restating the diff line by line.
 - Every claim must be true of the code as pushed: what it fixes, what it leaves alone, whether CI is green.
 - No ticket link in the body when the title already carries the key.
-- If the repo has a PR template, fill it in instead, just as tersely.

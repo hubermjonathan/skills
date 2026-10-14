@@ -15,7 +15,7 @@ USAGE = """usage:
 def transcript_files():
     dirs = os.environ.get("TRANSCRIPT_DIRS")
     if not dirs:
-        sys.exit("TRANSCRIPT_DIRS is not set. Set it to the session stores, colon-separated. The find-transcript skill lists them.")
+        sys.exit("TRANSCRIPT_DIRS is not set. Set it to the session stores, colon-separated. The `find-transcript` skill lists them.")
     for root in dirs.split(":"):
         yield from glob.glob(f"{root}/**/*.jsonl", recursive=True)
 
@@ -74,10 +74,11 @@ def extract(argv):
     cutoff = time.time() - days * 86400
     if since and "--days" not in argv:
         cutoff = time.mktime(time.strptime(since, "%Y-%m-%d"))
+    files = list(transcript_files())
     rows = 0
     with open(out, "w") as f:
         f.write("session\tagent\tcwd\tts\tkind\tname\tdetail\n")
-        for path in transcript_files():
+        for path in files:
             if os.path.getmtime(path) < cutoff:
                 continue
             for e in events(path):
@@ -112,11 +113,12 @@ def check(argv):
         by_session.pop(session, None)
     print(f"{len(by_session)} sessions, {len(skipped)} skipped by --skip-cwd\n")
 
+    named = {r["expect"] for r in rules} | {r["after"] for r in rules if "after" in r}
     loaded = collections.Counter()
     for evs in by_session.values():
-        for s in {n for k, n, _, _ in evs if k == "skill"}:
+        for s in {n for k, n, _, _ in evs if k == "skill" and any(same(n, w) for w in named)}:
             loaded[s] += 1
-    print("## Sessions that loaded each skill")
+    print("## Sessions that loaded each skill the rules name")
     for s, n in loaded.most_common():
         print(f"- {s}: {n}")
 
@@ -146,7 +148,7 @@ def check(argv):
                     break
         total = hits + len(misses)
         label = f"after `{rule['after']}`" if "after" in rule else f"`{rule.get('tool', '.')}` matching `{rule.get('match', '.')}`"
-        rate = f"{hits}/{total} ({hits * 100 // total}%)" if total else "never happened"
+        rate = (f"{hits}/{total}" + (f" ({hits * 100 // total}%)" if total >= 10 else "")) if total else "never happened"
         print(f"- {label} -> `{expect}`: {rate}" + (f", plus {missing} where `{expect}` was not installed" if missing else ""))
         for m in misses[:5]:
             print(f"  - miss: {m}")

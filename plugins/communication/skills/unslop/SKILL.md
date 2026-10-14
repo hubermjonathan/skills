@@ -14,7 +14,7 @@ Edit text to remove AI patterns. Word and sentence rules, such as plain words, a
 
 1. Scan for the patterns below.
 2. Rewrite. Preserve meaning, match intended tone.
-3. Self-audit: "What makes this obviously AI generated?" Fix remaining tells.
+3. Self-audit. Ask "What makes this obviously AI generated?", and fix what the answer names. Stop when it names nothing.
 
 ## Patterns to detect and fix
 
@@ -46,11 +46,3 @@ Edit text to remove AI patterns. Word and sentence rules, such as plain words, a
 
 13. **Excessive hedging.** "could potentially possibly be argued that it might" becomes "may".
 14. **Generic conclusions.** "The future looks bright." State specific plans or facts.
-
-### Jargon
-
-15. **Abstract metaphor nouns.** Substrate, wedge, vector, locus, vantage, nexus, primitive (as noun), harness (as metaphor), surface (as in "API surface"), bedrock, scaffolding (as metaphor), modality, paradigm, gold-plating, ratchet (as metaphor), evacuate (for moving code), endgame, north star, flywheel. These read as technical but usually have a plainer concrete word. "Substrate" becomes "base". "Wedge in" becomes "add". "Vector" becomes "way" or "method". "Gold-plating" becomes "more than the job needs". "Ratchet" becomes the mechanism's real name or "a limit that only tightens". "Evacuate" becomes "move out". "Endgame" becomes "the last phase". Pick the concrete word.
-
-### Plain speech
-
-16. **Cut adverbs, or use a stronger verb.** "runs quickly" becomes "is fast" or the number. "significantly improves" becomes the measured delta. An adverb propping up a weak verb means the verb is wrong.

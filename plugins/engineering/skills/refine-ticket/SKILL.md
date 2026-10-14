@@ -22,6 +22,6 @@ You get one ticket ready to build. A ticket is ready when someone who never saw 
    - **Original description**: the reporter's text, unchanged.
 6. Show the draft to the user and wait for their approval. Then replace the ticket's description with it.
 
-**Done when:** the ticket's description has every section, each acceptance criterion is checkable, a bug has a reproduction or a record of what was tried, and no question is open.
+**Done when:** the ticket's description has every section that applies, each acceptance criterion is checkable, a bug has a reproduction or a record of what was tried, and no question is open.
 
 "Decisions" is the only record of why the ticket asks for what it does. A later reader uses it to tell a wrong build from a wrong requirement, so never skip it.

@@ -17,15 +17,16 @@ The user's instructions on naming win over everything below. These are the defau
 
 - Never commit on the default branch. Branch first.
 - Base new work on a fresh default branch: `git fetch` first and branch from `origin/<default>`, not a stale local copy.
-- Do not set the default branch as the new branch's upstream. Set upstream on the first push with `git push -u origin <branch>`.
+- Create the branch with `--no-track`, as in `git switch -c <branch> --no-track origin/<default>`, and set its upstream on the first push with `git push -u origin <branch>`.
 
 ## Commits
 
 - One logical change per commit.
 - Check `git status` and stage explicit paths. Never commit working files, local settings, or build output.
+- A working file supports the work but isn't part of it, such as a plan, a test plan, or notes.
 - If a pre-commit hook fails, such as a secret scanner, fix the cause. Never pass `--no-verify`.
 - Push only when the user asks or the calling skill needs it.
-- Once a PR is open, add commits instead of rewriting history, and bring in the base with `git merge origin/<base>` rather than a rebase. Rebase only when the user asks, then push with `--force-with-lease`, never `--force`.
+- Once a PR is open, add commits instead of rewriting history, and bring in the base with `git fetch` and `git merge origin/<base>` rather than a rebase. Rebase only when the user asks, then push with `--force-with-lease`, never `--force`.
 
 ## Cleanup
 

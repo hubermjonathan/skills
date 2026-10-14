@@ -12,7 +12,7 @@ A profile is a mined design system: usage rules, design tokens, and an optional 
 
 ## 1. Resolve the profile
 
-Take the profile name from the request. If there is none, list the installed profiles and ask which to use. Never pick one yourself.
+Take the profile name from the request. If there is none, list the installed profiles and ask which to use.
 
     sh scripts/profile.sh <name>
 

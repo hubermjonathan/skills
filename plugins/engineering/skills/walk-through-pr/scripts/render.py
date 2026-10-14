@@ -44,8 +44,6 @@ def validate(data, stats):
         if len(c.get("author_questions") or []) > 3:
             errors.append(f"cohort {cid}: more than 3 author questions")
         sketch = c.get("sketch") or {}
-        if "diagram" in c:
-            errors.append(f"cohort {cid}: diagram is gone. Put a mermaid source in sketch with kind mermaid")
         if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source") or not sketch.get("where"):
             errors.append(f"cohort {cid}: sketch needs kind (one of {sorted(SKETCH_KINDS)}), source, and where")
         if not 2 <= len(c.get("review_focus") or []) <= 4:
@@ -157,7 +155,6 @@ def main(argv):
     if housekeeping:
         rows.append(f'<tr><td><a href="#housekeeping">Housekeeping</a></td><td>{plural(len(housekeeping), "file")}</td><td>–</td></tr>')
         bumps = data.get("version_bump") or []
-        bumps = [bumps] if isinstance(bumps, dict) else bumps
         bump_html = "".join(
             f"<p>Version bump{' for <code>' + esc(b['package']) + '</code>' if b.get('package') else ''}: "
             f"<code>{esc(b.get('from'))}</code> to <code>{esc(b.get('to'))}</code>. {esc(b.get('convention'))}</p>"
@@ -180,11 +177,12 @@ def main(argv):
                      else "<p>The ticket lists no asks.</p>")
         unasked = "".join(f"<li>{esc(x)}</li>" for x in ticket.get("unasked") or [])
         ticket_html = (f'<p><a href="{html.escape(ticket.get("url", ""))}">{esc(ticket.get("key"))}</a>: {esc(ticket.get("summary"))}</p>'
+                       + (f'<p class="note">{esc(ticket["note"])}</p>' if ticket.get("note") else "")
                        + asks_html + (f"<p>Changes no ask covers:</p><ul>{unasked}</ul>" if unasked else ""))
     else:
         ticket_html = "<p>The PR title and branch carry no ticket key.</p>"
 
-    m = re.match(r"([a-z]+(?:\([^)]*\))?!?:\s*(?:[A-Z][A-Z0-9]+-\d+\b)?)\s*(.+)", meta["title"])
+    m = re.match(r"([\w./-]+(?:\([^)]*\))?!?:\s*(?:[A-Z][A-Z0-9]+-\d+\b)?)\s*(.+)", meta["title"])
     h1 = (f'<span class="h1-scope">{esc(m.group(1).strip())}</span> {esc(m.group(2))}' if m else esc(meta["title"]))
     labels = [l["name"] for l in meta.get("labels") or []]
     label_row = (f'<div><dt>Labels</dt><dd class="chips">{"".join(f"<span>{esc(l)}</span>" for l in labels)}</dd></div>' if labels else "")
@@ -231,86 +229,62 @@ def main(argv):
 
 
 CSS = r'''
-:root { color-scheme: dark; --brand: #00a87e; --brand-dark: #00986a; --brand-soft: rgba(0,168,126,.14); --surface: #1c1d20; --surface-2: #282a2e; --warn: #f4be19; --good: #00a87e; --bad: #e05666; --fg: #fafafa; --muted: #a3a4ab; --line: #34363c; --bg: #121212; --code-bg: #282a2e; --accent: #2cc39a; --before: rgba(224,86,102,.12); --after: rgba(0,168,126,.12); }
+:root { color-scheme: dark; --brand: #00a87e; --brand-soft: rgba(0,168,126,.14); --surface: #1c1d20; --surface-2: #282a2e; --warn: #f4be19; --good: #00a87e; --bad: #e05666; --fg: #fafafa; --muted: #a3a4ab; --line: #34363c; --bg: #121212; --code-bg: #282a2e; --accent: #2cc39a; --before: rgba(224,86,102,.12); --after: rgba(0,168,126,.12); }
 * { box-sizing: border-box; }
-body { margin: 0; font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--fg); background: var(--bg); }
-.layout { max-width: 920px; margin: 0 auto; padding: 24px; }
-a { color: var(--accent); }
-.eyebrow, .facts, .note, .deps { color: var(--muted); font-size: 13px; }
-h1 { font-size: 26px; margin: 4px 0 8px; }
-h2 { font-size: 20px; margin: 40px 0 8px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-h3 { font-size: 15px; margin: 20px 0 6px; }
-.lede { font-size: 17px; }
+body { margin: 0; font: 16px/1.65 Lato, "Helvetica Neue", Arial, sans-serif; color: var(--fg); background: var(--bg); }
+.layout { max-width: 880px; margin: 0 auto; padding: 24px; }
+a { color: var(--accent); text-decoration-color: rgba(44,195,154,.4); text-underline-offset: 2px; }
+.note { color: var(--muted); font-size: 13px; font-style: italic; }
+.deps { color: var(--muted); font-size: 13px; margin-top: 0; }
+h1 { font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -.01em; margin: 6px 0 12px; }
+h2 { display: flex; align-items: center; font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -.01em; margin: 6px 0 12px; }
+h3 { font-weight: 900; line-height: 1.3; }
 .check { font-size: 13px; font-weight: 400; color: var(--muted); white-space: nowrap; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
 .delta .before { background: var(--before); }
 .delta .after { background: var(--after); }
-code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
+code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: #e2e2e2; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
 figure { margin: 8px 0; }
 figcaption { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); }
 pre { background: var(--code-bg); padding: 10px; border-radius: 6px; overflow: auto; }
 pre code { background: none; padding: 0; }
 
-.layout { max-width: 880px; }
-body { font-size: 16px; line-height: 1.65; }
 p, li { max-width: 72ch; }
-.lede { font-size: 18px; line-height: 1.6; color: var(--fg); }
-section { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px 24px 20px; margin: 24px 0; }
-h2 { margin: 16px 0 8px; padding-top: 0; border-top: 0; font-size: 21px; }
-.deps { margin-top: 0; }
+section { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 4px 24px 20px; margin: 24px 0; scroll-margin-top: calc(60px + env(safe-area-inset-top, 0px)); transition: opacity .2s; }
 section > p:not(.deps) { color: var(--fg); }
 details.block { border-top: 1px solid var(--line); margin-top: 14px; }
 details.block > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 0 6px; }
 details.block > summary::-webkit-details-marker { display: none; }
-details.block > summary::before { content: "\25B8"; color: var(--muted); font-size: 12px; transition: transform .15s; width: 10px; }
+details.block > summary::before { content: "\25B8"; color: var(--brand); font-size: 12px; transition: transform .15s; width: 10px; }
 details.block[open] > summary::before { transform: rotate(90deg); }
 details.block > summary h3 { margin: 0; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-details.block > summary:hover h3 { color: var(--fg); }
-.count { font-size: 12px; color: var(--muted); background: var(--code-bg); border-radius: 999px; padding: 1px 8px; }
+details.block > summary:hover h3 { color: var(--brand); }
+.count { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--brand-soft); border-radius: 999px; padding: 1px 8px; }
 .block-body { padding: 2px 0 4px 20px; }
 details.author > summary h3 { color: var(--warn); }
 .block-body ol, .block-body ul { padding-left: 20px; margin: 6px 0; }
 .block-body li { margin: 10px 0; }
 .block-body ol > li > code:first-child { display: block; width: fit-content; max-width: 100%; margin-bottom: 4px; font-size: 12px; color: var(--muted); }
 .block-body p strong { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
-.delta th { width: 76px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.delta th { width: 76px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; background: transparent; }
 .delta td, .delta th { border: 0; padding: 10px 12px; }
-.delta tr.before td, .delta tr.before th { border-left: 3px solid var(--bad); }
-.delta tr.after td, .delta tr.after th { border-left: 3px solid var(--good); }
-.delta tr.after th, .delta tr.before th { border-left-width: 3px; }
-.delta td { border-left: 0 !important; }
+.delta tr.before th { border-left: 3px solid var(--bad); }
+.delta tr.after th { border-left: 3px solid var(--good); }
 .delta { border-radius: 8px; overflow: hidden; }
 .scroll { overflow-x: auto; }
 .scroll table { min-width: 480px; }
-th { color: var(--muted); font-weight: 600; font-size: 13px; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; background: var(--surface-2); }
 .focus li > code:last-child, .author li > code:last-of-type { display: block; width: fit-content; max-width: 100%; margin-top: 4px; font-size: 12px; color: var(--muted); }
-.diagram { margin: 14px 0 0; padding: 12px; background: var(--code-bg); border-radius: 8px; overflow-x: auto; }
+.diagram { margin: 14px 0 0; padding: 12px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
 .diagram pre { margin: 0; background: none; }
-.note { font-style: italic; }
-@media (max-width: 640px) { .layout { padding: 12px; } section { padding: 4px 14px 14px; } .block-body { padding-left: 4px; } }
 
-body { font-family: Lato, "Helvetica Neue", Arial, sans-serif; }
-h1, h2, h3, h1 { font-weight: 900; font-size: 26px; line-height: 1.3; letter-spacing: -.01em; margin: 6px 0 12px; }
-h2 { font-weight: 900; }
-section { border-radius: 16px; border-color: var(--line); }
-section h2 { color: var(--fg); }
 section h2::before { content: ""; display: inline-block; width: 4px; height: 20px; border-radius: 2px; background: var(--brand); margin-right: 10px; vertical-align: -3px; }
-h2 { justify-content: flex-start; gap: 0; }
 .author li > br { display: none; }
 .author li > span.note { display: block; margin-top: 6px; }
-h2 .check { margin-left: auto; }
-.check input { accent-color: var(--brand); width: 16px; height: 16px; vertical-align: -3px; }
-details.block > summary::before { color: var(--brand); }
-details.block > summary:hover h3 { color: var(--brand); }
-.count { background: var(--brand-soft); color: var(--accent); font-weight: 700; }
-details.author > summary h3 { color: var(--warn); }
-th { background: var(--surface-2); color: var(--muted); }
-.delta th { background: transparent; }
-code { color: #e2e2e2; }
-a { color: var(--accent); text-decoration-color: rgba(44,195,154,.4); text-underline-offset: 2px; }
+h2 .check { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; line-height: 1; cursor: pointer; flex-shrink: 0; }
+h2 .check input { margin: 0; vertical-align: middle; width: 16px; height: 16px; flex: none; cursor: pointer; accent-color: var(--brand); }
 a:hover { color: #fff; text-decoration-color: var(--brand); }
-.diagram { border: 1px solid var(--line); }
 .sketch-diff span { display: block; }
 .sketch-diff .add { background: var(--after); }
 .sketch-diff .del { background: var(--before); }
@@ -329,10 +303,6 @@ dl.facts .del { color: var(--bad); font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips span { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--muted); }
 
-h2 { align-items: center; }
-h2 .check { display: inline-flex; align-items: center; gap: 8px; line-height: 1; cursor: pointer; flex-shrink: 0; }
-h2 .check input { margin: 0; vertical-align: middle; width: 16px; height: 16px; flex: none; cursor: pointer; }
-
 .progressbar { position: sticky; top: 0; z-index: 10; padding-top: env(safe-area-inset-top, 0px); background: rgba(18,18,18,.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .progressbar-inner { max-width: 880px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 14px; }
 .progressbar-label { font-weight: 700; font-size: 13px; white-space: nowrap; color: var(--fg); min-width: 130px; }
@@ -340,7 +310,6 @@ h2 .check input { margin: 0; vertical-align: middle; width: 16px; height: 16px; 
 .progressbar-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #00986a, #00a87e, #2cc39a); transition: width .35s ease; }
 .all-read .progressbar-label { color: var(--accent); }
 html { scroll-padding-top: calc(52px + env(safe-area-inset-top, 0px)); }
-section { scroll-margin-top: calc(60px + env(safe-area-inset-top, 0px)); transition: opacity .2s; }
 section.is-read:not(.peek) > :not(h2) { display: none !important; }
 section.is-read { padding-bottom: 4px; opacity: .78; }
 section.is-read:hover, section.is-read.peek { opacity: 1; }
@@ -350,7 +319,7 @@ section.is-read h2::after { content: "Read \2713  \00B7  click to show"; order: 
 section.is-read.peek h2::after { content: "Read \2713  \00B7  click to hide"; }
 section.is-read h2 .check { order: 2; }
 #orientation a.read::after { content: " \2713"; color: var(--accent); }
-@media (max-width: 640px) { .progressbar-inner { padding: 8px 12px; } .progressbar-label { min-width: 0; } section.is-read h2 { flex-wrap: wrap; row-gap: 6px; } }
+@media (max-width: 640px) { .layout { padding: 12px; } section { padding: 4px 14px 14px; } .block-body { padding-left: 4px; } .progressbar-inner { padding: 8px 12px; } .progressbar-label { min-width: 0; } section.is-read h2 { flex-wrap: wrap; row-gap: 6px; } }
 '''
 
 PROGRESS_JS = r'''

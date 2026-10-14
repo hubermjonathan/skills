@@ -13,13 +13,13 @@ The goal is writing a tired engineer understands on the first read. Four layers 
 
 Three rules sit above the layers:
 
-- **Cut every word that does no work.** If the sentence survives without a word, the word goes. "In order to" is "to". "It is important to note that" is nothing.
+- **Cut every word that does no work.** If the sentence survives without a word, the word goes. "In order to" is "to". "It is important to note that" is nothing. An adverb that props up a weak verb means the verb is wrong: "significantly improves" becomes the measured delta, and "runs quickly" becomes "is fast" or the number.
 - **Use the short, everyday word.** "Use", not "utilize". "Help", not "facilitate". "Do", not "perform". A long word has to buy its length with precision.
 - **When a rule makes a sentence worse, fix the sentence another way or leave it alone.** The rules serve the reader. A sentence that follows every rule and sounds like a machine wrote it has failed.
 
 The codebase is the word list. Write the real symbol, file, flag, or command name, not a synonym or a description of it.
 
-Don't invent jargon. Use the words a developer would say out loud: "turn off", "split", "a check that blocks the merge", not "sunset", "decompose", or "a quality gate". A named pattern is fine when the doc says what it means the first time.
+Don't invent jargon. Use the words a developer would say out loud: "turn off", "split", "a check that blocks the merge", not "sunset", "decompose", or "a quality gate". Swap an abstract metaphor noun for the concrete word: "base", not "substrate". "Add", not "wedge in". "Way", not "vector". "More than the job needs", not "gold-plating". The same goes for locus, vantage, nexus, primitive, harness, surface, bedrock, scaffolding, modality, paradigm, ratchet, evacuate, endgame, north star, and flywheel. A named pattern is fine when the doc says what it means the first time.
 
 ## Vary the rhythm
 
@@ -60,7 +60,7 @@ Source: diataxis.fr, fetched 2026-07-18.
 - Write instructions as commands: "Click Submit." State facts plainly. Never "should be done".
 - Put the condition before the instruction: "To delete the document, click Delete." The reader skips what does not apply.
 - Put the common case first. Exceptions after.
-- Sound like a knowledgeable friend. No buzzwords, no figurative language, no "please" in instructions, and never "simply", "easy", or "quickly" in a procedure. If it were simple, the reader would not be here.
+- Sound like a knowledgeable friend. No "please" in instructions, and never "simply", "easy", or "quickly" in a procedure. If it were simple, the reader would not be here.
 - Don't pre-announce ("we will soon support...") and don't start consecutive sentences with the same phrase.
 - Link with words that say where the link goes: the page title or a short description. Never "click here". Prefer a sentence of context on the page over a link off it.
 - Headings carry the point, not just the topic ("Pick the mode first", not "Modes"). Use the case the user or the repo asks for, and sentence case when neither says. A task heading is a bare verb phrase ("Create an instance"). A concept heading is a noun phrase. One h1 per page, no skipped levels.
@@ -73,11 +73,7 @@ Source: developers.google.com/style, fetched 2026-07-18.
 
 - One instruction per sentence. One thought per sentence everywhere else.
 - Split instructions longer than about 20 words and other sentences longer than about 25.
-- Put the warning or condition before the step it guards: "If hot oil touches your skin, injuries can occur."
 - Keep "the" and "a": "Remove backup file" reads two ways. "Remove the backup file" reads one.
-- Give each word one meaning and one job, then keep it. If "check" means inspect, don't also use it for restrain.
-- Pick one word per action and stick to it: "start", not "start" here and "initiate" there.
-- Write procedures as direct commands, never as narration and never in the passive: "Install the component", not "the component must be installed".
 - Avoid "-ing" words where you can. They take too many grammatical jobs and breed misreadings.
 
 Source: asd-ste100.org (Issue 9, 2025), fetched 2026-07-18. The numbered rules and dictionary live in the spec PDF. The principles above are the transferable core.
@@ -94,14 +90,14 @@ Source: asd-ste100.org (Issue 9, 2025), fetched 2026-07-18. The numbered rules a
 - Use periods, not semicolons. Replace an em dash with a new sentence. Use a colon only before a list or an example, never to join two clauses.
 - Make text in parentheses a full grammatical unit or its own sentence. Never form plurals with "(s)".
 - No slashes or arrows: write "a, b, or both" instead of "a/b" or "and/or", and "returns" or "becomes" instead of "→".
-- Call each thing by one name, everywhere. A doc that says "the worker", "the consumer", and "the job runner" for one thing teaches three things. Rewording an unchanged sentence between edits costs the same way. Don't churn what didn't change.
+- Call each thing and each action by one name, and give each word one meaning, everywhere. A doc that says "the worker", "the consumer", and "the job runner" for one thing teaches three things. "Start" here and "initiate" there reads as two actions, and "check" for both inspect and restrain reads as one. Rewording an unchanged sentence between edits costs the same way. Don't churn what didn't change.
 - Skip idioms, colloquialisms, Latin abbreviations, and metaphors. A non-native reader, a translator, and an agent all parse plain constructions best.
 
 Source: Kohl, The Global English Style Guide (SAS Press). Guideline text fetched from the Internet Archive and the SAS sample chapter, 2026-07-18.
 
 ## Voice and repo specifics
 
-- Invoke the `unslop` skill as a last pass on prose a person outside the session reads: PR bodies, tickets, Slack messages, and docs.
+- Invoke the `unslop` skill as a last pass on prose a person outside the session reads.
 - PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them. A PR body is a briefing that a reviewer can read in under a minute. Do not paste logs, SHA lists, or metric tables. Link them.
 - Product UI strings are not documentation. Use your product's copy guidelines for those.
 - Match the repo's indentation in code snippets. Write real paths and real symbols. Make every count or tree claim true at the commit that lands it, and include the command that regenerates it.

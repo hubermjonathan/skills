@@ -45,7 +45,7 @@ harnesses, so it never differs by agent:
 
 | | `SKILL.md` frontmatter | `agents/openai.yaml` | `description` |
 |---|---|---|---|
-| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, as situations the agent recognizes, such as "use when asked to babysit a PR, get its checks passing, or get it ready to merge" |
+| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, written as `writing-for-agents` describes |
 | User-invoked | adds `disable-model-invocation: true` | adds `policy.allow_implicit_invocation: false` | Human-facing: a one-line summary read while browsing slash commands |
 
 `agents/openai.yaml` holds Codex-only presentation metadata, `interface.display_name` and
@@ -66,14 +66,10 @@ manifest, so no plugin has a `.claude-plugin/plugin.json`.
 
 ## After a change
 
-Run `scripts/sync-plugins.sh` after you edit the marketplace or add, rename, or move a skill. It
-writes the Codex marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable
-`plugin.json`, the one Codex reads. Then it checks every skill and runs `claude plugin validate .`.
-It fails until each skill has its row in its plugin's table in `README.md`, and its
-`agents/openai.yaml`. `scripts/sync-plugins.sh --check` writes nothing and fails on any file out of
-date.
+Run `scripts/sync-plugins.sh` after you change the marketplace or a skill. It writes the Codex
+marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable `plugin.json`, the one
+Codex reads. Then it checks every skill and runs `claude plugin validate .`.
+`scripts/sync-plugins.sh --check` writes nothing and fails on any file out of date.
 
 To sync another repo with the same layout and check that no skill name repeats across the two, pass
 both, as in `scripts/sync-plugins.sh . ../other-repo`.
-
-When you rename a skill, update every "invoke the `x` skill" that names it, in every repo.

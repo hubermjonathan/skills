@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 A skill earns its place only if it loads when the work calls for it. This audit reads past session transcripts, counts how often each expected skill loaded, and turns the misses into proposed fixes. It changes nothing until the user picks.
 
-It needs weeks of real sessions to say anything. A rule that fired fewer than about ten times gives noise, so report its count, not a percentage.
+It needs weeks of real sessions to say anything.
 
 ## 1. Pick the window
 
@@ -39,20 +39,19 @@ A **tool rule** says a tool call needs a skill loaded first:
 A **follow rule** says one skill needs to load another:
 
 ```json
-{"after": "slack", "expect": "brief"}
+{"after": "send-slack-message", "expect": "brief"}
 ```
 
 It hits when `expect` loads within `--window` events after `after`, 40 by default. Write one for each skill that a skill tells the agent to invoke.
 
-A name without a plugin prefix matches any plugin's skill of that name: `git` matches `skills:git`. Put the prefix in `expect` to pin one plugin.
+A name without a plugin prefix matches any plugin's skill of that name: `git` matches `engineering:git`. Put the prefix in `expect` to pin one plugin.
 
 ## 4. Run the check
 
-Run `scripts/skill-audit.py check expectations.json events.tsv`. It prints how many sessions loaded each skill, then each rule's hits out of firings, with up to five misses as `session timestamp`.
+Run `scripts/skill-audit.py check expectations.json events.tsv`. It prints how many sessions loaded each skill the rules name, then each rule's hits out of firings, with a percentage once the rule fired ten times, and up to five misses as `session timestamp`.
 
 - A firing in a session where the expected skill was not installed is counted apart, not as a miss.
 - Sessions run from a temp directory are skipped as tests. Pass `--skip-cwd <regex>` to change the pattern, or `--skip-cwd ''` to keep them.
-- The loaded list includes the agent's built-in commands, such as `clear` or `mcp`. Ignore those.
 
 ## 5. Read the misses
 
@@ -66,10 +65,10 @@ A subagent's session is its own transcript, so a skill its parent loaded does no
 
 ## 6. Test the fixes
 
-For each group of "should have fired" misses, pick a fix, strongest first:
+For each group of "should have fired" misses, pick a fix, strongest first. Invoke the `writing-for-agents` skill for how to word it:
 
-- **Make the call explicit.** The calling skill names the skill as a step: "Invoke the `brief` skill for the text, capped at 1 to 3 sentences plus links." A hint, a description match, or a call with an escape clause ("unless...") loads far less often.
-- **Tune the description.** Add the case the misses share to the expected skill's description, as a situation, not a phrase to match.
+- **Make the call explicit.** The calling skill names the skill as a step.
+- **Tune the description.** Add the case the misses share to the expected skill's description.
 - **Drop the expectation.** When the misses were done right without the skill, the call or the skill can go.
 
 Test each wording before proposing it. Copy the skills, make the edit in the copy, and run your agent non-interactively with the copy loaded, on a prompt like the misses, at least three times per wording. Count the loads from each run's output. Test the current wording the same way, so the two counts compare.
