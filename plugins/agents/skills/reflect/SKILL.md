@@ -47,7 +47,7 @@ Show the Accepted, Rejected, and Backlog output, numbered, with Accepted in the 
 
 Invoke the `writing-for-agents` skill before editing a skill or an agent instruction file. Then find the real file before editing anything:
 
-- Never edit an installed copy of a plugin or skill that your agent manages, such as a plugin cache. It is overwritten on update. Find the source checkout of that plugin's repo and edit there.
+- Edit a plugin or skill in the source checkout of its repo. An installed copy that your agent manages, such as a plugin cache, is overwritten on update.
 - A skill from a repo the user owns is edited in that repo, on a branch, following its own AGENTS.md or CLAUDE.md.
 
 Then follow each approved row's routing:
