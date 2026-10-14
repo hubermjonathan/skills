@@ -13,13 +13,13 @@ The goal is writing a tired engineer understands on the first read. Four layers 
 
 Three rules sit above the layers:
 
-- **Cut every word that does no work.** If the sentence survives without a word, the word goes. "In order to" is "to". "It is important to note that" is nothing.
+- **Cut every word that does no work.** If the sentence survives without a word, the word goes. "In order to" is "to". "It is important to note that" is nothing. An adverb that props up a weak verb means the verb is wrong: "significantly improves" becomes the measured delta, and "runs quickly" becomes "is fast" or the number.
 - **Use the short, everyday word.** "Use", not "utilize". "Help", not "facilitate". "Do", not "perform". A long word has to buy its length with precision.
 - **When a rule makes a sentence worse, fix the sentence another way or leave it alone.** The rules serve the reader. A sentence that follows every rule and sounds like a machine wrote it has failed.
 
 The codebase is the word list. Write the real symbol, file, flag, or command name, not a synonym or a description of it.
 
-Don't invent jargon. Use the words a developer would say out loud: "turn off", "split", "a check that blocks the merge", not "sunset", "decompose", or "a quality gate". A named pattern is fine when the doc says what it means the first time.
+Don't invent jargon. Use the words a developer would say out loud: "turn off", "split", "a check that blocks the merge", not "sunset", "decompose", or "a quality gate". Swap an abstract metaphor noun for the concrete word: "base", not "substrate". "Add", not "wedge in". "Way", not "vector". "More than the job needs", not "gold-plating". The same goes for locus, vantage, nexus, primitive, harness, surface, bedrock, scaffolding, modality, paradigm, ratchet, evacuate, endgame, north star, and flywheel. A named pattern is fine when the doc says what it means the first time.
 
 ## Vary the rhythm
 
