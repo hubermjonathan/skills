@@ -62,7 +62,7 @@ case "${1:-}" in
 esac
 
 if [ -z "$(printf '%s' "${IMESSAGE_HANDLES:-}" | tr -d '[:space:]')" ]; then
-  echo "not sent: IMESSAGE_HANDLES is not set. Set it to space-separated name=handle pairs, such as 'me=+11234567890 jack=jack@icloud.com'." >&2
+  echo "not sent: IMESSAGE_HANDLES is not set. Set it to space-separated name=handle pairs, such as 'me=+11234567890 jac=jac@icloud.com'." >&2
   exit 2
 fi
 
