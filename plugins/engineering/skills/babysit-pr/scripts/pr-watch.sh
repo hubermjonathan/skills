@@ -8,7 +8,6 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-GHARGS=(); [[ -n "$GHREPO" ]] && GHARGS=(--repo "$GHREPO")
 INTERVAL="${WATCH_INTERVAL:-60}"
 AGENT_NOTE='\A> \[!NOTE\]\r?\n> [^\n]*responding on behalf of'
 PR_NUM="$PR"; REPO_SLUG="$GHREPO"
@@ -28,11 +27,11 @@ p()    { jq -r "$1 // empty" <<<"$2"; }
 FIELDS='state,isDraft,labels,mergeStateStatus,reviewDecision,statusCheckRollup,comments,reviews,mergeCommit,headRefOid'
 WRITER='if ((.body // "") | test($note)) then "agent" else "human" end'
 
-read -r PR_NUM REPO_SLUG < <(gh pr view "$PR" "${GHARGS[@]}" --json number,url -q '"\(.number) \(.url | split("/")[3:5] | join("/"))"' 2>/dev/null)
+read -r PR_NUM REPO_SLUG < <(gh pr view "$PR" ${GHREPO:+--repo "$GHREPO"} --json number,url -q '"\(.number) \(.url | split("/")[3:5] | join("/"))"' 2>/dev/null)
 [[ -n "$REPO_SLUG" ]] || die "could not resolve pr $PR"
 
 while :; do
-  if ! snap="$(gh pr view "$PR" "${GHARGS[@]}" --json "$FIELDS" 2>&1)" || ! jq -e . <<<"$snap" >/dev/null 2>&1; then
+  if ! snap="$(gh pr view "$PR" ${GHREPO:+--repo "$GHREPO"} --json "$FIELDS" 2>&1)" || ! jq -e . <<<"$snap" >/dev/null 2>&1; then
     (( ++fails < 3 )) || die "gh failed 3 polls in a row: ${snap:0:200}"
     sleep "$INTERVAL"; continue
   fi
