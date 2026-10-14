@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 A skill earns its place only if it loads when the work calls for it. This audit reads past session transcripts, counts how often each expected skill loaded, and turns the misses into proposed fixes. It changes nothing until the user picks.
 
-It needs weeks of real sessions to say anything. A rule that fired fewer than about ten times gives noise, so report its count, not a percentage.
+It needs weeks of real sessions to say anything.
 
 ## 1. Pick the window
 
@@ -48,11 +48,10 @@ A name without a plugin prefix matches any plugin's skill of that name: `git` ma
 
 ## 4. Run the check
 
-Run `scripts/skill-audit.py check expectations.json events.tsv`. It prints how many sessions loaded each skill, then each rule's hits out of firings, with up to five misses as `session timestamp`.
+Run `scripts/skill-audit.py check expectations.json events.tsv`. It prints how many sessions loaded each skill the rules name, then each rule's hits out of firings, with a percentage once the rule fired ten times, and up to five misses as `session timestamp`.
 
 - A firing in a session where the expected skill was not installed is counted apart, not as a miss.
 - Sessions run from a temp directory are skipped as tests. Pass `--skip-cwd <regex>` to change the pattern, or `--skip-cwd ''` to keep them.
-- The loaded list includes the agent's built-in commands, such as `clear` or `mcp`. Ignore those.
 
 ## 5. Read the misses
 

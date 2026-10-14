@@ -112,11 +112,12 @@ def check(argv):
         by_session.pop(session, None)
     print(f"{len(by_session)} sessions, {len(skipped)} skipped by --skip-cwd\n")
 
+    named = {r["expect"] for r in rules} | {r["after"] for r in rules if "after" in r}
     loaded = collections.Counter()
     for evs in by_session.values():
-        for s in {n for k, n, _, _ in evs if k == "skill"}:
+        for s in {n for k, n, _, _ in evs if k == "skill" and any(same(n, w) for w in named)}:
             loaded[s] += 1
-    print("## Sessions that loaded each skill")
+    print("## Sessions that loaded each skill the rules name")
     for s, n in loaded.most_common():
         print(f"- {s}: {n}")
 
@@ -146,7 +147,7 @@ def check(argv):
                     break
         total = hits + len(misses)
         label = f"after `{rule['after']}`" if "after" in rule else f"`{rule.get('tool', '.')}` matching `{rule.get('match', '.')}`"
-        rate = f"{hits}/{total} ({hits * 100 // total}%)" if total else "never happened"
+        rate = (f"{hits}/{total}" + (f" ({hits * 100 // total}%)" if total >= 10 else "")) if total else "never happened"
         print(f"- {label} -> `{expect}`: {rate}" + (f", plus {missing} where `{expect}` was not installed" if missing else ""))
         for m in misses[:5]:
             print(f"  - miss: {m}")
