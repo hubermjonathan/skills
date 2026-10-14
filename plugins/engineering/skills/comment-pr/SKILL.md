@@ -14,7 +14,7 @@ GitHub keeps PR feedback in three places, and a review that puts everything inli
       -q '[.comments[], .reviews[]] | .[] | "\(.author.login) \(.state // "comment"): \(.body)"'
 
     gh api /repos/<owner>/<repo>/pulls/<n>/comments --paginate \
-      -q '.[] | "\(.id) \(.user.login) \(.path):\(.line // .original_line): \(.body)"'
+      -q '.[] | "\(.id) in_reply_to=\(.in_reply_to_id // "none") \(.user.login) \(.path):\(.line // .original_line): \(.body)"'
 
 Automated reviewer bots count as reviewers. Their comments are review comments.
 
