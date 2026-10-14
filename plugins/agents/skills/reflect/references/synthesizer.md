@@ -66,7 +66,7 @@ One row per finding, highest impact first: a problem that recurs or cost the mos
 
 For each rejected finding:
 - Principle: <one sentence>
-- Reason: <durability | specificity | existing-skill-first | convergence | decision-changing | structural | duplicate | skill-not-used | already-covered | repo-rule>
+- Reason: <durability | specificity | existing-home-first | convergence | decision-changing | structural | skill-not-used | repo-rule | already-covered>
 
 ## Backlog
 
