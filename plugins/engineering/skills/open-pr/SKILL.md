@@ -18,7 +18,7 @@ The user's instructions win over the defaults below.
 
 ## Title
 
-Invoke the `git` skill, and write the title in its commit subject format. Append the ticket key as `(ABC-123)`, which does not count toward the 50 characters. Omit it if there is no ticket.
+`<scope>: <description>`, 50 characters at most: the `git` skill's commit subject format. Append the ticket key as `(ABC-123)`, which doesn't count toward the 50. Omit it if there is no ticket.
 
 ## Body
 
