@@ -27,7 +27,7 @@ fi
 
 for d in "${dirs[@]}"; do
 	[ -d "$d" ] || continue
-	hit="$(find "$d" -type f -name '*.jsonl' -mtime "-$days" -print0 2>/dev/null \
+	hit="$(find "$d" -type f -name '*.jsonl' -not -path '*/subagents/*' -mtime "-$days" -print0 2>/dev/null \
 		| xargs -0 ls -t 2>/dev/null \
 		| while read -r f; do grep -lF -- "$phrase" "$f" 2>/dev/null && break; done)"
 	if [ -n "$hit" ]; then
