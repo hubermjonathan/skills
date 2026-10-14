@@ -74,10 +74,11 @@ def extract(argv):
     cutoff = time.time() - days * 86400
     if since and "--days" not in argv:
         cutoff = time.mktime(time.strptime(since, "%Y-%m-%d"))
+    files = list(transcript_files())
     rows = 0
     with open(out, "w") as f:
         f.write("session\tagent\tcwd\tts\tkind\tname\tdetail\n")
-        for path in transcript_files():
+        for path in files:
             if os.path.getmtime(path) < cutoff:
                 continue
             for e in events(path):
