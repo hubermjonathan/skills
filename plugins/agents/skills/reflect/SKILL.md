@@ -21,7 +21,7 @@ Invoke the `find-transcript` skill for this session's transcript. When the user 
 
 ## 2. Spawn three reviewers in parallel
 
-Spawn three background subagents in one batch, one per lens. Pass each template verbatim with the transcript path or digest substituted where marked.
+Spawn three background subagents in one batch, one per lens. Give each its lens template followed by `references/reviewer-common.md`, both verbatim, with the transcript path or digest substituted where marked.
 
 | Lens | Prompt template |
 |---|---|
