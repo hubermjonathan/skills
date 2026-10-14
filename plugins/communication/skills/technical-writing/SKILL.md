@@ -97,7 +97,7 @@ Source: Kohl, The Global English Style Guide (SAS Press). Guideline text fetched
 
 ## Voice and repo specifics
 
-- Invoke the `unslop` skill as a last pass on prose a person outside the session reads: PR bodies, tickets, Slack messages, and docs.
+- Invoke the `unslop` skill as a last pass on prose a person outside the session reads.
 - PR descriptions and commit messages are writing too. Every layer except Diátaxis applies to them. A PR body is a briefing that a reviewer can read in under a minute. Do not paste logs, SHA lists, or metric tables. Link them.
 - Product UI strings are not documentation. Use your product's copy guidelines for those.
 - Match the repo's indentation in code snippets. Write real paths and real symbols. Make every count or tree claim true at the commit that lands it, and include the command that regenerates it.
