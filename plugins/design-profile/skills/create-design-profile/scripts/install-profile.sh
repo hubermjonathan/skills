@@ -43,11 +43,8 @@ GRAMMAR=$(expand "${GRAMMAR}")
 TOKENS=$(expand "${TOKENS}")
 [ -n "$ICONS" ] && ICONS=$(expand "$ICONS")
 
-case "$0" in
-  */*) SKILLS=${0%/*}/../.. ;;
-  *)   SKILLS=../.. ;;
-esac
-RESOLVER="$SKILLS/use/scripts/profile.sh"
+RESOLVER="$(dirname "$0")/../../use-design-profile/scripts/profile.sh"
+[ -f "$RESOLVER" ] || { echo 'no profile resolver. Install the `use-design-profile` skill next to this one, then run this again:' "$RESOLVER" >&2; exit 1; }
 PROFILES=$(sh "$RESOLVER" --store)
 DEST="$PROFILES/$PROFILE"
 
@@ -122,7 +119,7 @@ done
 [ -f "$DEST/icons.svg" ] && echo "  ok  profiles/$PROFILE/icons.svg"
 [ "$fail" = 0 ] || { echo; echo "install incomplete, see above." >&2; exit 1; }
 
-if [ -f "$RESOLVER" ] && sh "$RESOLVER" "$PROFILE" >/dev/null 2>&1; then
+if sh "$RESOLVER" "$PROFILE" >/dev/null 2>&1; then
   echo "  ok  the resolver loads '$PROFILE'"
 else
   echo "  warning: installed, but scripts/profile.sh could not resolve '$PROFILE'"
