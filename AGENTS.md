@@ -66,14 +66,10 @@ manifest, so no plugin has a `.claude-plugin/plugin.json`.
 
 ## After a change
 
-Run `scripts/sync-plugins.sh` after you edit the marketplace or add, rename, or move a skill. It
-writes the Codex marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable
-`plugin.json`, the one Codex reads. Then it checks every skill and runs `claude plugin validate .`.
-It fails until each skill has its row in its plugin's table in `README.md`, and its
-`agents/openai.yaml`. `scripts/sync-plugins.sh --check` writes nothing and fails on any file out of
-date.
+Run `scripts/sync-plugins.sh` after you change the marketplace or a skill. It writes the Codex
+marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable `plugin.json`, the one
+Codex reads. Then it checks every skill and runs `claude plugin validate .`.
+`scripts/sync-plugins.sh --check` writes nothing and fails on any file out of date.
 
 To sync another repo with the same layout and check that no skill name repeats across the two, pass
 both, as in `scripts/sync-plugins.sh . ../other-repo`.
-
-When you rename a skill, update every "invoke the `x` skill" that names it, in every repo.
