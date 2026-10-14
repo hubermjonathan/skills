@@ -33,5 +33,5 @@ description: >
 
    Apply with `gh pr edit <n> --body-file ...`.
 3. If the PR is a draft, run `gh pr ready <n>`.
-4. Check CI on the new head with `gh pr checks <n>`. A red right after a push or a base move is not real until the per-check query confirms it on the current head.
+4. Check CI on the new head with `gh pr checks <n>`. A red right after a push or a base move is not real until `gh pr checks <n>` shows it on the new head.
 5. Report in one or two lines: what was pushed, what changed in the title or body, what's marked stale, and check status.
