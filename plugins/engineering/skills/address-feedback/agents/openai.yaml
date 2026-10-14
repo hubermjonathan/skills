@@ -1,3 +1,3 @@
 interface:
-  display_name: "Address Feedback"
+  display_name: "Address feedback"
   short_description: "Act on PR review feedback: change, verify, push, reply"
