@@ -1,0 +1,5 @@
+interface:
+  display_name: "Pause"
+  short_description: "Hold off on changes until a question is settled"
+policy:
+  allow_implicit_invocation: false

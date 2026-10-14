@@ -1,0 +1,3 @@
+interface:
+  display_name: "Refine ticket"
+  short_description: "Get a ticket ready to build"

@@ -1,16 +1,39 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "hubermjonathan",
-  "description": "skills for coding agents",
+  "description": "Skills for coding agents",
   "owner": {
     "name": "Jonathan Huber",
     "url": "https://github.com/hubermjonathan"
   },
   "plugins": [
     {
-      "name": "skills",
-      "source": "./",
-      "description": "skills for coding agents"
+      "name": "engineering",
+      "displayName": "Engineering",
+      "description": "Take a code change from ticket to merge: plan it, write it, review it, open and push the PR, and test it",
+      "source": "./plugins/engineering",
+      "dependencies": ["communication", "agents"]
+    },
+    {
+      "name": "communication",
+      "displayName": "Communication",
+      "description": "Write for people and reach them: writing standards, briefs, visuals, Slack messages, texts, and QR codes",
+      "source": "./plugins/communication"
+    },
+    {
+      "name": "agents",
+      "displayName": "Agents",
+      "description": "Run agents and improve their skills: parallel workers, decision logs, session transcripts, and skill audits",
+      "source": "./plugins/agents"
+    },
+    {
+      "name": "design-profile",
+      "displayName": "Design profile",
+      "description": "Create and use design profiles for HTML pages",
+      "source": "./plugins/design-profile"
     }
-  ]
+  ],
+  "renames": {
+    "skills": "engineering"
+  }
 }

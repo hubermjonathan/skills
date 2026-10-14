@@ -1,60 +1,79 @@
-# repo conventions
+# Repo conventions
 
-skills live at `skills/<name>/SKILL.md`, one folder per skill, flat. the folder name, the
-`name` in frontmatter, and the skill's invocation name all match.
+Each plugin is a folder at `plugins/<plugin>/`, with one folder per skill at
+`plugins/<plugin>/skills/<name>/SKILL.md`. Plugins split by audience, the people who would install
+them. Add a plugin only when a skill's audience matches none of the existing ones.
 
-## invocation
+This repo hosts the `hubermjonathan` marketplace, which lists every plugin here.
 
-a skill is either model-invoked or user-invoked, and the setting is mirrored in both harnesses
-so it never differs by agent.
+## Names
 
-**model-invoked** is the default: the model can reach for it on its own. omit
-`disable-model-invocation` from the frontmatter and the `policy` block from `agents/openai.yaml`.
-the `description` is model-facing, so it keeps trigger phrasing ("use when the user says...")
-that auto-invocation matches against.
+- Name a skill that does a task by the task, verb first, with no prefix: `open-pr`,
+  `send-slack-message`, `create-qr-code`. Name a skill that holds a standard by its topic:
+  `principles`, `technical-writing`.
+- The skill folder name and the `name` in frontmatter match.
+- Skill names stay unique across every repo whose skills install together. `npx skills` installs
+  skills flat by name, and a bare `/<name>` runs a skill, so a reused name hides another.
+- Name a plugin for its audience, in kebab-case: `engineering`, `design-profile`.
 
-**user-invoked** means only the human typing its name can fire it, never the model. set both:
+## Agent agnostic
 
-- `disable-model-invocation: true` in `SKILL.md` frontmatter, for claude code
-- `policy.allow_implicit_invocation: false` in `agents/openai.yaml`, for codex
+Every skill works in any agent that loads `SKILL.md` files. Skill text names no agent's tools,
+models, or file paths: say "invoke the `x` skill", "spawn a background subagent", "run it as a
+background process", not an agent's tool names. When a script needs to know about specific agents,
+such as where each one stores session logs, the script holds that list with an env var override,
+and the skill text stays generic.
 
-the `description` is then human-facing, a one-line summary read while browsing slash commands,
-with no trigger list.
+## Waiting
 
-## files
+When a skill waits on CI, a deploy, or a bot, say how to tell it's done from a signal the agent can
+check, such as a check run, a run's status, or the live version, and what failure looks like. Leave
+out how long it usually takes: CI load and service size change that, so a duration goes stale. A
+polling interval or a soak time the user chose is fine.
 
-`SKILL.md` frontmatter carries `name`, `description`, and, for user-invoked skills only,
-`disable-model-invocation`.
+## Stages
 
-`skills/<name>/agents/openai.yaml` holds codex-only presentation metadata
-(`interface.display_name`, `interface.short_description`) and, for user-invoked skills, the
-invocation policy. it is not part of the `SKILL.md` standard and every other agent ignores it,
-so nothing else belongs there.
+A stage skill, such as `open-pr` or `push-pr`, does its one stage, reports what it finished, and
+stops. Only a factory skill, which runs every stage of a change, starts the next stage. A stage
+skill may still invoke another skill for work its own stage needs, the way `open-pr` gets its
+evidence from `verify`.
 
-## when adding or renaming a skill
+## Invocation
 
-- add or update the row in the skills table in `README.md`, linking the name to its `SKILL.md`
-  and filling the `user invoked` column with `yes` or `no`
-- add or update `agents/openai.yaml` for the skill, with the `policy` block if user-invoked
-- bump `version` in both `plugin.json` and `.claude-plugin/plugin.json`, keeping them identical,
-  so installed copies refresh. once per pr, not per commit: if the branch already carries a
-  bump, amend that value instead of bumping again
+Choose model-invoked or user-invoked as `writing-for-agents` describes. Mirror the choice in both
+harnesses, so it never differs by agent:
 
-## manifests
+| | `SKILL.md` frontmatter | `agents/openai.yaml` | `description` |
+|---|---|---|---|
+| Model-invoked, the default | `name`, `description` | `interface` only | Model-facing: when to use the skill, as situations the agent recognizes, such as "use when asked to babysit a PR, get its checks passing, or get it ready to merge" |
+| User-invoked | adds `disable-model-invocation: true` | adds `policy.allow_implicit_invocation: false` | Human-facing: a one-line summary read while browsing slash commands |
 
-| file | who reads it |
-|------|--------------|
-| `plugin.json` | portable agent-plugins manifest, used by codex |
-| `.claude-plugin/plugin.json` | claude code plugin |
-| `.claude-plugin/marketplace.json` | makes the repo its own single-plugin claude marketplace |
-| `.agents/plugins/marketplace.json` | makes the repo its own single-plugin codex marketplace |
+`agents/openai.yaml` holds Codex-only presentation metadata, `interface.display_name` and
+`interface.short_description`, plus the policy for a user-invoked skill. Every other agent ignores
+it, so nothing else goes there.
 
-run `claude plugin validate . --strict` after touching either claude manifest.
+## Manifests
 
-## prose
+`.claude-plugin/marketplace.json` is the only manifest you edit. It holds each plugin's name,
+display name, description, source, and dependencies. Claude Code reads each entry as that plugin's
+manifest, so no plugin has a `.claude-plugin/plugin.json`.
 
-`README.md`, `AGENTS.md`, and commit messages are lowercase. `SKILL.md` bodies are
-instructions an agent reads, so they use normal sentence case.
+- A plugin's `dependencies` list each plugin whose skills it tells the agent to invoke by name,
+  and each plugin whose skill one of its skills overlays, such as a `<topic>-conventions` skill
+  that adds a company's rules to a public skill.
+- No manifest sets `version`, so each commit counts as a new version and an update always pulls it.
+- To rename or remove a plugin, map its old name in `renames`, so existing installs follow it.
 
-no em-dashes anywhere. rewrite the sentence with a comma, colon, period, or conjunction
-instead of substituting a character.
+## After a change
+
+Run `scripts/sync-plugins.sh` after you edit the marketplace or add, rename, or move a skill. It
+writes the Codex marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable
+`plugin.json`, the one Codex reads. Then it checks every skill and runs `claude plugin validate .`.
+It fails until each skill has its row in its plugin's table in `README.md`, and its
+`agents/openai.yaml`. `scripts/sync-plugins.sh --check` writes nothing and fails on any file out of
+date.
+
+To sync another repo with the same layout and check that no skill name repeats across the two, pass
+both, as in `scripts/sync-plugins.sh . ../other-repo`.
+
+When you rename a skill, update every "invoke the `x` skill" that names it, in every repo.

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Audit skills"
+  short_description: "Measure how often skills load when needed, then propose fixes"
+policy:
+  allow_implicit_invocation: false

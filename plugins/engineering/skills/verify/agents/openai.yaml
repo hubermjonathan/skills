@@ -1,0 +1,3 @@
+interface:
+  display_name: "Verify"
+  short_description: "Prove a change builds, passes CI, and does what it says"

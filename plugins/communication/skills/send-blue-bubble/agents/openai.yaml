@@ -1,0 +1,3 @@
+interface:
+  display_name: "Send blue bubble"
+  short_description: "Text the user or people they name over iMessage"

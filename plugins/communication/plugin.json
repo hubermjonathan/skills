@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "communication",
+  "description": "Write for people and reach them: writing standards, briefs, visuals, Slack messages, texts, and QR codes",
+  "author": {
+    "name": "Jonathan Huber",
+    "url": "https://github.com/hubermjonathan"
+  },
+  "repository": "https://github.com/hubermjonathan/skills",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Communication"
+      }
+    }
+  }
+}
