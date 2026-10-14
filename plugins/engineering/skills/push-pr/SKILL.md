@@ -29,7 +29,7 @@ description: >
          > [!WARNING]
          > Outdated: ran on `<sha>`, <n> commits landed since.
 
-   - When the new head is past the commit the walkthrough was built on, change its `[!TIP]` to `[!WARNING]`, and end its line with "is outdated: <n> commits landed since." in place of ": start the review here."
+   - When the new head is past the commit the walkthrough was built on, change its `[!TIP]` to `[!WARNING]`, and end its line right after the commit with " is outdated: <n> commits landed since."
 
    Apply with `gh pr edit <n> --body-file ...`.
 3. If the PR is a draft, run `gh pr ready <n>`.
