@@ -21,7 +21,7 @@ Verify a commit, not a working tree. If there are uncommitted changes, stop and 
 
 ## 1. Builds and passes CI
 
-Run locally every check CI will run on this diff. Find them in the repo's CI config: the workflows and commands that trigger on a PR touching these files. A repo can have its own verify skill that says exactly how.
+Run locally every check CI will run on this diff. Find them in the repo's CI config: the workflows and commands that trigger on a PR touching these files. When the repo has its own skill for verifying it, invoke that skill too. It names the checks and how to run them locally.
 
 A check that needs CI's own setup, such as its credentials or runner image, and can't run here is "couldn't run", with its error. That isn't a failure of the change.
 
