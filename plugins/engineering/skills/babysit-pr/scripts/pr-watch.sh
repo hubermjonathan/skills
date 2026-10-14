@@ -13,7 +13,7 @@ INTERVAL="${WATCH_INTERVAL:-60}"
 AGENT_NOTE='\A> \[!NOTE\]\r?\n> [^\n]*responding on behalf of'
 PR_NUM="$PR"; REPO_SLUG="$GHREPO"
 
-first=1 green=0 last_stall="" prev_rd="" prev_labels="[]" seen=$'\n'
+first=1 fails=0 green=0 last_stall="" prev_rd="" prev_labels="[]" seen=$'\n'
 
 now() { date -u +%FT%TZ; }
 emit() {
@@ -32,8 +32,11 @@ read -r PR_NUM REPO_SLUG < <(gh pr view "$PR" "${GHARGS[@]}" --json number,url -
 [[ -n "$REPO_SLUG" ]] || die "could not resolve pr $PR"
 
 while :; do
-  if ! snap="$(gh pr view "$PR" "${GHARGS[@]}" --json "$FIELDS" 2>&1)"; then die "$snap"; fi
-  jq -e . <<<"$snap" >/dev/null 2>&1 || die "gh returned non-json: ${snap:0:200}"
+  if ! snap="$(gh pr view "$PR" "${GHARGS[@]}" --json "$FIELDS" 2>&1)" || ! jq -e . <<<"$snap" >/dev/null 2>&1; then
+    (( ++fails < 3 )) || die "gh failed 3 polls in a row: ${snap:0:200}"
+    sleep "$INTERVAL"; continue
+  fi
+  fails=0
 
   state="$(p .state "$snap")"
   msj="$(p .mergeStateStatus "$snap")"
