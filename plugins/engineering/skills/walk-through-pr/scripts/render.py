@@ -181,7 +181,7 @@ def main(argv):
     else:
         ticket_html = "<p>The PR title and branch carry no ticket key.</p>"
 
-    m = re.match(r"([a-z]+(?:\([^)]*\))?!?:\s*(?:[A-Z][A-Z0-9]+-\d+\b)?)\s*(.+)", meta["title"])
+    m = re.match(r"([\w./-]+(?:\([^)]*\))?!?:\s*(?:[A-Z][A-Z0-9]+-\d+\b)?)\s*(.+)", meta["title"])
     h1 = (f'<span class="h1-scope">{esc(m.group(1).strip())}</span> {esc(m.group(2))}' if m else esc(meta["title"]))
     labels = [l["name"] for l in meta.get("labels") or []]
     label_row = (f'<div><dt>Labels</dt><dd class="chips">{"".join(f"<span>{esc(l)}</span>" for l in labels)}</dd></div>' if labels else "")
