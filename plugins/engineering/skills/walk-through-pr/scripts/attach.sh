@@ -55,7 +55,7 @@ awk -v url="$url" -v sha="$sha" -v note="$note" '
   skip { if ($0 == "<!-- /pr-walkthrough -->") { skip = 0; drop = 1 }; next }
   drop && !NF { next }
   { drop = 0 }
-  NR == 1 && !/^> \[!NOTE\]/ { section() }
+  !started++ && !/^> \[!NOTE\]/ { section() }
   !done && in_note && !/^>/ { if (!NF) print; section(); in_note = 0; if (!NF) next }
   /^> \[!NOTE\]/ && !done { in_note = 1 }
   { print }
