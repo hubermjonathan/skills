@@ -16,6 +16,7 @@ You run the plan. The user does only what you can't, such as a login or a check 
    - **After:** compare each step with its after expectation.
    - Negative cases must hold in both phases.
 5. When a step fails, record the symptom, the expected result, and the evidence. Skip later steps that depend on it, and run the rest.
-6. Return the results file path and one line per step: pass or fail, with the before and after values when both phases ran.
+6. End the phase with the plan's Cleanup, even after a failed step. Append what it undid, and anything it couldn't, to the results file.
+7. Return the results file path and one line per step: pass or fail, with the before and after values when both phases ran. Add one line for the cleanup.
 
 Post results to a ticket or PR only when the caller asks.
