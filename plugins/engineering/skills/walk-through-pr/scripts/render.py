@@ -44,8 +44,6 @@ def validate(data, stats):
         if len(c.get("author_questions") or []) > 3:
             errors.append(f"cohort {cid}: more than 3 author questions")
         sketch = c.get("sketch") or {}
-        if "diagram" in c:
-            errors.append(f"cohort {cid}: diagram is gone. Put a mermaid source in sketch with kind mermaid")
         if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source") or not sketch.get("where"):
             errors.append(f"cohort {cid}: sketch needs kind (one of {sorted(SKETCH_KINDS)}), source, and where")
         if not 2 <= len(c.get("review_focus") or []) <= 4:
@@ -157,7 +155,6 @@ def main(argv):
     if housekeeping:
         rows.append(f'<tr><td><a href="#housekeeping">Housekeeping</a></td><td>{plural(len(housekeeping), "file")}</td><td>–</td></tr>')
         bumps = data.get("version_bump") or []
-        bumps = [bumps] if isinstance(bumps, dict) else bumps
         bump_html = "".join(
             f"<p>Version bump{' for <code>' + esc(b['package']) + '</code>' if b.get('package') else ''}: "
             f"<code>{esc(b.get('from'))}</code> to <code>{esc(b.get('to'))}</code>. {esc(b.get('convention'))}</p>"
