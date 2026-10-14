@@ -177,6 +177,7 @@ def main(argv):
                      else "<p>The ticket lists no asks.</p>")
         unasked = "".join(f"<li>{esc(x)}</li>" for x in ticket.get("unasked") or [])
         ticket_html = (f'<p><a href="{html.escape(ticket.get("url", ""))}">{esc(ticket.get("key"))}</a>: {esc(ticket.get("summary"))}</p>'
+                       + (f'<p class="note">{esc(ticket["note"])}</p>' if ticket.get("note") else "")
                        + asks_html + (f"<p>Changes no ask covers:</p><ul>{unasked}</ul>" if unasked else ""))
     else:
         ticket_html = "<p>The PR title and branch carry no ticket key.</p>"
