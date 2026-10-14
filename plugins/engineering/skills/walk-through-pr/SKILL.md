@@ -7,7 +7,7 @@ description: >
   walkthrough, summary, or review prep.
 ---
 
-# PR walkthrough
+# Walk through a PR
 
 Build one HTML page that lets a human review a PR efficiently. The page is a map, not a verdict.
 
