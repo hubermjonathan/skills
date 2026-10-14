@@ -9,7 +9,7 @@ description: >
 You plan how to build one ticket. The `write-code` skill builds from your plan, so you write no code here.
 
 1. Read the whole ticket. If it isn't ready to build, as the `refine-ticket` skill defines, invoke that skill first.
-2. Read the code the change touches: the files, their callers and tests, and the repo's `AGENTS.md` or `CLAUDE.md`.
+2. Read the code the change touches: the files, their callers and tests, and the repo's agent instruction file, such as `AGENTS.md`.
 3. Choose the approach: the smallest change that meets every acceptance criterion, as the `principles` skill describes. When the ticket and the code leave a real choice between approaches, bring the user the options and your pick, and wait for their answer.
 4. Write the plan to a working file named `<ticket-key>-plan.md`, with these sections:
    - **Approach**: what changes, in a few sentences.
