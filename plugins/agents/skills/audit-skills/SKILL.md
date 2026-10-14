@@ -39,12 +39,12 @@ A **tool rule** says a tool call needs a skill loaded first:
 A **follow rule** says one skill needs to load another:
 
 ```json
-{"after": "slack", "expect": "brief"}
+{"after": "send-slack-message", "expect": "brief"}
 ```
 
 It hits when `expect` loads within `--window` events after `after`, 40 by default. Write one for each skill that a skill tells the agent to invoke.
 
-A name without a plugin prefix matches any plugin's skill of that name: `git` matches `skills:git`. Put the prefix in `expect` to pin one plugin.
+A name without a plugin prefix matches any plugin's skill of that name: `git` matches `engineering:git`. Put the prefix in `expect` to pin one plugin.
 
 ## 4. Run the check
 
