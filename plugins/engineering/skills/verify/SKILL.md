@@ -40,7 +40,7 @@ Everything here runs locally. Testing the change deployed, such as on staging, i
 
 ## 3. Evidence
 
-When every check passes and every claim is proven, write the `Checks and claims` part of the PR body's `Evidence` section, in the format the `open-pr` skill sets: the commit it ran on, then the real output for each check and claim, trimmed to the lines that show the result. If the PR is open, replace only that part. Otherwise return it to the caller.
+When no check failed and every claim is proven, write the `Checks and claims` part of the PR body's `Evidence` section, in the format the `open-pr` skill sets: the commit it ran on, the real output for each check and claim, trimmed to the lines that show the result, and each check that couldn't run, with its error. If the PR is open, replace only that part. Otherwise return it to the caller.
 
 ## Report
 
