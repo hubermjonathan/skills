@@ -22,7 +22,7 @@ description: >
 
 ## After pushing
 
-1. Reread the title and body against the full diff, `git diff origin/<base>...HEAD`. Fix anything no longer true without asking: a reverted fix still claimed, a new change not mentioned, a scope that grew or shrank, a stale version in a bullet. Keep the format from the "open-pr" skill, including the note at the top. If the body has no note, add it. Keep the `Walkthrough` section below the note, between its `<!-- pr-walkthrough -->` markers. Apply with `gh pr edit <n> --title ... --body-file ...`.
+1. Reread the title and body against the full diff, `git diff origin/<base>...HEAD`. Fix anything no longer true without asking: a reverted fix still claimed, a new change not mentioned, a scope that grew or shrank, a stale version in a bullet. Keep the format from the `open-pr` skill, including the note at the top. If the body has no note, add it. Keep the `Walkthrough` section below the note, between its `<!-- pr-walkthrough -->` markers. Apply with `gh pr edit <n> --title ... --body-file ...`.
 2. Mark what the push made outdated, in place. Never change evidence or the walkthrough beyond that: only a new run replaces them.
    - For each part of `Evidence` whose `Ran on` commit the new head is past, replace that `Ran on` line with:
 

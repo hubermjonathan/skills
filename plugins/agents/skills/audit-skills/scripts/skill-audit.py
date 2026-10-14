@@ -15,7 +15,7 @@ USAGE = """usage:
 def transcript_files():
     dirs = os.environ.get("TRANSCRIPT_DIRS")
     if not dirs:
-        sys.exit("TRANSCRIPT_DIRS is not set. Set it to the session stores, colon-separated. The find-transcript skill lists them.")
+        sys.exit("TRANSCRIPT_DIRS is not set. Set it to the session stores, colon-separated. The `find-transcript` skill lists them.")
     for root in dirs.split(":"):
         yield from glob.glob(f"{root}/**/*.jsonl", recursive=True)
 
