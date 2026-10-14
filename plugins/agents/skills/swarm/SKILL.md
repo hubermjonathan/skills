@@ -26,9 +26,9 @@ Fan out N parallel workers. They may cover separate slices, race the same brief,
 
 Spawn all N workers at once as background subagents, in one batch, so they run in parallel. Writing workers each get their own git worktree. If your agent cannot run subagents in parallel, run them one after another, each in a fresh context, and note that in the report.
 
-Every brief stands alone. Include the goal, scope, exact slice or race arm, how to verify, and what to report. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence. A worker that can prove a defect reports `ISSUES` and lists every issue it can prove, not only the first.
+Invoke the `writing-for-agents` skill for how to write each brief, and name the brief's exact slice or race arm. Reports use `PASS`, `ISSUES`, or `BLOCKED` with evidence. A worker that can prove a defect reports `ISSUES` and lists every issue it can prove, not only the first.
 
-In a race, briefs are identical and blind: no worker sees another's output or the parent's theory.
+In a race, briefs are identical.
 
 If a worker drops out, proceed with N-1 and note it.
 
