@@ -22,6 +22,8 @@ Invoke the `git` skill, and write the title in its commit subject format. Append
 
 ## Body
 
+If the repo has a PR template, fill it in place of the sections below, just as tersely.
+
 Open the body with a note naming who wrote it and for whom, then a blank line:
 
     > [!NOTE]
@@ -65,4 +67,3 @@ Rules:
 - No checklist, and no restating the diff line by line.
 - Every claim must be true of the code as pushed: what it fixes, what it leaves alone, whether CI is green.
 - No ticket link in the body when the title already carries the key.
-- If the repo has a PR template, fill it in instead, just as tersely.
