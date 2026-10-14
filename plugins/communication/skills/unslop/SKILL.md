@@ -14,7 +14,7 @@ Edit text to remove AI patterns. Word and sentence rules, such as plain words, a
 
 1. Scan for the patterns below.
 2. Rewrite. Preserve meaning, match intended tone.
-3. Self-audit: "What makes this obviously AI generated?" Fix remaining tells.
+3. Self-audit. Ask "What makes this obviously AI generated?", and fix what the answer names. Stop when it names nothing.
 
 ## Patterns to detect and fix
 
