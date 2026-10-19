@@ -1,6 +1,6 @@
 #!/bin/sh
 # Sends stdin to the people named as arguments, looking each name up in IMESSAGE_HANDLES,
-# or to a group chat by its name with --group. Prints names, never handles.
+# or to a group chat by its name with --group, then each file from a leading --attach. Prints names, never handles.
 set -f
 script="$(dirname "$0")/send.applescript"
 start_group="Messages can't start a group from a script. Start a group text from a phone, with the agent's account and those people, then send again."
@@ -35,6 +35,21 @@ read_message() {
   fi
 }
 
+# Each leading --attach names a file to send after the text, passed on as one argument with a path per line.
+files=""
+while [ "${1:-}" = "--attach" ]; do
+  if [ $# -lt 2 ] || [ ! -f "$2" ] || [ ! -r "$2" ]; then
+    echo "not sent: --attach takes a file that exists, such as --attach shot.png." >&2
+    exit 2
+  fi
+  case "$2" in /*) file=$2 ;; *) file="$PWD/$2" ;; esac
+  case "$file" in *"
+"*) echo "not sent: an --attach path can't hold a line break." >&2; exit 2 ;; esac
+  files="${files:+$files
+}$file"
+  shift 2
+done
+
 case "${1:-}" in
   --list)
     names
@@ -51,7 +66,7 @@ case "${1:-}" in
       exit 2
     fi
     read_message
-    messages group "$message" "$2"
+    messages group "$message" "$files" "$2"
     case "$out" in
       "no group") echo "not sent: no group chat is named '$2'. $start_group Name it '$2' there." >&2; exit 3 ;;
       "several groups") echo "not sent: more than one group chat is named '$2'. Rename one from a phone, then send again." >&2; exit 3 ;;
@@ -101,7 +116,7 @@ done <<HANDLES
 $handles
 HANDLES
 
-messages people "$message" "$@"
+messages people "$message" "$files" "$@"
 if [ "$out" = "no group" ]; then
   echo "not sent: no group chat has exactly these people: $asked. $start_group" >&2
   exit 3
