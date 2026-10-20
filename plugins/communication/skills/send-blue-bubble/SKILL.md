@@ -24,19 +24,19 @@ Texts come from the agent's own iMessage account. People read them on a phone wi
 
    If a person or group isn't listed, tell the user, and send nothing. A person needs adding to `IMESSAGE_HANDLES`. A group needs starting and naming from a phone.
 4. Invoke the `brief` skill for the text, with a recipient reading on a phone as the reader, capped at a few lines: what happened, the one link or ID they need, and what you need from them, if anything.
-5. Send it with a quoted heredoc, so the shell expands nothing inside the message:
+5. Send it with a quoted heredoc, so the shell expands nothing inside the message. Start with `--thread <name>`: the name of the thread or session you're running in, as the user sees it in their agent app, or the repo and branch when it has no name. The script puts `🧵 <name>` on the text's first line, so the user can tell which thread it came from:
 
-       <this skill's directory>/scripts/send.sh me jac <<'MSG'
+       <this skill's directory>/scripts/send.sh --thread 123-budget-update me jac <<'MSG'
        Budget update: Q3 spend is 4% under plan. Details: https://example.com/budget
        MSG
 
-       <this skill's directory>/scripts/send.sh --group "Budget updates" <<'MSG'
+       <this skill's directory>/scripts/send.sh --thread 123-budget-update --group "Budget updates" <<'MSG'
        Budget update: Q3 spend is 4% under plan. Details: https://example.com/budget
        MSG
 
-   To send images or other files, such as screenshots the user asked for, put one `--attach <file>` before the recipients for each file. The text goes first as their caption, then each file in order:
+   To send images or other files, such as screenshots the user asked for, put one `--attach <file>` after `--thread` for each file. The text goes first as their caption, then each file in order:
 
-       <this skill's directory>/scripts/send.sh --attach floor.png --attach run.png me <<'MSG'
+       <this skill's directory>/scripts/send.sh --thread 456-new-floor-screen --attach floor.png --attach run.png me <<'MSG'
        The Floor, then the Run screen.
        MSG
 

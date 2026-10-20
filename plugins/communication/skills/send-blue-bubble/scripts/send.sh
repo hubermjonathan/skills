@@ -28,12 +28,24 @@ messages() {
 }
 
 read_message() {
+  if [ -z "$(printf '%s' "$thread" | tr -d '[:space:]')" ]; then
+    echo "not sent: name the thread this text comes from first, such as --thread 123-fix-login-redirect." >&2
+    exit 2
+  fi
   message=$(cat)
   if [ -z "$(printf '%s' "$message" | tr -d '[:space:]')" ]; then
     echo "not sent: the message on stdin is empty." >&2
     exit 2
   fi
+  message="🧵 $thread
+$message"
 }
+
+thread=""
+if [ "${1:-}" = "--thread" ]; then
+  thread=${2:-}
+  [ $# -ge 2 ] && shift 2 || shift
+fi
 
 # Messages' upload daemon reads files only from a few folders, so each file goes out from a copy in the user's temp folder.
 files=""
