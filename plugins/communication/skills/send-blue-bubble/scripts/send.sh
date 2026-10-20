@@ -7,6 +7,9 @@ start_group="Messages can't start a group from a script. Start a group text from
 
 lower() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]'; }
 
+# Messages can't send bold from a script, so the label uses Unicode's sans-serif bold letters.
+bold() { printf '%s' "$1" | LC_ALL=en_US.UTF-8 tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' '𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵'; }
+
 names() {
   for pair in ${IMESSAGE_HANDLES:-}; do lower "${pair%%=*}"; echo; done
 }
@@ -37,7 +40,7 @@ read_message() {
     echo "not sent: the message on stdin is empty." >&2
     exit 2
   fi
-  message="🧵 $thread
+  message="🧵 $(bold "$thread")
 
 $message"
 }

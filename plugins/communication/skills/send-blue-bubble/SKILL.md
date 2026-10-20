@@ -24,7 +24,7 @@ Texts come from the agent's own iMessage account. People read them on a phone wi
 
    If a person or group isn't listed, tell the user, and send nothing. A person needs adding to `IMESSAGE_HANDLES`. A group needs starting and naming from a phone.
 4. Invoke the `brief` skill for the text, with a recipient reading on a phone as the reader, capped at a few lines: what happened, the one link or ID they need, and what you need from them, if anything.
-5. Send it with a quoted heredoc, so the shell expands nothing inside the message. Start with `--thread <name>`: the name of the thread or session you're running in, as the user sees it in their agent app, or the repo and branch when it has no name. The script puts `🧵 <name>` on the text's first line, so the user can tell which thread it came from:
+5. Send it with a quoted heredoc, so the shell expands nothing inside the message. Start with `--thread <name>`: the name of the thread or session you're running in, as the user sees it in their agent app, or the repo and branch when it has no name. The script puts `🧵 <name>`, in bold, on the text's first line, so the user can tell which thread it came from:
 
        <this skill's directory>/scripts/send.sh --thread 123-budget-update me jac <<'MSG'
        Budget update: Q3 spend is 4% under plan. Details: https://example.com/budget
