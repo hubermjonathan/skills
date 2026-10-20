@@ -38,6 +38,7 @@ read_message() {
     exit 2
   fi
   message="🧵 $thread
+
 $message"
 }
 
