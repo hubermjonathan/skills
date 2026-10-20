@@ -1,6 +1,6 @@
 #!/bin/sh
 # Sends stdin to the people named as arguments, looking each name up in IMESSAGE_HANDLES,
-# or to a group chat by its name with --group, then each file from a leading --attach. Prints names, never handles.
+# or to a group chat by its name with --group. Prints names, never handles.
 set -f
 script="$(dirname "$0")/send.applescript"
 start_group="Messages can't start a group from a script. Start a group text from a phone, with the agent's account and those people, then send again."
@@ -35,20 +35,34 @@ read_message() {
   fi
 }
 
-# Each leading --attach names a file to send after the text, passed on as one argument with a path per line.
+# Messages' upload daemon reads files only from a few folders, so each file goes out from a copy in the user's temp folder.
 files=""
+n=0
 while [ "${1:-}" = "--attach" ]; do
   if [ $# -lt 2 ] || [ ! -f "$2" ] || [ ! -r "$2" ]; then
     echo "not sent: --attach takes a file that exists, such as --attach shot.png." >&2
     exit 2
   fi
-  case "$2" in /*) file=$2 ;; *) file="$PWD/$2" ;; esac
-  case "$file" in *"
+  case "$2" in *"
 "*) echo "not sent: an --attach path can't hold a line break." >&2; exit 2 ;; esac
+  if [ -z "$files" ]; then
+    stage=$(mktemp -d "$(getconf DARWIN_USER_TEMP_DIR)send-blue-bubble.XXXXXX") || exit 1
+    trap 'rm -rf "$stage"' EXIT
+  fi
+  n=$((n + 1))
+  copy="$stage/$n/$(basename "$2")"
+  mkdir "$stage/$n" && cp "$2" "$copy" || exit 1
   files="${files:+$files
-}$file"
+}$copy"
   shift 2
 done
+
+check_files() {
+  case "$out" in
+    failed:*) echo "the text was sent, but Messages couldn't send $(basename "${out#failed:}")." >&2; exit 1 ;;
+    unconfirmed:*) echo "the text was sent, but $(basename "${out#unconfirmed:}") was still sending after a minute. Ask the user whether it arrived before sending it again." >&2; exit 1 ;;
+  esac
+}
 
 case "${1:-}" in
   --list)
@@ -71,6 +85,7 @@ case "${1:-}" in
       "no group") echo "not sent: no group chat is named '$2'. $start_group Name it '$2' there." >&2; exit 3 ;;
       "several groups") echo "not sent: more than one group chat is named '$2'. Rename one from a phone, then send again." >&2; exit 3 ;;
     esac
+    check_files
     echo sent
     exit 0
     ;;
@@ -121,4 +136,5 @@ if [ "$out" = "no group" ]; then
   echo "not sent: no group chat has exactly these people: $asked. $start_group" >&2
   exit 3
 fi
+check_files
 echo sent

@@ -40,7 +40,7 @@ Texts come from the agent's own iMessage account. People read them on a phone wi
        The Floor, then the Run screen.
        MSG
 
-   It prints `sent`. On failure it prints the reason to stderr, with the fix when the user has to make one, and exits nonzero.
+   It prints `sent` once the text and every file have gone out. On failure it prints the reason to stderr, with the fix when the user has to make one, and exits nonzero.
 6. If the send fails, tell the user the script's reason in the session. When it names a fix for the user, send again once they've made it.
 
 ## Setup
