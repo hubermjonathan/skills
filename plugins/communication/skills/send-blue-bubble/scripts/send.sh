@@ -50,8 +50,8 @@ while [ "${1:-}" = "--attach" ]; do
     trap 'rm -rf "$stage"' EXIT
   fi
   n=$((n + 1))
-  copy="$stage/$n/$(basename "$2")"
-  mkdir "$stage/$n" && cp "$2" "$copy" || exit 1
+  copy="$stage/$n/$(basename -- "$2")"
+  mkdir "$stage/$n" && cp -- "$2" "$copy" || exit 1
   files="${files:+$files
 }$copy"
   shift 2
