@@ -31,7 +31,8 @@ cannot vouch for a marketplace:
 {
   "extraKnownMarketplaces": {
     "hubermjonathan": {
-      "source": { "source": "github", "repo": "hubermjonathan/skills" }
+      "source": { "source": "github", "repo": "hubermjonathan/skills" },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
@@ -42,6 +43,10 @@ cannot vouch for a marketplace:
   }
 }
 ```
+
+`autoUpdate` pulls new commits in the background during a session, and the next session loads them.
+Claude Code leaves it off for a marketplace outside Anthropic's. After a `claude plugin marketplace
+add`, turn it on in `/plugin` under **Marketplaces**.
 
 ### Codex
 

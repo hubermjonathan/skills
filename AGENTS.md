@@ -54,22 +54,13 @@ it, so nothing else goes there.
 
 ## Manifests
 
-`.claude-plugin/marketplace.json` is the only manifest you edit. It holds each plugin's name,
-display name, description, source, and dependencies. Claude Code reads each entry as that plugin's
-manifest, so no plugin has a `.claude-plugin/plugin.json`.
+`.claude-plugin/marketplace.json` is the only manifest. It holds each plugin's name, display name,
+description, source, and dependencies. Claude Code and Codex both read it, and each reads a
+plugin's entry as that plugin's manifest, so no plugin has a manifest of its own. Don't add a Codex
+marketplace at `.agents/plugins/marketplace.json`, because Codex reads that file ahead of this one.
 
 - A plugin's `dependencies` list each plugin whose skills it tells the agent to invoke by name,
   and each plugin whose skill one of its skills overlays, such as a `<topic>-conventions` skill
   that adds a company's rules to a public skill.
 - No manifest sets `version`, so each commit counts as a new version and an update always pulls it.
 - To rename or remove a plugin, map its old name in `renames`, so existing installs follow it.
-
-## After a change
-
-Run `scripts/sync-plugins.sh` after you change the marketplace or a skill. It writes the Codex
-marketplace, `.agents/plugins/marketplace.json`, and each plugin's portable `plugin.json`, the one
-Codex reads. Then it checks every skill and runs `claude plugin validate .`.
-`scripts/sync-plugins.sh --check` writes nothing and fails on any file out of date.
-
-To sync another repo with the same layout and check that no skill name repeats across the two, pass
-both, as in `scripts/sync-plugins.sh . ../other-repo`.
