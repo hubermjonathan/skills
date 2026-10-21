@@ -4,7 +4,8 @@ description: >
   Engineering principles for any change, whether code, config, docs, or a skill:
   generic over one-off, smallest change, subtract first, fix root causes, prove it
   works, low reader load, encode repeated fixes in tooling. Use before shaping a
-  solution, when debugging, or when another skill needs them.
+  solution, while implementing one, when debugging, or when another skill needs
+  them.
 ---
 
 # Principles
