@@ -17,7 +17,7 @@
     {
       "name": "communication",
       "displayName": "Communication",
-      "description": "Write for people and reach them: writing standards, briefs, visuals, Slack messages, texts, and QR codes",
+      "description": "Write for people and reach them: writing standards, briefs, visuals, Slack messages, and QR codes",
       "source": "./plugins/communication"
     },
     {
