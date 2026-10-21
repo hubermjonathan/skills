@@ -8,13 +8,14 @@ description: >
 
 The user's instructions win over the defaults below.
 
-1. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
-2. Bump a version only when the repo, the user, or another skill says to.
-3. Commit and push.
-4. Invoke the `verify` skill for the `Checks and claims` evidence, unless the caller already has evidence for the head commit.
-5. Write the title and body in the format below.
-6. Open it ready for review with `gh pr create`. Never open a draft.
-7. Reply with the PR url.
+1. If an open PR already covers this change, invoke the `push-pr` skill on its branch instead, and stop here.
+2. Remove debug output and stray files from the diff. For comments and docs, invoke the `kill-comments` skill.
+3. Bump a version only when the repo, the user, or another skill says to.
+4. Commit and push.
+5. Invoke the `verify` skill for the `Checks and claims` evidence, unless the caller already has evidence for the head commit.
+6. Write the title and body in the format below.
+7. Open it ready for review with `gh pr create`. Never open a draft.
+8. Reply with the PR url.
 
 ## Title
 
@@ -59,7 +60,7 @@ Then the sections, in this order:
 Rules:
 
 - For `Change`, invoke the `show-me` skill and pick the smallest visual of the diff, such as a diff-shaped call tree or pseudocode.
-- `Checks and claims` under `Evidence` comes from step 4. A skill that tests the change deployed adds its own part below it, such as `Staging`, with its own `Ran on` line. Each skill replaces only its own part. It embeds the real output of what was run, in a code block, trimmed to the lines that show the result, and names the commit it ran on. Never restate a result in your own words. A test plan's results can be a table of step, before, after, and result instead of the two bullets. A screenshot goes in only as an image URL you already have, since GitHub's API can't upload one. If nothing was run, write "Not run" and why.
+- `Checks and claims` under `Evidence` comes from step 5. A skill that tests the change deployed adds its own part below it, such as `Staging`, with its own `Ran on` line. Each skill replaces only its own part. It embeds the real output of what was run, in a code block, trimmed to the lines that show the result, and names the commit it ran on. Never restate a result in your own words. A test plan's results can be a table of step, before, after, and result instead of the two bullets. A screenshot goes in only as an image URL you already have, since GitHub's API can't upload one. If nothing was run, write "Not run" and why.
 - For a docs-only change, `Why` is one sentence, and `Evidence` and `Risk` are left out.
 - `Follow up` is optional. Leave it out rather than writing "none".
 - The `walk-through-pr` skill adds a `Walkthrough` section right below the note later. Other skills leave it there.
