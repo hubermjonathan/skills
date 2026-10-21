@@ -97,7 +97,6 @@ Write for people and reach them.
 | [`create-qr-code`](plugins/communication/skills/create-qr-code/SKILL.md) | Makes a QR code for a link and shows it in the reply | No |
 | [`explain-by-example`](plugins/communication/skills/explain-by-example/SKILL.md) | Explains something in more depth by walking through one concrete example, step by step | No |
 | [`grill-me`](plugins/communication/skills/grill-me/SKILL.md) | Interviews you round by round to stress-test a plan, decision, or idea | No |
-| [`send-blue-bubble`](plugins/communication/skills/send-blue-bubble/SKILL.md) | Texts the user, or people they name, with a blue bubble, one to one or as a group | No |
 | [`send-slack-message`](plugins/communication/skills/send-slack-message/SKILL.md) | Drafts and sends short Slack messages | No |
 | [`show-me`](plugins/communication/skills/show-me/SKILL.md) | Shows a point as the smallest visual that makes it clear: pseudocode, a call or file tree, a diagram, or a diff-shaped sketch | No |
 | [`technical-writing`](plugins/communication/skills/technical-writing/SKILL.md) | Layered writing standard for chat replies, docs, PRs, tickets, and commits | No |
