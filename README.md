@@ -45,8 +45,8 @@ cannot vouch for a marketplace:
 ```
 
 `autoUpdate` pulls new commits in the background during a session, and the next session loads them.
-Claude Code leaves it off for a marketplace outside Anthropic's. After a `claude plugin marketplace
-add`, turn it on in `/plugin` under **Marketplaces**.
+Claude Code leaves it off by default for a third-party marketplace like this one. After a `claude
+plugin marketplace add`, turn it on in `/plugin` under **Marketplaces**.
 
 ### Codex
 
