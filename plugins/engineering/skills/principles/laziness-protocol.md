@@ -2,6 +2,7 @@
 
 Aim for the most result with the least code and complexity.
 
+- **Build the generic mechanism, not the one-off.** When a request is one case of a broader need, build what handles every case like it, everywhere it shows up, sized to the cases that exist today.
 - **Consolidate decisions.** Do not repeat the same choice in several places. Put it behind one source of truth and pass the result as a simple flag.
 - **Minimize the diff.** Make the smallest change that solves the problem. Fewer lines beat "elegant" boilerplate.
 - **Question the threading.** If a task asks you to pass a new signal through types, schemas, pipelines, or similar layers, stop and look for a more direct path.
