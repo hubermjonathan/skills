@@ -41,3 +41,4 @@ Clean up a PR's branch as soon as you merge the PR or learn that the user merged
 
 1. `git fetch --prune`. If the remote branch is still there, delete it with `git push origin --delete <branch>`.
 2. Remove the PR's worktree and local branch as in step 4 of Cleanup. Step 3 still applies.
+3. Update the local default branch with `git pull --ff-only` in the checkout that has it.
