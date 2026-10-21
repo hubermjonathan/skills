@@ -2,7 +2,8 @@
 name: git
 description: >
   Branch, worktree, commit, and cleanup conventions. Use when making a branch or
-  worktree, committing, pushing, or cleaning up local branches and worktrees.
+  worktree, committing, pushing, merging a PR or learning that one merged, or cleaning
+  up local branches and worktrees.
 ---
 
 The user's instructions on naming win over everything below. These are the defaults.
@@ -34,4 +35,10 @@ The user's instructions on naming win over everything below. These are the defau
 3. Anything with uncommitted changes or unpushed commits is listed, not removed.
 4. Show the list and remove after the user confirms, or directly if they said to clean up everything: `git worktree remove`, then `git branch -D`.
 
-After a PR merges, remove its worktree and local branch the same way.
+## After a PR merges
+
+Clean up a PR's branch as soon as you merge the PR or learn that the user merged it. The merge is the user's approval, so go ahead without asking.
+
+1. `git fetch --prune`. If the remote branch is still there, delete it with `git push origin --delete <branch>`.
+2. Remove the PR's worktree and local branch as in step 4 of Cleanup. Step 3 still applies.
+3. Update the local default branch with `git pull --ff-only` in the checkout that has it.
