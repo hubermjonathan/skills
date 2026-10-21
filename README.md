@@ -1,4 +1,4 @@
-# Skills
+# skills
 
 Skills for coding agents. Every skill is a plain `SKILL.md` under [`plugins/`](plugins), so any
 agent that speaks the skill format can use this repo. Claude Code and Codex install them as
@@ -23,9 +23,13 @@ claude plugin install engineering@hubermjonathan
 claude plugin install design-profile@hubermjonathan
 ```
 
-Installing `engineering` also installs `communication` and `agents`, which its skills call. To
-declare them in `~/.claude/settings.json` instead, use user scope, since project and local scope
-cannot vouch for a marketplace:
+Installing `engineering` also installs `communication` and `agents`, which its skills call.
+`claude plugin marketplace add` leaves auto-update off for a third-party marketplace like this
+one. Turn it on in `/plugin` under **Marketplaces**. With it on, Claude Code pulls new commits in
+the background during a session, and the next session loads them.
+
+To declare the plugins in `~/.claude/settings.json` instead, use user scope, since project and
+local scope cannot vouch for a marketplace. `"autoUpdate": true` turns on the same auto-update:
 
 ```json
 {
@@ -44,10 +48,6 @@ cannot vouch for a marketplace:
 }
 ```
 
-`autoUpdate` pulls new commits in the background during a session, and the next session loads them.
-Claude Code leaves it off by default for a third-party marketplace like this one. After a `claude
-plugin marketplace add`, turn it on in `/plugin` under **Marketplaces**.
-
 ### Codex
 
 ```sh
@@ -58,11 +58,10 @@ codex plugin add agents@hubermjonathan
 codex plugin add design-profile@hubermjonathan
 ```
 
-Codex has no plugin dependencies, so add each plugin you want.
+Codex has no plugin dependencies, so add `communication` and `agents` along with `engineering`,
+whose skills call them.
 
 ## Skills
-
-Each plugin is a folder under [`plugins/`](plugins), with one folder per skill in its `skills/`.
 
 ### Engineering
 
@@ -77,7 +76,7 @@ Take a code change from ticket to merge.
 | [`kill-comments`](plugins/engineering/skills/kill-comments/SKILL.md) | Deletes code comments and "what" docs so code is the what and docs are the why | No |
 | [`git`](plugins/engineering/skills/git/SKILL.md) | Branch, worktree, commit, and cleanup conventions | No |
 | [`review-code`](plugins/engineering/skills/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
-| [`walk-through-pr`](plugins/engineering/skills/walk-through-pr/SKILL.md) | Builds a CodeRabbit-style change stack page for a human reviewer: changes grouped by area of impact in reading order, what each group depends on, the ticket's asks mapped to the diff, questions only the author can answer, and reading checkboxes | No |
+| [`walk-through-pr`](plugins/engineering/skills/walk-through-pr/SKILL.md) | Builds a page that maps a PR for a human reviewer: changes grouped by area of impact in reading order, what each group depends on, the ticket's asks mapped to the diff, questions only the author can answer, and reading checkboxes | No |
 | [`open-pr`](plugins/engineering/skills/open-pr/SKILL.md) | Opens a PR, ready for review, with a fixed title and body format | No |
 | [`push-pr`](plugins/engineering/skills/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
 | [`comment-pr`](plugins/engineering/skills/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
@@ -124,6 +123,14 @@ Style HTML pages with a design system.
 |-------|--------------|--------------|
 | [`create-design-profile`](plugins/design-profile/skills/create-design-profile/SKILL.md) | Adds a design profile from finished files, or mines one from a design system | Yes |
 | [`use-design-profile`](plugins/design-profile/skills/use-design-profile/SKILL.md) | Styles an HTML page with a named design profile | No |
+
+## Layout
+
+| Path | What it is |
+|---|---|
+| `AGENTS.md` | Conventions for agents that edit this repo. `CLAUDE.md` links to it |
+| `.claude-plugin/marketplace.json` | The `hubermjonathan` marketplace, which Claude Code and Codex both read: each plugin's name, description, source, and dependencies. The only manifest |
+| `plugins/` | One folder per plugin. Each skill is in the plugin's `skills/`, with an `agents/openai.yaml` for its Codex display name and invocation policy |
 
 ## Adding a skill
 

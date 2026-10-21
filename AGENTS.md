@@ -4,16 +4,15 @@ Each plugin is a folder at `plugins/<plugin>/`, with one folder per skill at
 `plugins/<plugin>/skills/<name>/SKILL.md`. Plugins split by audience, the people who would install
 them. Add a plugin only when a skill's audience matches none of the existing ones.
 
-This repo hosts the `hubermjonathan` marketplace, which lists every plugin here.
-
 ## Names
 
 - Name a skill that does a task by the task, verb first, with no prefix: `open-pr`,
   `send-slack-message`, `create-qr-code`. Name a skill that holds a standard by its topic:
   `principles`, `technical-writing`.
 - The skill folder name and the `name` in frontmatter match.
-- Skill names stay unique across every repo whose skills install together. `npx skills` installs
-  skills flat by name, and a bare `/<name>` runs a skill, so a reused name hides another.
+- Skill names stay unique across this repo and `hubermjonathan/skills-work`, whose skills install
+  beside these. `npx skills` installs skills flat by name, and a bare `/<name>` runs a skill, so a
+  reused name hides another.
 - Name a plugin for its audience, in kebab-case: `engineering`, `design-profile`.
 
 ## Agent agnostic
@@ -54,13 +53,27 @@ it, so nothing else goes there.
 
 ## Manifests
 
-`.claude-plugin/marketplace.json` is the only manifest. It holds each plugin's name, display name,
-description, source, and dependencies. Claude Code and Codex both read it, and each reads a
-plugin's entry as that plugin's manifest, so no plugin has a manifest of its own. Don't add a Codex
+`.claude-plugin/marketplace.json` is the only manifest, and it lists every folder under
+`plugins/`. Claude Code and Codex both read it, and each reads a plugin's entry as that plugin's
+manifest, so no plugin has a manifest of its own. Don't add a Codex
 marketplace at `.agents/plugins/marketplace.json`, because Codex reads that file ahead of this one.
 
 - A plugin's `dependencies` list each plugin whose skills it tells the agent to invoke by name,
   and each plugin whose skill one of its skills overlays, such as a `<topic>-conventions` skill
   that adds a company's rules to a public skill.
-- No manifest sets `version`, so each commit counts as a new version and an update always pulls it.
-- To rename or remove a plugin, map its old name in `renames`, so existing installs follow it.
+- Leave `version` out of the manifest, so each commit counts as a new version and an update always
+  pulls it.
+- To rename a plugin, map its old name to its new name in `renames`, so existing installs follow
+  it. To remove a plugin, map its old name to `null`. `renames` is append-only, so keep every entry.
+
+## README
+
+Every skill has one row in its plugin's table in `README.md`, and its **User invoked** cell matches
+`disable-model-invocation`. A new plugin gets its own table.
+
+## After a change
+
+A merged skill change reaches Claude Code and Codex on their own. Each refreshes the marketplace in
+the background during a session, and the next session loads the new skills. Claude Code does this
+only with auto-update on, which dot turns on. For an agent set up with `npx skills`, run
+`npx -y skills update`.
