@@ -17,6 +17,7 @@ description: >
 
 ## Pushing
 
+- If the push brings in the base, first compare GitHub's recorded base, `gh pr view <n> --json baseRefOid`, with `git rev-parse origin/<base>`. If they differ, run `gh pr edit <n> --base <base>` to refresh it. Otherwise GitHub diffs against the stale base and shows the base's newer commits as the PR's own, which pulls in unrelated reviewers and CI and can dismiss an approval.
 - Push the way the `git` skill says.
 - If the PR was approved, tell the user a new push may dismiss the approval.
 
