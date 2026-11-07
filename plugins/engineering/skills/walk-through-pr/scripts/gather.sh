@@ -31,7 +31,7 @@ mkdir -p "$OUT" || exit 1
 echo "out: $OUT"
 
 gh pr view "$PR" $REPO_FLAG --json \
-  number,title,url,author,state,isDraft,baseRefName,headRefName,headRefOid,additions,deletions,changedFiles,labels,createdAt \
+  number,title,url,author,state,isDraft,baseRefName,headRefName,headRefOid,labels,createdAt \
   > "$OUT/meta.json" || { echo "gh pr view failed" >&2; exit 1; }
 
 gh pr diff "$PR" $REPO_FLAG > "$OUT/pr.diff"
@@ -66,14 +66,6 @@ PY
 
 gh pr view "$PR" $REPO_FLAG --json commits \
   -q '.commits[] | .messageHeadline' > "$OUT/commit-subjects.txt" 2>/dev/null || true
-
-python3 - "$OUT/meta.json" > "$OUT/ticket-key.txt" <<'PY'
-import json, re, sys
-m = json.load(open(sys.argv[1]))
-hay = f"{m.get('title','')} {m.get('headRefName','')}"
-keys = re.findall(r'\(([A-Z][A-Z0-9]{1,9}-\d+)\)', hay) + re.findall(r'\b([A-Z][A-Z0-9]{1,9}-\d+)\b', hay)
-print(keys[0] if keys else "")
-PY
 
 if [[ -n "$IN_CHECKOUT" ]]; then
   git -C "$ROOT" fetch -q origin "$BASE" 2>/dev/null || true
@@ -144,26 +136,6 @@ else
   echo "# skipped: run gather.sh inside a checkout of $REPO to list callers" > "$OUT/callers.tsv"
 fi
 
-{
-  if [[ -z "$IN_CHECKOUT" ]]; then
-    echo "# skipped: run gather.sh inside a checkout of $REPO to list version files"
-  else
-    echo "# version manifests / changelogs / changesets present near the changed files"
-    cut -f4 "$OUT/files.tsv" | while read -r f; do dirname "$f"; done | sort -u \
-      | while read -r d; do
-          while [[ "$d" != "." && "$d" != "/" ]]; do
-            for candidate in CHANGELOG.md package.json .changeset; do
-              [[ -e "$ROOT/$d/$candidate" ]] && echo "$d/$candidate"
-            done
-            d=$(dirname "$d")
-          done
-        done | sort -u
-    for candidate in CHANGELOG.md package.json .changeset; do
-      [[ -e "$ROOT/$candidate" ]] && echo "$candidate"
-    done
-  fi
-} > "$OUT/release-plumbing.txt" 2>/dev/null
-
 cat <<EOF
 
 gathered:
@@ -172,9 +144,7 @@ gathered:
   $OUT/pr-numbered.diff      the same diff with the head's line numbers
   $OUT/files.tsv             status, +, -, path
   $OUT/commit-subjects.txt   author prose, hints only
-  $OUT/ticket-key.txt        $(cat "$OUT/ticket-key.txt")
   $OUT/callers.tsv           where the base branch mentions each changed name, outside the diff
-  $OUT/release-plumbing.txt  version/changelog files that sit above the changed dirs
 
 base: $BASE   head: $HEAD
 EOF

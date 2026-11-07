@@ -12,7 +12,7 @@
       "displayName": "Engineering",
       "description": "Take a code change from ticket to merge: plan it, write it, review it, open and push the PR, and test it",
       "source": "./plugins/engineering",
-      "dependencies": ["communication", "agents"]
+      "dependencies": ["communication", "agents", "design-profile"]
     },
     {
       "name": "communication",

@@ -1,0 +1,97 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "areas", "housekeeping"],
+  "properties": {
+    "summary": {"type": "string"},
+    "areas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "gist", "behavior", "sketch", "changes", "reach", "tests", "questions"],
+        "properties": {
+          "name": {"type": "string"},
+          "gist": {"type": "string"},
+          "behavior": {
+            "anyOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["before", "after"],
+                "properties": {"before": {"type": "string"}, "after": {"type": "string"}}
+              }
+            ]
+          },
+          "sketch": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "source"],
+            "properties": {
+              "kind": {"type": "string", "enum": ["mermaid", "tree-diff"]},
+              "source": {"type": "string"}
+            }
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["change", "where", "role"],
+              "properties": {
+                "change": {"type": "string"},
+                "where": {"type": "string"},
+                "role": {"type": "string", "enum": ["behavior", "contract", "config", "docs"]},
+                "also": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          },
+          "reach": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["where", "note"],
+              "properties": {"where": {"type": "string"}, "note": {"type": "string"}}
+            }
+          },
+          "tests": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["files", "covered", "missing"],
+            "properties": {
+              "files": {"type": "array", "items": {"type": "string"}},
+              "covered": {"type": "array", "items": {"type": "string"}},
+              "missing": {"type": "array", "items": {"type": "string"}}
+            }
+          },
+          "questions": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["q", "where", "ask_author"],
+              "properties": {
+                "q": {"type": "string"},
+                "where": {"type": "string"},
+                "ask_author": {"type": "boolean"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "housekeeping": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["where", "note"],
+        "properties": {"where": {"type": "string"}, "note": {"type": "string"}}
+      }
+    }
+  }
+}
