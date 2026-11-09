@@ -1,140 +1,271 @@
 #!/usr/bin/env python3
+import collections
+import hashlib
 import html
 import json
+import os
 import re
 import sys
 
-ROLES = {"behavior", "contract", "test", "config", "release", "docs", "generated"}
-STATUSES = {"addressed", "partial", "not in this diff"}
-SKETCH_KINDS = {"text", "diff", "code", "mermaid"}
+ROLES = {"behavior", "contract", "config", "docs"}
+SKETCH_KINDS = {"mermaid", "tree-diff"}
+WORD_CAPS = {"summary": 50, "gist": 15, "change": 12, "note": 15, "question": 30, "test": 12}
+ADDED, REMOVED = "#00a87e", "#e05666"
+PALETTES = {
+    "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
+              "added": "#def3ec", "removed": "#ffd7df", "note": "#fdf2cc", "cluster": "#fafafa"},
+    "dark": {"bg": "#121215", "text": "#f7f7f7", "line": "#ababab", "node": "#282a2e", "border": "#8a8a8a",
+             "added": "#0e382f", "removed": "#462329", "note": "#3f3416", "cluster": "#1e2024"},
+}
+
+
+def mermaid_config(mode):
+    c = PALETTES[mode]
+    return {
+        "startOnLoad": False,
+        "theme": "base",
+        "themeVariables": {
+            "darkMode": mode == "dark", "background": c["bg"], "fontFamily": "Lato", "fontSize": "16px",
+            "textColor": c["text"], "primaryTextColor": c["text"], "lineColor": c["line"],
+            "primaryColor": c["node"], "primaryBorderColor": c["border"], "secondaryColor": c["node"], "tertiaryColor": c["bg"],
+            "actorBkg": c["node"], "actorBorder": c["border"], "actorTextColor": c["text"], "actorLineColor": c["border"],
+            "signalColor": c["text"], "signalTextColor": c["text"],
+            "labelBoxBkgColor": c["bg"], "labelBoxBorderColor": c["border"], "labelTextColor": c["text"], "loopTextColor": c["text"],
+            "noteBkgColor": c["note"], "noteBorderColor": "#f4be19", "noteTextColor": c["text"],
+            "edgeLabelBackground": c["bg"], "clusterBkg": c["cluster"], "clusterBorder": c["border"],
+        },
+        "sequence": {"mirrorActors": False, "actorMargin": 30},
+        "themeCSS": (f".node.added rect,.node.added polygon,.node.added circle,.node.added path{{fill:{c['added']} !important;stroke:{ADDED} !important;stroke-width:2px !important}}"
+                     f".node.removed rect,.node.removed polygon,.node.removed circle,.node.removed path{{fill:{c['removed']} !important;stroke:{REMOVED} !important;stroke-dasharray:5 3 !important}}"
+                     ".node.removed .nodeLabel{text-decoration:line-through}"
+                     f".flowchart-link.edge-thickness-thick{{stroke:{ADDED} !important}}"),
+    }
+
+
+MARKS = {"added": "rgba(0, 168, 126, 0.18)", "removed": "rgba(224, 86, 102, 0.18)"}
+MARKED = re.compile(r":::(added|removed)|^\s*rect (added|removed)\s*$|==>", re.M)
+KEY = [(r":::added", "box added", "Added"), (r":::removed", "box removed", "Removed"), (r"==>", "arrow", "Added arrow"),
+       (r"(?m)^\s*rect added\s*$", "band added", "Added calls"), (r"(?m)^\s*rect removed\s*$", "band removed", "Removed calls")]
+TEST_PATH = re.compile(r"(^|/)(tests?|__tests__|spec)/|\.(test|spec)\.[jt]sx?$|Tests?\.(java|kt)$|_test\.(go|py)$|(^|/)test_[^/]*\.py$")
 
 
 def esc(text):
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(str(text or "")))
 
 
-def plural(n, word):
-    return f"{n} {word}" + ("" if n == 1 else "s")
+def split_where(where):
+    m = re.fullmatch(r"(.+?):(\d+(?:-\d+)?)", str(where or ""))
+    return (m.group(1), m.group(2)) if m else (str(where or ""), "")
 
 
-def block(title, body, count=None, cls="", is_open=False):
-    badge = f' <span class="count">{count}</span>' if count is not None else ""
-    return (f'<details class="block{" " + cls if cls else ""}"{" open" if is_open else ""}>'
-            f"<summary><h3>{title}</h3>{badge}</summary><div class=\"block-body\">{body}</div></details>")
+def slug(name, taken):
+    base = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "area"
+    sid, n = base, 2
+    while sid in taken:
+        sid, n = f"{base}-{n}", n + 1
+    taken.add(sid)
+    return sid
 
 
-def validate(data, stats):
+def ticket_key(meta):
+    for text in (meta.get("title", ""), meta.get("headRefName", "")):
+        m = re.search(r"\(([A-Z][A-Z0-9]{1,9}-\d+)\)", text) or re.search(r"\b([A-Z][A-Z0-9]{1,9}-\d+)\b", text)
+        if m:
+            return m.group(1)
+    return ""
+
+
+class Files:
+    def __init__(self, repo, number, head, changed, paths):
+        self.repo, self.number, self.head, self.changed = repo, number, head, changed
+        by_name = collections.defaultdict(set)
+        for p in paths:
+            by_name[p.rsplit("/", 1)[-1]].add(p)
+        self.labels = {}
+        for group in by_name.values():
+            for p in group:
+                parts, k = p.split("/"), 1
+                while k < len(parts) and sum(1 for q in group if q.split("/")[-k:] == parts[-k:]) > 1:
+                    k += 1
+                self.labels[p] = "/".join(parts[-k:])
+
+    def link(self, where):
+        path, lines = split_where(where)
+        start = lines.split("-")[0]
+        if path in self.changed:
+            href = f"https://github.com/{self.repo}/pull/{self.number}/files#diff-{hashlib.sha256(path.encode()).hexdigest()}"
+            href += f"R{start}" if start else ""
+        else:
+            href = f"https://github.com/{self.repo}/blob/{self.head}/{path}" + (f"#L{start}" if start else "")
+        label = self.labels.get(path, path.rsplit("/", 1)[-1]) + (f":{lines}" if lines else "")
+        return f'<a class="file" href="{html.escape(href)}" title="{html.escape(path)}"><code>{html.escape(label)}</code></a>'
+
+
+def words(text):
+    return len(str(text or "").split())
+
+
+def normalize(a, changed, warnings):
+    name = a.get("name")
+    tests = a.setdefault("tests", {})
+    tests.setdefault("files", [])
+    rows = collections.OrderedDict()
+    for c in a.get("changes") or []:
+        path = split_where(c.get("where"))[0]
+        if TEST_PATH.search(path):
+            warnings.append(f"{name}: {path} is a test, so it moves from changes to tests.files")
+            tests["files"].append(path)
+            continue
+        if path in rows:
+            row = rows[path]
+            row["change"] = f'{row["change"]}; {c.get("change")}'
+            row["also"] = list(dict.fromkeys((row.get("also") or []) + (c.get("also") or [])))
+            warnings.append(f"{name}: {path} has more than one row, so they merge into one")
+        else:
+            rows[path] = dict(c)
+    a["changes"] = list(rows.values())
+    tests["files"] = list(dict.fromkeys(split_where(w)[0] for w in tests["files"]))
+    inside = [r for r in a.get("reach") or [] if split_where(r.get("where"))[0] in changed]
+    for r in inside:
+        warnings.append(f"{name}: {r.get('where')} is in this PR, so it isn't a caller outside it, and doesn't show")
+    a["reach"] = [r for r in a.get("reach") or [] if r not in inside]
+
+
+def check(data, changed):
     errors, warnings = [], []
-    cohorts = data.get("cohorts") or []
-    if not cohorts:
-        errors.append("no cohorts")
-    seen, assigned = set(), {}
-    for i, c in enumerate(cohorts):
-        cid = c.get("id", "")
-        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", cid) or cid in seen or cid in ("housekeeping", "orientation", "ticket"):
-            errors.append(f"cohort {i + 1}: id {cid!r} must be unique kebab-case and not housekeeping, orientation, or ticket")
-        for dep in c.get("depends_on") or []:
-            if dep not in seen:
-                errors.append(f"cohort {cid}: depends on {dep!r}, which isn't an earlier cohort. Reorder, or merge cohorts that depend on each other")
-        seen.add(cid)
-        for path, role in (c.get("files") or {}).items():
-            if role not in ROLES:
-                errors.append(f"cohort {cid}: {path} has role {role!r}, not one of {sorted(ROLES)}")
-            assigned.setdefault(path, []).append(cid)
-        if len(c.get("author_questions") or []) > 3:
-            errors.append(f"cohort {cid}: more than 3 author questions")
-        sketch = c.get("sketch") or {}
-        if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source") or not sketch.get("where"):
-            errors.append(f"cohort {cid}: sketch needs kind (one of {sorted(SKETCH_KINDS)}), source, and where")
-        if not 2 <= len(c.get("review_focus") or []) <= 4:
-            warnings.append(f"cohort {cid}: review focus should have 2 to 4 questions")
-    for row in data.get("housekeeping") or []:
-        assigned.setdefault(row.get("path", ""), []).append("housekeeping")
-    for path, owners in assigned.items():
-        if path not in stats:
-            errors.append(f"{path} is not in files.tsv")
-        if len(owners) > 1:
-            errors.append(f"{path} is in more than one cohort: {owners}")
-    for path in stats:
-        if path not in assigned:
-            errors.append(f"{path} from files.tsv is in no cohort and not in housekeeping")
-    for ask in (data.get("ticket") or {}).get("asks") or []:
-        if ask.get("status") not in STATUSES:
-            errors.append(f"ask {ask.get('ask')!r}: status must be one of {sorted(STATUSES)}")
-    return errors, warnings
+    areas = data.get("areas") or []
+    if not areas:
+        errors.append("no areas")
+    seen = set()
+    for i, a in enumerate(areas, 1):
+        name = a.get("name") or f"area {i}"
+        if not a.get("name"):
+            errors.append(f"area {i}: no name")
+        sketch = a.get("sketch") or {}
+        if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source"):
+            errors.append(f"{name}: sketch needs kind (one of {sorted(SKETCH_KINDS)}) and source")
+        elif not (MARKED.search(sketch["source"]) if sketch["kind"] == "mermaid" else
+                  sketch["kind"] == "tree-diff" and re.search(r"(?m)^[+-]", sketch["source"])):
+            warnings.append(f"{name}: the sketch marks nothing as added or removed")
+        normalize(a, changed, warnings)
+        for c in a["changes"]:
+            if c.get("role", "behavior") not in ROLES:
+                errors.append(f"{name}: {c.get('where')} has role {c.get('role')!r}, not one of {sorted(ROLES)}")
+            seen.update([split_where(c.get("where"))[0]] + list(c.get("also") or []))
+            if words(c.get("change")) > WORD_CAPS["change"]:
+                warnings.append(f"{name}: the change at {c.get('where')} runs past {WORD_CAPS['change']} words")
+        seen.update(a["tests"]["files"])
+        if words(a.get("gist")) > WORD_CAPS["gist"]:
+            warnings.append(f"{name}: gist runs past {WORD_CAPS['gist']} words")
+        if len(a.get("questions") or []) > 4:
+            warnings.append(f"{name}: more than 4 questions, so only the first 4 show")
+        for q in a.get("questions") or []:
+            if words(q.get("q")) > WORD_CAPS["question"]:
+                warnings.append(f"{name}: a question runs past {WORD_CAPS['question']} words")
+        for r in a["reach"]:
+            if words(r.get("note")) > WORD_CAPS["note"]:
+                warnings.append(f"{name}: a caller note runs past {WORD_CAPS['note']} words")
+        for t in a["tests"].get("covered", []) + a["tests"].get("missing", []):
+            if words(t) > WORD_CAPS["test"]:
+                warnings.append(f"{name}: a test line runs past {WORD_CAPS['test']} words")
+    for h in data.get("housekeeping") or []:
+        seen.add(split_where(h.get("where"))[0])
+    if words(data.get("summary")) > WORD_CAPS["summary"]:
+        warnings.append(f"summary runs past {WORD_CAPS['summary']} words")
+    for path in sorted(seen - changed):
+        warnings.append(f"{path} is listed but isn't in files.tsv")
+    missing = [p for p in sorted(changed) if p not in seen]
+    for p in missing:
+        warnings.append(f"{p} from files.tsv is in no area and not in housekeeping, so it shows under housekeeping")
+    return errors, warnings, missing
+
+
+CONTRACT_CHIP = '<span class="chip contract">Contract</span>'
+
+
+def changes_contract(a):
+    return any(c.get("role") == "contract" for c in a["changes"])
+
+
+def diagram(kind, source):
+    if kind == "mermaid":
+        source = re.sub(r"(?m)^(\s*rect) (added|removed)\s*$", lambda m: f"{m.group(1)} {MARKS[m.group(2)]}", source)
+        source = source.replace("\\n", "<br/>")
+        return f'<pre class="diagram">{html.escape(source)}</pre>'
+    cls = {"+": "add", "-": "del"} if kind == "tree-diff" else {}
+    lines = "".join(f'<span class="{cls.get(l[:1], "ctx")}">{html.escape(l) or " "}</span>' for l in source.split("\n"))
+    return f"<pre><code>{lines}</code></pre>"
+
+
+def key_html(source):
+    items = "".join(f'<span><i class="{cls}"></i>{label}</span>' for pattern, cls, label in KEY if re.search(pattern, source))
+    return f'<p class="key">{items}</p>' if items else ""
 
 
 def sketch_html(s):
-    caption = f'<p class="note">A sketch of <code>{esc(s["where"])}</code>, not the literal diff. The code is under Layers.</p>'
-    if s["kind"] == "mermaid":
-        return caption + f'<div class="diagram"><pre class="mermaid">{html.escape(s["source"])}</pre></div>'
-    if s["kind"] == "diff":
-        cls = {"+": "add", "-": "del"}
-        lines = "".join(f'<span class="{cls.get(l[:1], "ctx")}">{html.escape(l)}</span>' for l in s["source"].split("\n"))
-        return caption + f'<pre class="sketch-diff"><code>{lines}</code></pre>'
-    return caption + f'<pre><code>{html.escape(s["source"])}</code></pre>'
+    key = key_html(s["source"]) if s["kind"] == "mermaid" else ""
+    return f'<div class="sketch">{diagram(s["kind"], s["source"])}{key}</div>'
 
 
-def cohort_section(c, links):
-    cid = c["id"]
-    b = c.get("behavior")
-    behavior = ("<p>Behavior is unchanged.</p>" if not b else
-                f'<table class="delta"><tr class="before"><th>Before</th><td>{esc(b.get("before"))}</td></tr>'
-                f'<tr class="after"><th>After</th><td>{esc(b.get("after"))}</td></tr></table>')
-    sketch = sketch_html(c["sketch"])
-    focus = c.get("review_focus") or []
-    focus_html = "<ul>" + "".join(f"<li>{esc(q.get('q'))} <code>{esc(q.get('where'))}</code></li>" for q in focus) + "</ul>"
-    questions = c.get("author_questions") or []
-    author = ""
-    if questions:
-        author = block("Only the author knows",
-                       "<p class=\"note\">The PR description wasn't read, so it may already answer some of these.</p><ul>"
-                       + "".join(f"<li>{esc(q.get('q'))} <code>{esc(q.get('where'))}</code><br><span class=\"note\">Looked for: {esc(q.get('looked_for'))}</span></li>" for q in questions)
-                       + "</ul>", len(questions), "author", True)
-    layers = c.get("layers") or []
-    items = []
-    for j, l in enumerate(layers, 1):
-        path = str(l.get("where", "")).split(":")[0]
-        code = (f'<figure><figcaption>{esc(path)}</figcaption><pre><code>{html.escape(l["code"])}</code></pre></figure>'
-                if l.get("code") else "")
-        count = f' <span class="note">{esc(l["count"])}</span>' if l.get("count") else ""
-        items.append(f'<li id="{cid}-layer-{j}"><code>{esc(l.get("where"))}</code>: {esc(l.get("does"))}{count}{code}</li>')
-    blast = c.get("blast_radius") or []
-    blast_html = ("<ul>" + "".join(f"<li>{esc(x)}</li>" for x in blast) + "</ul>" if blast
-                  else "<p>Nothing outside this diff calls the changed code.</p>")
-    tests = c.get("tests") or {}
-    asserted, gaps = tests.get("asserted") or [], tests.get("gaps") or []
-    tests_html = ("<p><strong>Asserted:</strong></p><ul>" + "".join(f"<li>{esc(x)}</li>" for x in asserted or ["Nothing in this diff."]) + "</ul>"
-                  "<p><strong>No assertion:</strong></p><ul>" + "".join(f"<li>{esc(x)}</li>" for x in gaps or ["No gaps found."]) + "</ul>")
-    deps = c.get("depends_on") or []
+def area_html(i, a, aid, files):
+    b = a.get("behavior")
+    delta = ('<p class="unchanged">Behavior doesn\'t change.</p>' if not b else
+             f'<div class="delta"><div class="before"><span>Before</span><p>{esc(b.get("before"))}</p></div>'
+             f'<div class="after"><span>After</span><p>{esc(b.get("after"))}</p></div></div>')
+    rows = []
+    for c in a["changes"]:
+        role = c.get("role", "behavior")
+        chip = CONTRACT_CHIP + " " if role == "contract" else ""
+        tag = f' <span class="role">{role}</span>' if role in ("config", "docs") else ""
+        also = c.get("also") or []
+        more = (f'<details class="also"><summary>and {len(also)} more</summary>{" ".join(files.link(p) for p in also)}</details>' if also else "")
+        rows.append(f'<li>{chip}{esc(c.get("change"))} {files.link(c.get("where"))}{tag}{more}</li>')
+    changes_html = "<ul>" + "".join(rows) + "</ul>" if rows else "<p>Only tests change in this area.</p>"
+    reach = a["reach"]
+    reach_html = ("<ul>" + "".join(f"<li>{esc(r.get('note'))} {files.link(r.get('where'))}</li>" for r in reach) + "</ul>"
+                  if reach else "<p>Nothing outside this PR calls the changed code.</p>")
+    tests = a["tests"]
+    covered, gaps = tests.get("covered") or [], tests.get("missing") or []
+    tests_html = (f'<p><strong>Tested:</strong> {"; ".join(esc(t) for t in covered) if covered else "nothing in this PR"}.</p>'
+                  f'<p><strong>Not tested:</strong> {"; ".join(esc(t) for t in gaps) if gaps else "no gaps found"}.</p>')
+    qs = (a.get("questions") or [])[:4]
+    questions = ""
+    if qs:
+        items = "".join("<li>" + ('<span class="chip">Ask the author</span> ' if q.get("ask_author") else "")
+                        + f'{esc(q.get("q"))} {files.link(q.get("where"))}</li>' for q in qs)
+        questions = f'<div class="questions"><p class="label">Worth a look</p><ul>{items}</ul></div>'
     return f"""
-<section id="{cid}">
-  <h2>{esc(c['name'])} <label class="check"><input type="checkbox" data-cohort="{cid}"> I've read this</label></h2>
-  <p class="deps">Depends on: {links(deps) or 'nothing'}</p>
-  <p>{esc(c.get('what_changed'))}</p>
-  {block("Behavior delta", behavior, is_open=True)}
-  {block("Sketch", sketch, is_open=True)}
-  {block("Review focus", focus_html, len(focus), "focus", True)}
-  {author}
-  {block("Layers", "<ol>" + "".join(items) + "</ol>", len(layers))}
-  {block("Blast radius", blast_html, len(blast))}
-  {block("Test coverage", tests_html, f"{len(asserted)} asserted · {plural(len(gaps), 'gap')}")}
+<section class="area" id="{aid}">
+  <h2><span class="num">{i}</span>{esc(a.get('name'))}</h2>
+  <p class="gist">{esc(a.get('gist'))}</p>
+  {delta}
+  {sketch_html(a['sketch'])}
+  {questions}
+  <dl class="facts">
+    <dt>Changes</dt><dd>{changes_html}</dd>
+    <dt>Callers outside this PR</dt><dd>{reach_html}</dd>
+    <dt>Tests</dt><dd>{tests_html}</dd>
+  </dl>
 </section>"""
 
 
-def main(argv):
-    if len(argv) < 4:
-        sys.exit("usage: render.py <data.json> <gather-dir> <out.html>")
-    data = json.load(open(argv[1]))
-    gather, out = argv[2], argv[3]
-    meta = json.load(open(f"{gather}/meta.json"))
-    stats = {}
-    for line in open(f"{gather}/files.tsv"):
-        parts = line.rstrip("\n").split("\t")
-        if len(parts) == 4:
-            stats[parts[3]] = (int(parts[1] or 0), int(parts[2] or 0))
+def theme_toggle(tokens):
+    section = re.search(r"9\. Theme toggle.*?\*/", tokens, re.S)
+    parts = re.findall(r'<script>.*?</script>|<button class="ou-theme-toggle".*?</button>', section.group(0) if section else "", re.S)
+    if len(parts) != 3:
+        sys.exit("tokens.css has no theme toggle in section 9: expected its two scripts and its button")
+    return parts
 
-    errors, warnings = validate(data, stats)
+
+def main(argv):
+    if len(argv) < 5:
+        sys.exit("usage: render.py <data.json> <gather-dir> <out.html> <design-dir>")
+    data = json.load(open(argv[1]))
+    gather, out, design = argv[2], argv[3], argv[4]
+    meta = json.load(open(f"{gather}/meta.json"))
+    changed = [l.rstrip("\n").split("\t")[3] for l in open(f"{gather}/files.tsv") if l.count("\t") == 3]
+
+    errors, warnings, missing = check(data, set(changed))
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
     if errors:
@@ -142,86 +273,60 @@ def main(argv):
             print(f"error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    cohorts = data["cohorts"]
-    housekeeping = data.get("housekeeping") or []
     repo = re.search(r"github\.com/([^/]+/[^/]+)/pull", meta["url"]).group(1)
-    number = meta["number"]
-    names = {c["id"]: c["name"] for c in cohorts}
-    links = lambda ids: ", ".join(f'<a href="#{d}">{esc(names[d])}</a>' for d in ids)
+    number, head = meta["number"], meta["headRefOid"]
+    areas = data["areas"]
+    housekeeping = list(data.get("housekeeping") or []) + [{"where": p, "note": ""} for p in missing]
+    referenced = set(changed)
+    for a in areas:
+        referenced.update(split_where(x.get("where"))[0] for x in a["changes"] + a["reach"] + (a.get("questions") or []))
+        referenced.update(p for c in a["changes"] for p in c.get("also") or [])
+    files = Files(repo, number, head, set(changed), referenced)
 
-    rows = [f"<tr><td><a href=\"#{c['id']}\">{esc(c['name'])}</a></td><td>{esc(c.get('summary'))}</td>"
-            f"<td>{links(c.get('depends_on') or []) or '–'}</td></tr>" for c in cohorts]
-    sections = [cohort_section(c, links) for c in cohorts]
+    taken = set()
+    ids = [slug(a["name"], taken) for a in areas]
+    order = "".join(f'<li><a href="#{aid}">{esc(a["name"])}</a>{" " + CONTRACT_CHIP if changes_contract(a) else ""} <span>{esc(a.get("gist"))}</span></li>'
+                    for a, aid in zip(areas, ids))
+    sections = "".join(area_html(i, a, aid, files) for i, (a, aid) in enumerate(zip(areas, ids), 1))
     if housekeeping:
-        rows.append(f'<tr><td><a href="#housekeeping">Housekeeping</a></td><td>{plural(len(housekeeping), "file")}</td><td>–</td></tr>')
-        bumps = data.get("version_bump") or []
-        bump_html = "".join(
-            f"<p>Version bump{' for <code>' + esc(b['package']) + '</code>' if b.get('package') else ''}: "
-            f"<code>{esc(b.get('from'))}</code> to <code>{esc(b.get('to'))}</code>. {esc(b.get('convention'))}</p>"
-            for b in bumps)
-        hk_rows = "".join(f"<tr><td><code>{esc(r.get('path'))}</code></td><td>{esc(r.get('kind'))}</td><td>{esc(r.get('note'))}</td></tr>" for r in housekeeping)
-        sections.append(f"""
-<section id="housekeeping">
-  <h2>Housekeeping <label class="check"><input type="checkbox" data-cohort="housekeeping"> I've read this</label></h2>
-  <div class="scroll"><table><tr><th>File</th><th>Kind</th><th>Note</th></tr>
-  {hk_rows}
-  </table></div>{bump_html}
-</section>""")
-    areas = len(cohorts) + (1 if housekeeping else 0)
+        rows = "".join(f'<li>{esc(h.get("note"))} {files.link(h.get("where"))}</li>' for h in housekeeping)
+        one = len(housekeeping) == 1
+        count = f'{len(housekeeping)} file{"" if one else "s"} with no behavior of {"its" if one else "their"} own'
+        order += (f'<li class="housekeeping"><details><summary><b>Housekeeping</b><svg class="ou-icon" aria-hidden="true"><use href="#ou-chevron"/></svg>'
+                  f' <span>{count}</span></summary><ul>{rows}</ul></details></li>')
 
-    ticket = data.get("ticket")
-    if ticket:
-        asks = "".join(f"<tr><td>{esc(a.get('ask'))}</td><td>{esc(a.get('status'))}</td><td><code>{esc(a.get('where'))}</code> {esc(a.get('note'))}</td></tr>"
-                       for a in ticket.get("asks") or [])
-        asks_html = (f'<div class="scroll"><table><tr><th>Ask</th><th>In this diff</th><th>Where</th></tr>{asks}</table></div>' if asks
-                     else "<p>The ticket lists no asks.</p>")
-        unasked = "".join(f"<li>{esc(x)}</li>" for x in ticket.get("unasked") or [])
-        ticket_html = (f'<p><a href="{html.escape(ticket.get("url", ""))}">{esc(ticket.get("key"))}</a>: {esc(ticket.get("summary"))}</p>'
-                       + (f'<p class="note">{esc(ticket["note"])}</p>' if ticket.get("note") else "")
-                       + asks_html + (f"<p>Changes no ask covers:</p><ul>{unasked}</ul>" if unasked else ""))
-    else:
-        ticket_html = "<p>The PR title and branch carry no ticket key.</p>"
-
-    m = re.match(r"([\w./-]+(?:\([^)]*\))?!?:\s*(?:[A-Z][A-Z0-9]+-\d+\b)?)\s*(.+)", meta["title"])
-    h1 = (f'<span class="h1-scope">{esc(m.group(1).strip())}</span> {esc(m.group(2))}' if m else esc(meta["title"]))
-    labels = [l["name"] for l in meta.get("labels") or []]
-    label_row = (f'<div><dt>Labels</dt><dd class="chips">{"".join(f"<span>{esc(l)}</span>" for l in labels)}</dd></div>' if labels else "")
-    first = data.get("open_first") or {}
-    order = " → ".join(esc(c["name"]) for c in cohorts)
-    mermaid = ('<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({startOnLoad: true});</script>'
-               if any(c["sketch"]["kind"] == "mermaid" for c in cohorts) else "")
-    key = json.dumps(f"pr-walkthrough:{repo}#{number}@{meta['headRefOid']}")
+    configs = {mode: mermaid_config(mode) for mode in PALETTES}
+    mermaid = (f'<script type="module">{MERMAID_JS % json.dumps(configs)}</script>'
+               if any(a["sketch"]["kind"] == "mermaid" for a in areas) else "")
+    tokens = open(os.path.join(design, "tokens.css")).read()
+    stamp, toggle, sync = theme_toggle(tokens)
+    sprite = open(os.path.join(design, "icons.svg")).read()
+    symbols = "".join(re.search(rf'<symbol id="ou-{name}".*?</symbol>', sprite, re.S).group(0) for name in ("external", "chevron"))
+    icon = '<svg class="ou-icon" aria-hidden="true"><use href="#ou-external"/></svg>'
+    key, url = ticket_key(meta), os.environ.get("TICKET_URL", "")
+    ticket = f' · <a href="{html.escape(url.replace("{key}", key))}" title="{key}">Open the ticket {icon}</a>' if key and url else ""
 
     page = f"""<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
-<title>Walkthrough of {html.escape(repo)} #{number}</title>
-<style>{CSS}</style></head>
-<body><div class="progressbar"><div class="progressbar-inner"><span class="progressbar-label" data-progress>0 of {areas} areas read</span><div class="progressbar-track" role="progressbar" aria-label="Review progress" aria-valuemin="0" aria-valuenow="0" aria-valuemax="{areas}"><div class="progressbar-fill" data-progress-fill></div></div></div></div>
-<div class="layout">
-<main>
+<title>{html.escape(repo)} #{number} walkthrough</title>
+<style>{tokens}{CSS}{MARK_CSS}</style></head>
+<body>
+{stamp}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
+<main class="page">
   <header>
-  <p class="eyebrow">{html.escape(repo)} #{number}</p>
-  <h1>{h1}</h1>
-  <p class="lede">{esc(data.get('lede'))}</p>
-  <dl class="facts">
-    <div><dt>Author</dt><dd>{esc(meta['author']['login'])}</dd></div>
-    <div><dt>Branch</dt><dd><code>{esc(meta['baseRefName'])}</code> ← <code>{esc(meta['headRefName'])}</code></dd></div>
-    <div><dt>Size</dt><dd>{plural(meta['changedFiles'], 'file')} · <span class="add">+{meta['additions']}</span> / <span class="del">-{meta['deletions']}</span></dd></div>
-    {label_row}
-  </dl>
-</header>
-  <section id="orientation"><h2>Orientation</h2>
-  <div class="scroll"><table><tr><th>Area</th><th>What changed</th><th>Depends on</th></tr>{''.join(rows)}</table></div>
-  <p>Read in this order: {order}.</p>
-  <p>Open first: <code>{esc(first.get('path'))}</code>, {esc(first.get('why'))}</p></section>
-  <section id="ticket"><h2>Ticket</h2>{ticket_html}</section>
-  {''.join(sections)}
+    <div class="top"><span class="repo">{html.escape(repo)} #{number}</span>
+      {toggle}</div>
+    <h1>{html.escape(meta["title"])}</h1>
+    <p class="summary">{esc(data.get('summary'))}</p>
+    <p class="meta">{esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}">Open the PR {icon}</a>{ticket}</p>
+  </header>
+  <section class="order"><h2>Reading order</h2><ol>{order}</ol></section>
+  {sections}
 </main>
-</div>
 {mermaid}
-<script>{PROGRESS_JS.replace("__KEY__", key)}</script>
-<script>{HASH_JS}</script>
+{sync}
 </body></html>
 """
     open(out, "w").write(page)
@@ -229,157 +334,101 @@ def main(argv):
 
 
 CSS = r'''
-:root { color-scheme: dark; --brand: #00a87e; --brand-soft: rgba(0,168,126,.14); --surface: #1c1d20; --surface-2: #282a2e; --warn: #f4be19; --good: #00a87e; --bad: #e05666; --fg: #fafafa; --muted: #a3a4ab; --line: #34363c; --bg: #121212; --code-bg: #282a2e; --accent: #2cc39a; --before: rgba(224,86,102,.12); --after: rgba(0,168,126,.12); }
-* { box-sizing: border-box; }
-body { margin: 0; font: 16px/1.65 Lato, "Helvetica Neue", Arial, sans-serif; color: var(--fg); background: var(--bg); }
-.layout { max-width: 880px; margin: 0 auto; padding: 24px; }
-a { color: var(--accent); text-decoration-color: rgba(44,195,154,.4); text-underline-offset: 2px; }
-.note { color: var(--muted); font-size: 13px; font-style: italic; }
-.deps { color: var(--muted); font-size: 13px; margin-top: 0; }
-h1 { font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -.01em; margin: 6px 0 12px; }
-h2 { display: flex; align-items: center; font-size: 26px; font-weight: 900; line-height: 1.3; letter-spacing: -.01em; margin: 6px 0 12px; }
-h3 { font-weight: 900; line-height: 1.3; }
-.check { font-size: 13px; font-weight: 400; color: var(--muted); white-space: nowrap; }
-table { border-collapse: collapse; width: 100%; font-size: 14px; }
-th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
-.delta .before { background: var(--before); }
-.delta .after { background: var(--after); }
-code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: #e2e2e2; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
-figure { margin: 8px 0; }
-figcaption { font: 12px ui-monospace, Menlo, monospace; color: var(--muted); }
-pre { background: var(--code-bg); padding: 10px; border-radius: 6px; overflow: auto; }
-pre code { background: none; padding: 0; }
-
-p, li { max-width: 72ch; }
-section { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 4px 24px 20px; margin: 24px 0; scroll-margin-top: calc(60px + env(safe-area-inset-top, 0px)); transition: opacity .2s; }
-section > p:not(.deps) { color: var(--fg); }
-details.block { border-top: 1px solid var(--line); margin-top: 14px; }
-details.block > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 0 6px; }
-details.block > summary::-webkit-details-marker { display: none; }
-details.block > summary::before { content: "\25B8"; color: var(--brand); font-size: 12px; transition: transform .15s; width: 10px; }
-details.block[open] > summary::before { transform: rotate(90deg); }
-details.block > summary h3 { margin: 0; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-details.block > summary:hover h3 { color: var(--brand); }
-.count { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--brand-soft); border-radius: 999px; padding: 1px 8px; }
-.block-body { padding: 2px 0 4px 20px; }
-details.author > summary h3 { color: var(--warn); }
-.block-body ol, .block-body ul { padding-left: 20px; margin: 6px 0; }
-.block-body li { margin: 10px 0; }
-.block-body ol > li > code:first-child { display: block; width: fit-content; max-width: 100%; margin-bottom: 4px; font-size: 12px; color: var(--muted); }
-.block-body p strong { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
-.delta th { width: 76px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; background: transparent; }
-.delta td, .delta th { border: 0; padding: 10px 12px; }
-.delta tr.before th { border-left: 3px solid var(--bad); }
-.delta tr.after th { border-left: 3px solid var(--good); }
-.delta { border-radius: 8px; overflow: hidden; }
-.scroll { overflow-x: auto; }
-.scroll table { min-width: 480px; }
-th { color: var(--muted); font-weight: 600; font-size: 13px; background: var(--surface-2); }
-.focus li > code:last-child, .author li > code:last-of-type { display: block; width: fit-content; max-width: 100%; margin-top: 4px; font-size: 12px; color: var(--muted); }
-.diagram { margin: 14px 0 0; padding: 12px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
-.diagram pre { margin: 0; background: none; }
-
-section h2::before { content: ""; display: inline-block; width: 4px; height: 20px; border-radius: 2px; background: var(--brand); margin-right: 10px; vertical-align: -3px; }
-.author li > br { display: none; }
-.author li > span.note { display: block; margin-top: 6px; }
-h2 .check { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; line-height: 1; cursor: pointer; flex-shrink: 0; }
-h2 .check input { margin: 0; vertical-align: middle; width: 16px; height: 16px; flex: none; cursor: pointer; accent-color: var(--brand); }
-a:hover { color: #fff; text-decoration-color: var(--brand); }
-.sketch-diff span { display: block; }
-.sketch-diff .add { background: var(--after); }
-.sketch-diff .del { background: var(--before); }
-::selection { background: rgba(0,168,126,.4); }
-
-header { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brand); border-radius: 16px; padding: 20px 24px 18px; margin: 20px 0 8px; }
-header .eyebrow { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
-.h1-scope { display: block; font-size: 14px; font-weight: 700; letter-spacing: 0; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin-bottom: 2px; }
-header .lede { font-size: 16px; line-height: 1.65; color: #d4d5da; margin: 0 0 16px; }
-dl.facts { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; color: var(--fg); }
-dl.facts > div { display: contents; }
-dl.facts dt { color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding-top: 3px; }
-dl.facts dd { margin: 0; min-width: 0; }
-dl.facts .add { color: var(--good); font-weight: 700; }
-dl.facts .del { color: var(--bad); font-weight: 700; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chips span { font-size: 12px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; color: var(--muted); }
-
-.progressbar { position: sticky; top: 0; z-index: 10; padding-top: env(safe-area-inset-top, 0px); background: rgba(18,18,18,.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-.progressbar-inner { max-width: 880px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 14px; }
-.progressbar-label { font-weight: 700; font-size: 13px; white-space: nowrap; color: var(--fg); min-width: 130px; }
-.progressbar-track { flex: 1; height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
-.progressbar-fill { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, #00986a, #00a87e, #2cc39a); transition: width .35s ease; }
-.all-read .progressbar-label { color: var(--accent); }
-html { scroll-padding-top: calc(52px + env(safe-area-inset-top, 0px)); }
-section.is-read:not(.peek) > :not(h2) { display: none !important; }
-section.is-read { padding-bottom: 4px; opacity: .78; }
-section.is-read:hover, section.is-read.peek { opacity: 1; }
-section.is-read h2 { cursor: pointer; margin: 12px 0; }
-section.is-read h2::before { background: var(--muted); }
-section.is-read h2::after { content: "Read \2713  \00B7  click to show"; order: 1; margin-left: 12px; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--brand-soft); border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
-section.is-read.peek h2::after { content: "Read \2713  \00B7  click to hide"; }
-section.is-read h2 .check { order: 2; }
-#orientation a.read::after { content: " \2713"; color: var(--accent); }
-@media (max-width: 640px) { .layout { padding: 12px; } section { padding: 4px 14px 14px; } .block-body { padding-left: 4px; } .progressbar-inner { padding: 8px 12px; } .progressbar-label { min-width: 0; } section.is-read h2 { flex-wrap: wrap; row-gap: 6px; } }
+.page { max-width: 880px; margin: 0 auto; padding: var(--ou-space-3) var(--ou-gutter) var(--ou-space-8); }
+a { color: var(--ou-accent-pressed); text-underline-offset: 2px; transition: color var(--ou-duration-press) var(--ou-ease-standard); }
+a:hover { color: var(--ou-accent-hover); }
+a:active { color: var(--ou-accent-pressed); }
+pre, code { background: transparent; color: inherit; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.875em; overflow-wrap: anywhere; }
+a.file { text-decoration: none; }
+a.file code { color: var(--ou-accent-pressed); border-bottom: 1px solid var(--ou-border); }
+a.file:hover code { border-bottom-color: var(--ou-accent); }
+p, li { max-width: var(--ou-measure); }
+header .top { display: flex; align-items: center; justify-content: space-between; gap: var(--ou-space-2); }
+header .repo { font-weight: var(--ou-weight-medium); font-size: var(--ou-size-body); color: var(--ou-text-secondary); }
+h1 { font-size: var(--ou-size-h3); line-height: 1.375; margin: var(--ou-space-1) 0 var(--ou-space-2); }
+h2 { font-size: var(--ou-size-h4); line-height: 1.5385; margin: 0 0 var(--ou-space-1); }
+.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: 0 0 var(--ou-space-2); max-width: none; }
+.meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: 0; max-width: none; }
+section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); padding: var(--ou-space-3); margin-top: var(--ou-space-3); scroll-margin-top: var(--ou-space-2); }
+.order ol { margin: 0; padding-left: var(--ou-space-3); }
+.order li { margin: var(--ou-space-half) 0; }
+.order li > a { font-weight: var(--ou-weight-medium); }
+.order li > span, .housekeeping summary span, .gist { color: var(--ou-text-secondary); }
+.num { color: var(--ou-accent-pressed); margin-right: var(--ou-space-1); }
+.gist { margin: 0 0 var(--ou-space-2); }
+.delta { display: grid; gap: var(--ou-space-1); margin: 0 0 var(--ou-space-2); }
+.delta > div { display: grid; grid-template-columns: 72px 1fr; gap: var(--ou-space-2); padding: var(--ou-space-1) var(--ou-space-2); border-left: 3px solid var(--ou-text-hint); }
+.delta > .after { border-left-color: var(--ou-accent); }
+.delta span { font-weight: var(--ou-weight-medium); font-size: var(--ou-size-body); color: var(--ou-text-secondary); padding-top: 2px; }
+.delta p { margin: 0; }
+.unchanged { color: var(--ou-text-secondary); }
+.sketch { margin: 0 0 var(--ou-space-2); border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); overflow-x: auto; background: var(--ou-surface); color: var(--ou-text); }
+.sketch pre { margin: 0; padding: var(--ou-space-2) 0; font-size: var(--ou-size-body); line-height: 1.6; }
+.sketch pre > code { display: inline-block; min-width: 100%; vertical-align: top; }
+.sketch pre span { display: block; padding: 0 var(--ou-space-2); }
+.sketch pre.diagram { padding: var(--ou-space-2); text-align: center; }
+.sketch .add { background: color-mix(in srgb, var(--ou-accent) 14%, transparent); }
+.sketch .del { background: color-mix(in srgb, var(--ou-error) 14%, transparent); }
+.questions { margin: 0 0 var(--ou-space-2); }
+.label, .facts dt { font-weight: var(--ou-weight-medium); font-size: var(--ou-size-body); margin: 0 0 var(--ou-space-half); }
+.questions ul { margin: 0; padding-left: var(--ou-space-3); }
+.questions li { margin: var(--ou-space-1) 0; }
+.chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; white-space: nowrap; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--ou-space-1) var(--ou-space-2); margin: 0; padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); font-size: var(--ou-size-body); line-height: 1.6; }
+.facts dt { margin: 0; color: var(--ou-text-secondary); }
+.facts dd { margin: 0; min-width: 0; }
+.facts ul { margin: 0; padding: 0; list-style: none; }
+.facts li { margin: 0 0 var(--ou-space-half); }
+.facts p { margin: 0; }
+.chip.contract { background: var(--ou-warning); color: var(--ou-warning-text); }
+.chip { vertical-align: 1.5px; }
+.facts .chip { vertical-align: 0.5px; }
+.role { font-size: var(--ou-size-caption); color: var(--ou-text-hint); }
+.also { display: inline; }
+.also summary { display: inline; cursor: pointer; color: var(--ou-text-hint); }
+.also[open] { display: block; }
+.housekeeping summary { cursor: pointer; list-style: none; }
+.housekeeping summary::-webkit-details-marker { display: none; }
+.housekeeping summary b { font-weight: var(--ou-weight-medium); color: var(--ou-accent-pressed); }
+.housekeeping summary:hover b { color: var(--ou-accent-hover); }
+.housekeeping summary .ou-icon { width: 0.75em; height: 0.75em; margin: 0 2px 0 4px; color: var(--ou-accent-pressed); vertical-align: -1px; transition: transform var(--ou-duration-press) var(--ou-ease-standard); }
+.housekeeping details[open] .ou-icon { transform: rotate(90deg); }
+.housekeeping ul { margin: var(--ou-space-1) 0 var(--ou-space-1) var(--ou-space-2); padding: 0; list-style: none; font-size: var(--ou-size-body); }
+.housekeeping ul li { margin: var(--ou-space-half) 0; }
+.key { display: flex; flex-wrap: wrap; gap: var(--ou-space-half) var(--ou-space-2); margin: 0; padding: var(--ou-space-1) var(--ou-space-2); max-width: none; border-top: 1px solid var(--ou-border); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key i { box-sizing: border-box; width: 18px; height: 12px; border-radius: 2px; }
+.key .arrow { height: 0; border-radius: 0; }
+@media (max-width: 600px) {
+  section { padding: var(--ou-space-2); }
+  .facts { grid-template-columns: 1fr; }
+  .facts dd { margin-bottom: var(--ou-space-1); }
+  .delta > div { grid-template-columns: 1fr; gap: 0; }
+}
 '''
 
-PROGRESS_JS = r'''
-(() => {
-  const key = __KEY__;
-  let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(key) || "{}"); } catch (e) {}
-  const boxes = [...document.querySelectorAll("input[data-cohort]")];
-  const label = document.querySelector("[data-progress]");
-  const fill = document.querySelector("[data-progress-fill]");
-  const bar = document.querySelector(".progressbar [role=progressbar]");
-  const sectionOf = (b) => b.closest("section");
-  const update = () => {
-    const done = boxes.filter((b) => b.checked).length;
-    if (label) label.textContent = done === boxes.length ? `All ${boxes.length} areas read` : `${done} of ${boxes.length} areas read`;
-    if (fill) fill.style.width = `${boxes.length ? (done / boxes.length) * 100 : 0}%`;
-    if (bar) { bar.setAttribute("aria-valuenow", String(done)); bar.setAttribute("aria-valuemax", String(boxes.length)); }
-    document.documentElement.classList.toggle("all-read", done === boxes.length);
-    for (const b of boxes) {
-      const sec = sectionOf(b);
-      if (sec) { sec.classList.toggle("is-read", b.checked); if (!b.checked) sec.classList.remove("peek"); }
-      for (const a of document.querySelectorAll(`#orientation a[href="#${b.dataset.cohort}"]`)) a.classList.toggle("read", b.checked);
-    }
-  };
-  for (const b of boxes) {
-    b.checked = !!saved[b.dataset.cohort];
-    b.addEventListener("change", () => {
-      saved[b.dataset.cohort] = b.checked;
-      try { localStorage.setItem(key, JSON.stringify(saved)); } catch (e) {}
-      const sec = sectionOf(b);
-      if (sec) sec.classList.remove("peek");
-      update();
-      if (b.checked && sec && sec.getBoundingClientRect().top < 0) sec.scrollIntoView({ block: "start" });
-    });
-    const h2 = b.closest("h2");
-    if (h2) h2.addEventListener("click", (ev) => {
-      if (ev.target.closest("label")) return;
-      const sec = sectionOf(b);
-      if (sec && sec.classList.contains("is-read")) sec.classList.toggle("peek");
-    });
-  }
-  window.addEventListener("hashchange", () => {
-    const el = document.getElementById(location.hash.slice(1));
-    const sec = el && el.closest("section.is-read");
-    if (sec && el !== sec) { sec.classList.add("peek"); el.scrollIntoView(); }
-  });
-  update();
-})();
+MERMAID_JS = r'''
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+const configs = %s, root = document.documentElement, nodes = [...document.querySelectorAll("pre.diagram")];
+for (const pre of nodes) pre.dataset.source = pre.textContent;
+async function draw() {
+  mermaid.initialize(configs[root.getAttribute("data-theme") === "dark" ? "dark" : "light"]);
+  for (const pre of nodes) { pre.removeAttribute("data-processed"); pre.textContent = pre.dataset.source; }
+  await mermaid.run({nodes, suppressErrors: true});
+  for (const svg of document.querySelectorAll("pre.diagram svg")) svg.style.minWidth = Math.round(svg.viewBox.baseVal.width * 0.8) + "px";
+}
+await draw();
+new MutationObserver(draw).observe(root, {attributes: true, attributeFilter: ["data-theme"]});
 '''
 
-HASH_JS = r'''
-(() => {
-  const openTarget = () => {
-    const id = location.hash.slice(1); if (!id) return;
-    const el = document.getElementById(id); const d = el && el.closest("details");
-    if (d) { d.open = true; el.scrollIntoView(); }
-  };
-  window.addEventListener("hashchange", openTarget); openTarget();
-})();
-'''
+MARK_CSS = "".join(f':root{sel}{{--mk-added:{c["added"]};--mk-removed:{c["removed"]}}}'
+                   for sel, c in (("", PALETTES["light"]), ('[data-theme="dark"]', PALETTES["dark"]))) + (
+    f".key .box.added{{background:var(--mk-added);border:2px solid {ADDED}}}"
+    f".key .box.removed{{background:var(--mk-removed);border:2px dashed {REMOVED}}}"
+    f".key .arrow{{border-top:3px solid {ADDED}}}"
+    f".key .band.added{{background:{MARKS['added']}}}.key .band.removed{{background:{MARKS['removed']}}}")
+
 
 if __name__ == "__main__":
     main(sys.argv)

@@ -76,7 +76,7 @@ Take a code change from ticket to merge.
 | [`kill-comments`](plugins/engineering/skills/kill-comments/SKILL.md) | Deletes code comments and "what" docs so code is the what and docs are the why | No |
 | [`git`](plugins/engineering/skills/git/SKILL.md) | Branch, worktree, commit, and cleanup conventions | No |
 | [`review-code`](plugins/engineering/skills/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
-| [`walk-through-pr`](plugins/engineering/skills/walk-through-pr/SKILL.md) | Builds a page that maps a PR for a human reviewer: changes grouped by area of impact in reading order, what each group depends on, the ticket's asks mapped to the diff, questions only the author can answer, and reading checkboxes | No |
+| [`walk-through-pr`](plugins/engineering/skills/walk-through-pr/SKILL.md) | Builds a short page that maps a PR for a human reviewer: its changes grouped by area of impact in reading order, each with its before-and-after behavior, a sketch with the change marked, the callers the PR leaves alone, and questions to settle | No |
 | [`open-pr`](plugins/engineering/skills/open-pr/SKILL.md) | Opens a PR, ready for review, with a fixed title and body format | No |
 | [`push-pr`](plugins/engineering/skills/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
 | [`comment-pr`](plugins/engineering/skills/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
