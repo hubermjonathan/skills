@@ -33,7 +33,7 @@ An **area** is one area of impact: changes a reviewer should hold in their head 
 - the behavior: two files that together move one flag's effect are one area, even in different modules
 - the surface: a contract change and the clients updated for it are one area
 
-Release plumbing, docs, lockfiles, and generated files go in **housekeeping**. A config change with an effect of its own, such as a scanner's ignore list, is an area.
+**Housekeeping** holds only the files a reviewer can skip: version bumps, lockfiles, generated files, tool settings such as `.gitignore` or a tool's version pin, and docs that describe no area. Every other file goes in the area it ships with, however small: a deleted script's README goes with its removal, and a new job's chart and Terraform go with its deployment. A config change with an effect of its own, such as a scanner's ignore list, is an area.
 
 Order areas by what to read first: the contract or the core behavior change, then what follows from it. When area B uses something area A changes, A comes first.
 

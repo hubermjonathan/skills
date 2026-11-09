@@ -51,7 +51,7 @@ The renderer warns when a field runs past its word cap. Treat a warning as a sen
 | `reach` | Code in files this PR doesn't touch that uses the changed names, from `callers.tsv`. Use an empty list when nothing does, and the page says so. | 15 words per `note` |
 | `tests` | `files`: the test files this area changes, which the page counts as accounted for but doesn't list. `covered`: behavior that a test in the PR checks. `missing`: behavior that no test checks. Phrases, not sentences. | 12 words each |
 | `questions` | Up to 4, each anchored on a `where`. Set `ask_author` when only the author can answer it, such as where a value came from or why a check was removed. Otherwise it's something a reviewer can settle by reading. | 30 words each |
-| `housekeeping` | Release plumbing, docs, lockfiles, and generated files, one row each, with a short `note` or `""`. | |
+| `housekeeping` | The files a reviewer can skip, as `SKILL.md` defines them, one row each, with a short `note` or `""`. | |
 
 Every path in `files.tsv` appears in an area's `changes` (or its `also`), an area's `tests.files`, or `housekeeping`. A file that holds changes for two areas appears in both. A path the data leaves out shows under housekeeping, with a warning.
 

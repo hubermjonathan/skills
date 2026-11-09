@@ -339,9 +339,9 @@ a { color: var(--ou-accent-pressed); text-underline-offset: 2px; transition: col
 a:hover { color: var(--ou-accent-hover); }
 a:active { color: var(--ou-accent-pressed); }
 pre, code { background: transparent; color: inherit; }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.875em; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.875em; overflow-wrap: anywhere; }
 a.file { text-decoration: none; }
-a.file code { color: var(--ou-accent-pressed); border-bottom: 1px solid var(--ou-border); overflow-wrap: anywhere; }
+a.file code { color: var(--ou-accent-pressed); border-bottom: 1px solid var(--ou-border); }
 a.file:hover code { border-bottom-color: var(--ou-accent); }
 p, li { max-width: var(--ou-measure); }
 header .top { display: flex; align-items: center; justify-content: space-between; gap: var(--ou-space-2); }
