@@ -13,9 +13,9 @@ WORD_CAPS = {"summary": 50, "gist": 15, "change": 12, "note": 15, "question": 30
 ADDED, REMOVED = "#00a87e", "#e05666"
 PALETTES = {
     "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
-              "actor": "#def3ec", "added": "#def3ec", "removed": "#ffd7df", "note": "#fdf2cc", "cluster": "#fafafa"},
+              "added": "#def3ec", "removed": "#ffd7df", "note": "#fdf2cc", "cluster": "#fafafa"},
     "dark": {"bg": "#121215", "text": "#f7f7f7", "line": "#ababab", "node": "#282a2e", "border": "#8a8a8a",
-             "actor": "#0e382f", "added": "#0e382f", "removed": "#462329", "note": "#3f3416", "cluster": "#1e2024"},
+             "added": "#0e382f", "removed": "#462329", "note": "#3f3416", "cluster": "#1e2024"},
 }
 
 
@@ -28,7 +28,7 @@ def mermaid_config(mode):
             "darkMode": mode == "dark", "background": c["bg"], "fontFamily": "Lato", "fontSize": "16px",
             "textColor": c["text"], "primaryTextColor": c["text"], "lineColor": c["line"],
             "primaryColor": c["node"], "primaryBorderColor": c["border"], "secondaryColor": c["node"], "tertiaryColor": c["bg"],
-            "actorBkg": c["actor"], "actorBorder": "#00a87e", "actorTextColor": c["text"], "actorLineColor": c["border"],
+            "actorBkg": c["node"], "actorBorder": c["border"], "actorTextColor": c["text"], "actorLineColor": c["border"],
             "signalColor": c["text"], "signalTextColor": c["text"],
             "labelBoxBkgColor": c["bg"], "labelBoxBorderColor": c["border"], "labelTextColor": c["text"], "loopTextColor": c["text"],
             "noteBkgColor": c["note"], "noteBorderColor": "#f4be19", "noteTextColor": c["text"],
@@ -289,16 +289,19 @@ def main(argv):
                     for a, aid in zip(areas, ids))
     sections = "".join(area_html(i, a, aid, files) for i, (a, aid) in enumerate(zip(areas, ids), 1))
     if housekeeping:
-        order += f'<li><a href="#housekeeping">Housekeeping</a> <span>{len(housekeeping)} file{"" if len(housekeeping) == 1 else "s"} with no behavior of their own</span></li>'
         rows = "".join(f'<li>{esc(h.get("note"))} {files.link(h.get("where"))}</li>' for h in housekeeping)
-        sections += f'<section class="area housekeeping" id="housekeeping"><h2>Housekeeping</h2><ul>{rows}</ul></section>'
+        one = len(housekeeping) == 1
+        count = f'{len(housekeeping)} file{"" if one else "s"} with no behavior of {"its" if one else "their"} own'
+        order += (f'<li class="housekeeping"><details><summary><b>Housekeeping</b><svg class="ou-icon" aria-hidden="true"><use href="#ou-chevron"/></svg>'
+                  f' <span>{count}</span></summary><ul>{rows}</ul></details></li>')
 
     configs = {mode: mermaid_config(mode) for mode in PALETTES}
     mermaid = (f'<script type="module">{MERMAID_JS % json.dumps(configs)}</script>'
                if any(a["sketch"]["kind"] == "mermaid" for a in areas) else "")
     tokens = open(os.path.join(design, "tokens.css")).read()
     stamp, toggle, sync = theme_toggle(tokens)
-    external = re.search(r'<symbol id="ou-external".*?</symbol>', open(os.path.join(design, "icons.svg")).read(), re.S).group(0)
+    sprite = open(os.path.join(design, "icons.svg")).read()
+    symbols = "".join(re.search(rf'<symbol id="ou-{name}".*?</symbol>', sprite, re.S).group(0) for name in ("external", "chevron"))
     icon = '<svg class="ou-icon" aria-hidden="true"><use href="#ou-external"/></svg>'
     key, url = ticket_key(meta), os.environ.get("TICKET_URL", "")
     ticket = f' · <a href="{html.escape(url.replace("{key}", key))}" title="{key}">Open the ticket {icon}</a>' if key and url else ""
@@ -310,7 +313,7 @@ def main(argv):
 <style>{tokens}{CSS}{MARK_CSS}</style></head>
 <body>
 {stamp}
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">{external}</svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
 <main class="page">
   <header>
     <div class="top"><span class="repo">{html.escape(repo)} #{number}</span>
@@ -351,7 +354,7 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .order ol { margin: 0; padding-left: var(--ou-space-3); }
 .order li { margin: var(--ou-space-half) 0; }
 .order li > a { font-weight: var(--ou-weight-medium); }
-.order li > span, .gist { color: var(--ou-text-secondary); }
+.order li > span, .housekeeping summary span, .gist { color: var(--ou-text-secondary); }
 .num { color: var(--ou-accent-pressed); margin-right: var(--ou-space-1); }
 .gist { margin: 0 0 var(--ou-space-2); }
 .delta { display: grid; gap: var(--ou-space-1); margin: 0 0 var(--ou-space-2); }
@@ -385,8 +388,14 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .also { display: inline; }
 .also summary { display: inline; cursor: pointer; color: var(--ou-text-hint); }
 .also[open] { display: block; }
-.housekeeping ul { margin: 0; padding: 0; list-style: none; font-size: var(--ou-size-body); }
-.housekeeping li { margin: var(--ou-space-half) 0; }
+.housekeeping summary { cursor: pointer; list-style: none; }
+.housekeeping summary::-webkit-details-marker { display: none; }
+.housekeeping summary b { font-weight: var(--ou-weight-medium); color: var(--ou-accent-pressed); }
+.housekeeping summary:hover b { color: var(--ou-accent-hover); }
+.housekeeping summary .ou-icon { width: 0.75em; height: 0.75em; margin: 0 2px 0 4px; color: var(--ou-accent-pressed); vertical-align: -1px; transition: transform var(--ou-duration-press) var(--ou-ease-standard); }
+.housekeeping details[open] .ou-icon { transform: rotate(90deg); }
+.housekeeping ul { margin: var(--ou-space-1) 0 var(--ou-space-1) var(--ou-space-2); padding: 0; list-style: none; font-size: var(--ou-size-body); }
+.housekeeping ul li { margin: var(--ou-space-half) 0; }
 .key { display: flex; flex-wrap: wrap; gap: var(--ou-space-half) var(--ou-space-2); margin: 0; padding: var(--ou-space-1) var(--ou-space-2); max-width: none; border-top: 1px solid var(--ou-border); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
 .key span { display: inline-flex; align-items: center; gap: 6px; }
 .key i { box-sizing: border-box; width: 18px; height: 12px; border-radius: 2px; }
