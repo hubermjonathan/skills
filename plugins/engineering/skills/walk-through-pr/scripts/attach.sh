@@ -45,7 +45,7 @@ awk -v url="$url" -v sha="$sha" -v note="$note" '
     if (note) {
       print ""
       print "> [!IMPORTANT]"
-      print "> The walkthrough may be visible only to its author. Share it with the reviewers, then add the `ready-for-review` label or delete this note."
+      print "> The walkthrough may be visible only to its author. Share it with the reviewers, then mark this PR ready for review or delete this note."
     }
     print "<!-- /pr-walkthrough -->"
     print ""

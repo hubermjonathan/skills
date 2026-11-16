@@ -12,7 +12,7 @@ INTERVAL="${WATCH_INTERVAL:-60}"
 AGENT_NOTE='\A> \[!NOTE\]\r?\n> [^\n]*responding on behalf of'
 PR_NUM="$PR"; REPO_SLUG="$GHREPO"
 
-first=1 fails=0 green=0 last_stall="" prev_rd="" prev_labels="[]" seen=$'\n'
+first=1 fails=0 green=0 last_stall="" prev_rd="" prev_draft="" seen=$'\n'
 
 now() { date -u +%FT%TZ; }
 emit() {
@@ -24,7 +24,7 @@ seen() { [[ "$seen" == *$'\n'"$1"$'\n'* ]]; }
 mark() { seen+="$1"$'\n'; }
 p()    { jq -r "$1 // empty" <<<"$2"; }
 
-FIELDS='state,isDraft,labels,mergeStateStatus,reviewDecision,statusCheckRollup,comments,reviews,mergeCommit,headRefOid'
+FIELDS='state,isDraft,mergeStateStatus,reviewDecision,statusCheckRollup,comments,reviews,mergeCommit,headRefOid'
 WRITER='if ((.body // "") | test($note)) then "agent" else "human" end'
 
 read -r PR_NUM REPO_SLUG < <(gh pr view "$PR" ${GHREPO:+--repo "$GHREPO"} --json number,url -q '"\(.number) \(.url | split("/")[3:5] | join("/"))"' 2>/dev/null)
@@ -45,11 +45,8 @@ while :; do
     emit review_decision "\"decision\":$(jq -Rn --arg v "$rd" '$v')"
   fi
 
-  if (( ! first )); then
-    while read -r label; do
-      [[ -n "$label" ]] && emit labeled "\"label\":$(jq -Rn --arg v "$label" '$v')"
-    done < <(jq -r --argjson prev "$prev_labels" '((.labels // []) | map(.name)) - $prev | .[]' <<<"$snap")
-  fi
+  draft="$(jq -r .isDraft <<<"$snap")"
+  (( ! first )) && [[ "$prev_draft" == true && "$draft" == false ]] && emit ready_for_review
 
   inline="$(gh api "/repos/$REPO_SLUG/pulls/$PR_NUM/comments" --paginate 2>/dev/null \
     | jq -r --arg note "$AGENT_NOTE" ".[]? | \"r\(.id) \(.user.login//\"\") \($WRITER) \(.path//\"?\"):\(.line // .original_line // 0) \(.body // \"\" | gsub(\"[\r\n]+\"; \" \"))\"")"
@@ -96,7 +93,7 @@ while :; do
   fi
 
   prev_rd="$rd"
-  prev_labels="$(jq -c '(.labels // []) | map(.name)' <<<"$snap")"
+  prev_draft="$draft"
   first=0
 
   case "$state" in

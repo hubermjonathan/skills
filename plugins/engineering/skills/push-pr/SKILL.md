@@ -8,7 +8,7 @@ description: >
 
 ## Before pushing
 
-1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,isDraft,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name.
+1. Find the PR and its head: `gh pr view --json number,headRefName,baseRefName,reviewDecision,title,body`. Push to that head branch, which may not be your local branch name.
 2. Update from the base when it conflicts or the repo requires an up-to-date branch. Invoke the `git` skill for how. Resolve conflicts by keeping both sides' intent, and never abort.
 3. If this push answers review comments, reply to them first. Invoke the `comment-pr` skill.
 4. Remove debug output and stray files the new commits added. For comments and docs, invoke the `kill-comments` skill.
@@ -33,6 +33,5 @@ description: >
    - When the new head is past the commit the walkthrough was built on, change its `[!TIP]` to `[!WARNING]`, and end its line right after the commit with " is outdated: <n> commits landed since."
 
    Apply with `gh pr edit <n> --body-file ...`.
-3. If the PR is a draft, run `gh pr ready <n>`.
-4. Check CI on the new head with `gh pr checks <n>`. A red right after a push or a base move is not real until `gh pr checks <n>` shows it on the new head.
-5. Report in one or two lines: what was pushed, what changed in the title or body, what's marked stale, and check status.
+3. Check CI on the new head with `gh pr checks <n>`. A red right after a push or a base move is not real until `gh pr checks <n>` shows it on the new head.
+4. Report in one or two lines: what was pushed, what changed in the title or body, what's marked stale, and check status.
