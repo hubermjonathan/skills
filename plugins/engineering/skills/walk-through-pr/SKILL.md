@@ -99,7 +99,7 @@ If the page has a link, attach it to the PR description:
 
 It puts a `Walkthrough` section right below the description's disclosure note, replacing an earlier one, names the commit the page was built on, and never prints the description.
 
-A published page can start out visible only to its author, and only the author can share it. Unless you know the PR's reviewers can open the page, attach it with `--share-note`. That adds a note asking the author to share the page and then add the `ready-for-review` label, on the first attach only. When the PR gets that label, delete the note:
+A published page can start out visible only to its author, and only the author can share it. Unless you know the PR's reviewers can open the page, attach it with `--share-note`. That adds a note asking the author to share the page and then mark the PR ready for review, on the first attach only. When the PR is marked ready, delete the note:
 
     <this skill's directory>/scripts/attach.sh <pr> --shared
 

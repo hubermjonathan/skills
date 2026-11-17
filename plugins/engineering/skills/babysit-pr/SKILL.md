@@ -22,7 +22,7 @@ description: >
 - `check_passed`: note it.
 - `review_comment`: invoke the `address-feedback` skill.
 - `review_decision`: on `CHANGES_REQUESTED`, invoke the `address-feedback` skill. `APPROVED` satisfies the review requirement.
-- `labeled`: `ready-for-review` means the author has shared the walkthrough and handed the PR to reviewers. Delete the walkthrough's share note: invoke the `walk-through-pr` skill for it.
+- `ready_for_review`: the author marked the draft ready, so they've shared the walkthrough and handed the PR to reviewers. Delete the walkthrough's share note: invoke the `walk-through-pr` skill for it.
 - `merge_blocked`: on `conflict`, merge the latest base in as in step 3, resolve, and push. On `behind_base`, merge the base in only if branch protection requires an up-to-date branch. Tell the user if a conflict needs their decision.
 - `pr_merged` or `pr_closed`: stop.
 - `watcher_died`: restart it once and say so. If it dies again, stop and report.

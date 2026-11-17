@@ -14,7 +14,7 @@ The user's instructions win over the defaults below.
 4. Commit and push.
 5. Invoke the `verify` skill for the `Checks and claims` evidence, unless the caller already has evidence for the head commit.
 6. Write the title and body in the format below.
-7. Open it ready for review with `gh pr create`. Never open a draft.
+7. Open it with `gh pr create`, ready for review, or with `--draft` when the caller asks for a draft.
 8. Reply with the PR url.
 
 ## Title
