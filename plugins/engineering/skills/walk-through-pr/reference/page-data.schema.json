@@ -1,16 +1,33 @@
 {
   "type": "object",
   "additionalProperties": false,
-  "required": ["summary", "areas", "housekeeping"],
+  "required": ["summary", "overview", "areas", "housekeeping"],
+  "$defs": {
+    "sketch": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "source"],
+          "properties": {
+            "kind": {"type": "string", "enum": ["mermaid", "tree-diff"]},
+            "source": {"type": "string"}
+          }
+        }
+      ]
+    }
+  },
   "properties": {
     "summary": {"type": "string"},
+    "overview": {"$ref": "#/$defs/sketch"},
     "areas": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "gist", "behavior", "sketch", "changes", "reach", "tests", "questions"],
+        "required": ["name", "gist", "behavior", "sketch", "changes", "reach", "tests"],
         "properties": {
           "name": {"type": "string"},
           "gist": {"type": "string"},
@@ -25,15 +42,7 @@
               }
             ]
           },
-          "sketch": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["kind", "source"],
-            "properties": {
-              "kind": {"type": "string", "enum": ["mermaid", "tree-diff"]},
-              "source": {"type": "string"}
-            }
-          },
+          "sketch": {"$ref": "#/$defs/sketch"},
           "changes": {
             "type": "array",
             "items": {
@@ -65,20 +74,6 @@
               "files": {"type": "array", "items": {"type": "string"}},
               "covered": {"type": "array", "items": {"type": "string"}},
               "missing": {"type": "array", "items": {"type": "string"}}
-            }
-          },
-          "questions": {
-            "type": "array",
-            "maxItems": 4,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["q", "where", "ask_author"],
-              "properties": {
-                "q": {"type": "string"},
-                "where": {"type": "string"},
-                "ask_author": {"type": "boolean"}
-              }
             }
           }
         }

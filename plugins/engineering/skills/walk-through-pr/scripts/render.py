@@ -9,7 +9,7 @@ import sys
 
 ROLES = {"behavior", "contract", "config", "docs"}
 SKETCH_KINDS = {"mermaid", "tree-diff"}
-WORD_CAPS = {"summary": 50, "gist": 15, "change": 12, "note": 15, "question": 30, "test": 12}
+WORD_CAPS = {"summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12}
 ADDED, REMOVED = "#00a87e", "#e05666"
 PALETTES = {
     "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
@@ -89,7 +89,7 @@ class Files:
                     k += 1
                 self.labels[p] = "/".join(parts[-k:])
 
-    def link(self, where):
+    def link(self, where, label=None):
         path, lines = split_where(where)
         start = lines.split("-")[0]
         if path in self.changed:
@@ -97,7 +97,7 @@ class Files:
             href += f"R{start}" if start else ""
         else:
             href = f"https://github.com/{self.repo}/blob/{self.head}/{path}" + (f"#L{start}" if start else "")
-        label = self.labels.get(path, path.rsplit("/", 1)[-1]) + (f":{lines}" if lines else "")
+        label = label or self.labels.get(path, path.rsplit("/", 1)[-1]) + (f":{lines}" if lines else "")
         return f'<a class="file" href="{html.escape(href)}" title="{html.escape(path)}"><code>{html.escape(label)}</code></a>'
 
 
@@ -109,21 +109,15 @@ def normalize(a, changed, warnings):
     name = a.get("name")
     tests = a.setdefault("tests", {})
     tests.setdefault("files", [])
-    rows = collections.OrderedDict()
+    rows = []
     for c in a.get("changes") or []:
         path = split_where(c.get("where"))[0]
         if TEST_PATH.search(path):
             warnings.append(f"{name}: {path} is a test, so it moves from changes to tests.files")
             tests["files"].append(path)
-            continue
-        if path in rows:
-            row = rows[path]
-            row["change"] = f'{row["change"]}; {c.get("change")}'
-            row["also"] = list(dict.fromkeys((row.get("also") or []) + (c.get("also") or [])))
-            warnings.append(f"{name}: {path} has more than one row, so they merge into one")
         else:
-            rows[path] = dict(c)
-    a["changes"] = list(rows.values())
+            rows.append(c)
+    a["changes"] = rows
     tests["files"] = list(dict.fromkeys(split_where(w)[0] for w in tests["files"]))
     inside = [r for r in a.get("reach") or [] if split_where(r.get("where"))[0] in changed]
     for r in inside:
@@ -131,22 +125,35 @@ def normalize(a, changed, warnings):
     a["reach"] = [r for r in a.get("reach") or [] if r not in inside]
 
 
+def is_main(a):
+    return bool(a.get("behavior") or a.get("sketch"))
+
+
+def check_sketch(label, sketch, errors, warnings):
+    if sketch is None:
+        return
+    if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source"):
+        errors.append(f"{label}: sketch needs kind (one of {sorted(SKETCH_KINDS)}) and source")
+    elif not (MARKED.search(sketch["source"]) if sketch["kind"] == "mermaid" else
+              sketch["kind"] == "tree-diff" and re.search(r"(?m)^[+-]", sketch["source"])):
+        warnings.append(f"{label}: the sketch marks nothing as added or removed")
+
+
 def check(data, changed):
     errors, warnings = [], []
     areas = data.get("areas") or []
     if not areas:
         errors.append("no areas")
+    check_sketch("overview", data.get("overview"), errors, warnings)
+    last_main = max((i for i, a in enumerate(areas) if is_main(a)), default=-1)
     seen = set()
     for i, a in enumerate(areas, 1):
         name = a.get("name") or f"area {i}"
         if not a.get("name"):
             errors.append(f"area {i}: no name")
-        sketch = a.get("sketch") or {}
-        if sketch.get("kind") not in SKETCH_KINDS or not sketch.get("source"):
-            errors.append(f"{name}: sketch needs kind (one of {sorted(SKETCH_KINDS)}) and source")
-        elif not (MARKED.search(sketch["source"]) if sketch["kind"] == "mermaid" else
-                  sketch["kind"] == "tree-diff" and re.search(r"(?m)^[+-]", sketch["source"])):
-            warnings.append(f"{name}: the sketch marks nothing as added or removed")
+        check_sketch(name, a.get("sketch"), errors, warnings)
+        if i - 1 < last_main and not is_main(a):
+            warnings.append(f"{name}: has no behavior or sketch, so it's a supporting area, and it comes before a main area")
         normalize(a, changed, warnings)
         for c in a["changes"]:
             if c.get("role", "behavior") not in ROLES:
@@ -154,14 +161,11 @@ def check(data, changed):
             seen.update([split_where(c.get("where"))[0]] + list(c.get("also") or []))
             if words(c.get("change")) > WORD_CAPS["change"]:
                 warnings.append(f"{name}: the change at {c.get('where')} runs past {WORD_CAPS['change']} words")
+            if ";" in re.sub(r"`[^`]*`", "", str(c.get("change") or "")):
+                warnings.append(f"{name}: the change at {c.get('where')} joins clauses with a semicolon, so split it into rows")
         seen.update(a["tests"]["files"])
         if words(a.get("gist")) > WORD_CAPS["gist"]:
             warnings.append(f"{name}: gist runs past {WORD_CAPS['gist']} words")
-        if len(a.get("questions") or []) > 4:
-            warnings.append(f"{name}: more than 4 questions, so only the first 4 show")
-        for q in a.get("questions") or []:
-            if words(q.get("q")) > WORD_CAPS["question"]:
-                warnings.append(f"{name}: a question runs past {WORD_CAPS['question']} words")
         for r in a["reach"]:
             if words(r.get("note")) > WORD_CAPS["note"]:
                 warnings.append(f"{name}: a caller note runs past {WORD_CAPS['note']} words")
@@ -180,7 +184,11 @@ def check(data, changed):
     return errors, warnings, missing
 
 
-CONTRACT_CHIP = '<span class="chip contract">Contract</span>'
+CHIPS = {"contract": "Contract", "config": "Config", "docs": "Docs"}
+
+
+def chip(role):
+    return f'<span class="chip {role}">{CHIPS[role]}</span>' if role in CHIPS else ""
 
 
 def changes_contract(a):
@@ -207,45 +215,41 @@ def sketch_html(s):
     return f'<div class="sketch">{diagram(s["kind"], s["source"])}{key}</div>'
 
 
+def change_html(c, files):
+    lines = split_where(c.get("where"))[1]
+    also = c.get("also") or []
+    more = (f'<details class="also"><summary>and {len(also)} more</summary>{" ".join(files.link(p) for p in also)}</details>' if also else "")
+    return (f'<li>{chip(c.get("role"))} {esc(c.get("change"))}'
+            f'{" " + files.link(c.get("where"), "L" + lines) if lines else ""}{more}</li>')
+
+
 def area_html(i, a, aid, files):
-    b = a.get("behavior")
-    delta = ('<p class="unchanged">Behavior doesn\'t change.</p>' if not b else
+    b, s, main = a.get("behavior"), a.get("sketch"), is_main(a)
+    delta = ("" if not main else '<p class="unchanged">Behavior doesn\'t change.</p>' if not b else
              f'<div class="delta"><div class="before"><span>Before</span><p>{esc(b.get("before"))}</p></div>'
              f'<div class="after"><span>After</span><p>{esc(b.get("after"))}</p></div></div>')
-    rows = []
+    by_file = collections.OrderedDict()
     for c in a["changes"]:
-        role = c.get("role", "behavior")
-        chip = CONTRACT_CHIP + " " if role == "contract" else ""
-        tag = f' <span class="role">{role}</span>' if role in ("config", "docs") else ""
-        also = c.get("also") or []
-        more = (f'<details class="also"><summary>and {len(also)} more</summary>{" ".join(files.link(p) for p in also)}</details>' if also else "")
-        rows.append(f'<li>{chip}{esc(c.get("change"))} {files.link(c.get("where"))}{tag}{more}</li>')
-    changes_html = "<ul>" + "".join(rows) + "</ul>" if rows else "<p>Only tests change in this area.</p>"
+        by_file.setdefault(split_where(c.get("where"))[0], []).append(c)
+    rows = "".join(f'<li>{files.link(path)}<ul>{"".join(change_html(c, files) for c in cs)}</ul></li>' for path, cs in by_file.items())
+    facts = [("Changes", f'<ul class="changes">{rows}</ul>' if rows else "<p>Only tests change in this area.</p>")]
     reach = a["reach"]
-    reach_html = ("<ul>" + "".join(f"<li>{esc(r.get('note'))} {files.link(r.get('where'))}</li>" for r in reach) + "</ul>"
-                  if reach else "<p>Nothing outside this PR calls the changed code.</p>")
+    if main or reach:
+        facts.append(("Callers outside this PR", "<ul>" + "".join(f"<li>{esc(r.get('note'))} {files.link(r.get('where'))}</li>" for r in reach) + "</ul>"
+                      if reach else "<p>Nothing outside this PR calls the changed code.</p>"))
     tests = a["tests"]
     covered, gaps = tests.get("covered") or [], tests.get("missing") or []
-    tests_html = (f'<p><strong>Tested:</strong> {"; ".join(esc(t) for t in covered) if covered else "nothing in this PR"}.</p>'
-                  f'<p><strong>Not tested:</strong> {"; ".join(esc(t) for t in gaps) if gaps else "no gaps found"}.</p>')
-    qs = (a.get("questions") or [])[:4]
-    questions = ""
-    if qs:
-        items = "".join("<li>" + ('<span class="chip">Ask the author</span> ' if q.get("ask_author") else "")
-                        + f'{esc(q.get("q"))} {files.link(q.get("where"))}</li>' for q in qs)
-        questions = f'<div class="questions"><p class="label">Worth a look</p><ul>{items}</ul></div>'
+    if main or covered or gaps:
+        facts.append(("Tests", f'<p><strong>Tested:</strong> {"; ".join(esc(t) for t in covered) if covered else "nothing in this PR"}.</p>'
+                               f'<p><strong>Not tested:</strong> {"; ".join(esc(t) for t in gaps) if gaps else "no gaps found"}.</p>'))
+    facts_html = "".join(f"<dt>{dt}</dt><dd>{dd}</dd>" for dt, dd in facts)
     return f"""
 <section class="area" id="{aid}">
   <h2><span class="num">{i}</span>{esc(a.get('name'))}</h2>
   <p class="gist">{esc(a.get('gist'))}</p>
   {delta}
-  {sketch_html(a['sketch'])}
-  {questions}
-  <dl class="facts">
-    <dt>Changes</dt><dd>{changes_html}</dd>
-    <dt>Callers outside this PR</dt><dd>{reach_html}</dd>
-    <dt>Tests</dt><dd>{tests_html}</dd>
-  </dl>
+  {sketch_html(s) if s else ""}
+  <dl class="facts">{facts_html}</dl>
 </section>"""
 
 
@@ -279,13 +283,13 @@ def main(argv):
     housekeeping = list(data.get("housekeeping") or []) + [{"where": p, "note": ""} for p in missing]
     referenced = set(changed)
     for a in areas:
-        referenced.update(split_where(x.get("where"))[0] for x in a["changes"] + a["reach"] + (a.get("questions") or []))
+        referenced.update(split_where(x.get("where"))[0] for x in a["changes"] + a["reach"])
         referenced.update(p for c in a["changes"] for p in c.get("also") or [])
     files = Files(repo, number, head, set(changed), referenced)
 
     taken = set()
     ids = [slug(a["name"], taken) for a in areas]
-    order = "".join(f'<li><a href="#{aid}">{esc(a["name"])}</a>{" " + CONTRACT_CHIP if changes_contract(a) else ""} <span>{esc(a.get("gist"))}</span></li>'
+    order = "".join(f'<li><a href="#{aid}">{esc(a["name"])}</a>{" " + chip("contract") if changes_contract(a) else ""} <span>{esc(a.get("gist"))}</span></li>'
                     for a, aid in zip(areas, ids))
     sections = "".join(area_html(i, a, aid, files) for i, (a, aid) in enumerate(zip(areas, ids), 1))
     if housekeeping:
@@ -295,9 +299,12 @@ def main(argv):
         order += (f'<li class="housekeeping"><details><summary><b>Housekeeping</b><svg class="ou-icon" aria-hidden="true"><use href="#ou-chevron"/></svg>'
                   f' <span>{count}</span></summary><ul>{rows}</ul></details></li>')
 
+    overview = data.get("overview")
+    overview_html = f'<section class="overview"><h2>Where the changes land</h2>{sketch_html(overview)}</section>' if overview else ""
     configs = {mode: mermaid_config(mode) for mode in PALETTES}
+    sketches = [overview] + [a.get("sketch") for a in areas]
     mermaid = (f'<script type="module">{MERMAID_JS % json.dumps(configs)}</script>'
-               if any(a["sketch"]["kind"] == "mermaid" for a in areas) else "")
+               if any(s and s["kind"] == "mermaid" for s in sketches) else "")
     tokens = open(os.path.join(design, "tokens.css")).read()
     stamp, toggle, sync = theme_toggle(tokens)
     sprite = open(os.path.join(design, "icons.svg")).read()
@@ -322,6 +329,7 @@ def main(argv):
     <p class="summary">{esc(data.get('summary'))}</p>
     <p class="meta">{esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}">Open the PR {icon}</a>{ticket}</p>
   </header>
+  {overview_html}
   <section class="order"><h2>Reading order</h2><ol>{order}</ol></section>
   {sections}
 </main>
@@ -370,21 +378,20 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .sketch pre.diagram { padding: var(--ou-space-2); text-align: center; }
 .sketch .add { background: color-mix(in srgb, var(--ou-accent) 14%, transparent); }
 .sketch .del { background: color-mix(in srgb, var(--ou-error) 14%, transparent); }
-.questions { margin: 0 0 var(--ou-space-2); }
-.label, .facts dt { font-weight: var(--ou-weight-medium); font-size: var(--ou-size-body); margin: 0 0 var(--ou-space-half); }
-.questions ul { margin: 0; padding-left: var(--ou-space-3); }
-.questions li { margin: var(--ou-space-1) 0; }
+.overview .sketch { margin: 0; }
 .chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; white-space: nowrap; }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--ou-space-1) var(--ou-space-2); margin: 0; padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); font-size: var(--ou-size-body); line-height: 1.6; }
-.facts dt { margin: 0; color: var(--ou-text-secondary); }
+.facts dt { font-weight: var(--ou-weight-medium); margin: 0; color: var(--ou-text-secondary); }
 .facts dd { margin: 0; min-width: 0; }
 .facts ul { margin: 0; padding: 0; list-style: none; }
 .facts li { margin: 0 0 var(--ou-space-half); }
 .facts p { margin: 0; }
+.changes > li { margin: 0 0 var(--ou-space-1); }
+.changes ul { margin: var(--ou-space-half) 0 0; padding-left: var(--ou-space-3); list-style: disc; }
 .chip.contract { background: var(--ou-warning); color: var(--ou-warning-text); }
+.chip.config { background: color-mix(in srgb, var(--ou-info) 24%, transparent); }
 .chip { vertical-align: 1.5px; }
 .facts .chip { vertical-align: 0.5px; }
-.role { font-size: var(--ou-size-caption); color: var(--ou-text-hint); }
 .also { display: inline; }
 .also summary { display: inline; cursor: pointer; color: var(--ou-text-hint); }
 .also[open] { display: block; }
