@@ -92,8 +92,11 @@ def fold(name, closed=False):
 
 
 def block(head, body, key, name, closed=False, bid=""):
-    attrs = (' id="%s"' % bid if bid else "") + f' data-key="{key}"'
-    return (f'<div class="fblock{" closed" if closed else ""}"{attrs}>'
+    attrs = ' id="%s"' % bid if bid else ""
+    if not body:
+        return f'<div class="fblock"{attrs}><div class="fh">{head}</div></div>'
+    closed = closed or bool(TEST_PATH.search(split_where(name)[0]))
+    return (f'<div class="fblock{" closed" if closed else ""}"{attrs} data-key="{key}">'
             f'<div class="fh">{fold(name, closed)}{head}{VIEWED}</div>{body}</div>')
 
 
@@ -363,7 +366,7 @@ class Code:
         fd = self.diff.get(path)
         head = (f'<a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
                 f'<code>{html.escape(self.files.label(path))}</code>{ICON}</a>')
-        wrap = lambda body: block(head, body, short_id(tid, json.dumps(fd)), path, closed or bool(TEST_PATH.search(path)), bid)
+        wrap = lambda body: block(head, body, short_id(tid, json.dumps(fd)), path, closed, bid)
         if not fd or fd["binary"] or not fd["hunks"]:
             note = "Binary file" if fd and fd["binary"] else "No line changes"
             return set(), wrap(f'<p class="nodiff">{note}. Open it on GitHub to see it.</p>')
@@ -663,7 +666,8 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .hk { margin: 0; padding: 0; list-style: none; font-size: var(--ou-size-body); }
 .hk li { margin: 0 0 var(--ou-space-half); }
 .area { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ou-space-1) var(--ou-space-3); align-items: start; }
-.ah { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--ou-space-1); cursor: pointer; }
+.ah { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--ou-space-1); }
+[data-key] > :is(.fh, .ah) { cursor: pointer; }
 .ah h2 { margin: 0; }
 .fold { display: inline-flex; padding: 2px; margin: 0 -2px; background: none; border: 0; border-radius: var(--ou-radius-sm); color: var(--ou-text-secondary); cursor: pointer; }
 .fold .ou-icon { transform: rotate(90deg); transition: transform var(--ou-duration-press) var(--ou-ease-standard); }
@@ -673,7 +677,7 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .area.closed > :not(.ah), .fblock.closed > :not(.fh) { display: none; }
 .area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; }
 .fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: hidden; background: var(--ou-surface); }
-.fh { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); cursor: pointer; }
+.fh { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
 .fblock.closed > .fh { border-bottom: 0; }
 .fh > a { text-decoration: none; font-weight: var(--ou-weight-medium); }
 .stat { color: var(--ou-text-secondary); font-size: var(--ou-size-caption); }
@@ -905,9 +909,9 @@ document.addEventListener("click", async event => {
     return;
   }
   if (bar.contains(t)) return closeBar();
-  const cell = t.closest("tr.l td");
-  const dragged = cell && !getSelection().isCollapsed && getSelection().containsNode(cell, true);
-  if (cell && !dragged) return cell.parentElement === picked ? closeBar() : openBar(cell, false, event.clientX);
+  const dragged = !getSelection().isCollapsed && getSelection().containsNode(t, true);
+  const cell = !dragged && t.closest("tr.l td");
+  if (cell) return cell.parentElement === picked ? closeBar() : openBar(cell, false, event.clientX);
   closeBar();
   const gap = t.closest("tr.gap button");
   if (gap) return expand(gap.closest("tr.gap"));
@@ -917,7 +921,7 @@ document.addEventListener("click", async event => {
     jump(target);
     return event.preventDefault();
   }
-  const head = !t.closest("a, label") && t.closest(".fh, .ah");
+  const head = !dragged && !t.closest("a, label") && t.closest("[data-key] > :is(.fh, .ah)");
   if (head) {
     const el = head.parentElement;
     return show(el, !isOpen(el), box(el).checked);
