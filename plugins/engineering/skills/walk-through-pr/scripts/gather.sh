@@ -170,6 +170,26 @@ if syms:
 callers += [f"{s}\t{kind(s)}\t-\t-\tnot searched, past the first 80 names" for s in unsearched]
 open(f"{out}/callers.tsv", "w").write("\n".join(callers) + "\n")
 
+def owner_rule(line):
+    pattern, *owners = line.split()
+    body = pattern.strip("/")
+    anchored = pattern.startswith("/") or "/" in body
+    rx = re.sub(r"\\\*\\\*/|\\\*\\\*|\\\*|\\\?", lambda m: {r"\*\*/": "(?:.*/)?", r"\*\*": ".*", r"\*": "[^/]*", r"\?": "[^/]"}[m.group()], re.escape(body))
+    nested = "/.*" if pattern.endswith("/") else "" if "*" in body.rsplit("/", 1)[-1].replace("**", "") else "(?:/.*)?"
+    return re.compile(("^" if anchored else "^(?:.*/)?") + rx + nested + "$"), owners, body in ("*", "**")
+
+source = next((p for p in (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
+               if subprocess.run(["git", "-C", root, "cat-file", "-e", f"{base}:{p}"], capture_output=True).returncode == 0), None)
+text = subprocess.run(["git", "-C", root, "show", f"{base}:{source}"], capture_output=True, text=True).stdout if source else ""
+rules = [owner_rule(l) for l in (re.sub(r"(?<!\\)#.*", "", l).strip() for l in text.splitlines()) if l]
+fallback = set(os.environ.get("CODEOWNERS_FALLBACK", "").split())
+owned = [f"# owner\tpath, from {source or 'no CODEOWNERS file'} on the base"]
+for path in changed:
+    hits = [(group, catch_all) for rx, group, catch_all in rules if rx.match(path)]
+    owners = {o for group, c in hits if not c for o in group} or {o for group, _ in hits for o in group}
+    owned += [f"{o}\t{path}" for o in sorted(owners - fallback or owners)]
+open(f"{out}/owners.tsv", "w").write("\n".join(owned) + "\n")
+
 def save(ref, path, into):
     shown = subprocess.run(["git", "-C", root, "show", f"{ref}:{path}"], capture_output=True)
     if shown.returncode == 0 and b"\0" not in shown.stdout[:8000]:
@@ -194,6 +214,7 @@ gathered:
   $OUT/files.tsv             status, +, -, path
   $OUT/commit-subjects.txt   author prose, hints only
   $OUT/callers.tsv           where the base mentions each changed name, outside the diff
+  $OUT/owners.tsv            each changed file's code owners, from CODEOWNERS on the base
   $OUT/head/, $OUT/base/     changed files at the head and callers' files on the base, for the page's code pane
 
 base: $BASE_OID ($BASE_WHAT)   head: $HEAD

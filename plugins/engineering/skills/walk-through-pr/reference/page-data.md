@@ -7,6 +7,10 @@ Text fields allow `backtick` spans for code. A `where` is a repo path, optionall
 ```json
 {
   "summary": "Adds a confetti burst when a buyer accepts an offer.",
+  "teams": [
+    {"owner": "@acme/chat", "why": "You own the offer sheet, where the burst plays.", "what_changes": "Accepting an offer plays 40 particles for 1.2 seconds before the sheet closes."},
+    {"owner": "@acme/platform", "why": "You own the Metro config the sprite needs.", "what_changes": "Adds `.webp` to the asset extensions. Nothing else in the build changes."}
+  ],
   "overview": null,
   "areas": [
     {
@@ -51,6 +55,7 @@ The renderer warns when a field runs past its word cap. Treat a warning as a sen
 | Field | What it holds | Cap |
 |---|---|---|
 | `summary` | What the PR is, for someone who hasn't seen it. One or two sentences. | 50 words |
+| `teams` | One row per owner in `owners.tsv`, as `SKILL.md` describes, or an empty list when it lists none. `owner` is the handle as `owners.tsv` writes it. `why`: why the team is on the PR. `what_changes`: what changes in the team's code, in two or three sentences. | 20 words per `why`, 45 per `what_changes` |
 | `overview` | One sketch of the parts the main areas touch, in the same shape as an area's `sketch`, or `null`, as `SKILL.md` describes. | |
 | `areas` | In reading order, main areas first. | |
 | `name` | A few words naming the area of impact. | |

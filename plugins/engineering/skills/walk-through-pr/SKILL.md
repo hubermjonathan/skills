@@ -23,7 +23,9 @@ To only delete the share note, run `<this skill's directory>/scripts/attach.sh <
 
     <this skill's directory>/scripts/gather.sh <pr> [out-dir]
 
-Run it inside a checkout of the PR's repo. It reads callers and the code pane's files from there, and stops outside one. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `callers.tsv`, and `commit-subjects.txt`, plus `head/` and `base/`, the files the page's code pane shows. It also prints the base it read callers from: the base branch for an open PR, and the base just before the merge for a merged one.
+Run it inside a checkout of the PR's repo. It reads callers and the code pane's files from there, and stops outside one. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `callers.tsv`, `owners.tsv`, and `commit-subjects.txt`, plus `head/` and `base/`, the files the page's code pane shows. It also prints the base it read callers from: the base branch for an open PR, and the base just before the merge for a merged one.
+
+`owners.tsv` lists each changed file's code owners, from `CODEOWNERS` on the base. A file belongs to every owner on every line that matches it, and the catch-all `*` line counts only when no other line matches. To make an owner count only for files no other owner has, such as a platform team listed across the whole app, set `CODEOWNERS_FALLBACK` to its handles, space-separated, when you run `gather.sh`.
 
 Read the whole diff. Take line numbers from `pr-numbered.diff`. It numbers each line by its place at the PR's head. A removed line carries the number of the head line below it, and a deleted file keeps its old numbers.
 
@@ -86,6 +88,8 @@ For `reach`, read `callers.tsv`. It lists where the base mentions each changed n
 - `call`: the PR starts or stops calling the name. Its hits are reach only when the diff also changes the name's definition.
 
 A name lists its first 10 hits, and `hits` counts them all. For a name the file doesn't list, marks too common to list, or didn't search, grep the base yourself with `git grep -n -w <name> <base>`, where `<base>` is the base commit `gather.sh` printed. When a hit is only an import, point the row at the line that uses the name. The page links a caller you found this way but shows no code for it.
+
+For `teams`, write one row for each owner in `owners.tsv`, so each team on a PR that spans several owners sees why it's there before reading any area. The page adds the team's file count and links to the areas that hold its files. `why` ties the team's files to what the PR is for, in one sentence. `what_changes` says what changes in the team's code, in two or three sentences, with the names and values it acts on. When a team's part is light, say what it can skip, such as "Only the lockfile changes."
 
 ## Step 4: render
 

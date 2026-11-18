@@ -10,7 +10,7 @@ import urllib.parse
 
 ROLES = {"behavior", "contract", "config", "docs"}
 SKETCH_KINDS = {"mermaid", "tree-diff"}
-WORD_CAPS = {"summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12}
+WORD_CAPS = {"summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12, "why": 20, "what_changes": 45}
 ADDED, REMOVED = "#00a87e", "#e05666"
 PALETTES = {
     "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
@@ -209,7 +209,7 @@ def unsafe(path):
     return path.startswith("/") or ".." in path.split("/")
 
 
-def check(data, files, diff):
+def check(data, files, diff, owners):
     errors, warnings = [], []
     changed = set(files)
     areas = data.get("areas") or []
@@ -259,6 +259,15 @@ def check(data, files, diff):
             warnings.append(f"housekeeping: the note on {h.get('where')} runs past {WORD_CAPS['note']} words")
     if words(data.get("summary")) > WORD_CAPS["summary"]:
         warnings.append(f"summary runs past {WORD_CAPS['summary']} words")
+    teams = {t.get("owner"): t for t in data.get("teams") or []}
+    for owner in sorted(set(teams) - set(owners)):
+        warnings.append(f"teams: {owner} owns no file in owners.tsv, so its row doesn't show")
+    for owner in sorted(set(owners) - set(teams)):
+        warnings.append(f"teams: {owner} is in owners.tsv but has no row in teams")
+    for owner, t in teams.items():
+        for field in ("why", "what_changes"):
+            if words(t.get(field)) > WORD_CAPS[field]:
+                warnings.append(f"teams: the {field} for {owner} runs past {WORD_CAPS[field]} words")
     reach = {split_where(r.get("where"))[0] for a in areas for r in a["reach"]}
     for path in sorted(p for p in seen | reach if unsafe(p)):
         errors.append(f"{path} isn't a path inside the repo")
@@ -439,6 +448,28 @@ def area_html(i, a, aid, code):
 </section>"""
 
 
+def area_paths(a):
+    return ({split_where(c.get("where"))[0] for c in a["changes"]} | {p for c in a["changes"] for p in c.get("also") or []}
+            | set(a["tests"]["files"]))
+
+
+def teams_html(data, owners, areas, ids, housekeeping):
+    notes = {t.get("owner"): t for t in data.get("teams") or []}
+    skippable = {split_where(h.get("where"))[0] for h in housekeeping}
+    rows = []
+    for owner, paths in sorted(owners.items(), key=lambda kv: (-len(kv[1]), kv[0])):
+        links = [f'<a href="#{aid}" title="{html.escape(a["name"])}">{i}</a>'
+                 for i, (a, aid) in enumerate(zip(areas, ids), 1) if paths & area_paths(a)]
+        links += ['<a href="#housekeeping">housekeeping</a>'] if paths & skippable else []
+        n = notes.get(owner, {})
+        rows.append(f'<tr><th scope="row" title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}'
+                    f'<span>{len(paths)} file{"" if len(paths) == 1 else "s"} · {", ".join(links)}</span></th>'
+                    f'<td data-label="Why you\'re here">{esc(n.get("why"))}</td>'
+                    f'<td data-label="What changes for you">{esc(n.get("what_changes"))}</td></tr>')
+    return (f'<section class="teams"><h2>Why each team is here</h2><table><thead><tr><th>Team</th><th>Why you\'re here</th>'
+            f'<th>What changes for you</th></tr></thead><tbody>{"".join(rows)}</tbody></table></section>') if rows else ""
+
+
 def housekeeping_html(housekeeping, code):
     files = code.files
     items, blocks = [], []
@@ -471,11 +502,14 @@ def main(argv):
     files_tsv = {r[3]: r[:3] for r in (l.rstrip("\n").split("\t") for l in open(f"{gather}/files.tsv")) if len(r) == 4}
     changed = list(files_tsv)
     diff = parse_diff(open(f"{gather}/pr.diff", errors="replace", newline="").read(), changed)
+    owners = collections.defaultdict(set)
+    for owner, path in (l.rstrip("\n").split("\t") for l in open(f"{gather}/owners.tsv") if not l.startswith("#")):
+        owners[owner].add(path)
 
     warnings = []
     for a in data.get("areas") or []:
         normalize(a, set(changed), warnings)
-    errors, more, missing = check(data, files_tsv, diff)
+    errors, more, missing = check(data, files_tsv, diff, owners)
     for w in warnings + more:
         print(f"warning: {w}", file=sys.stderr)
     if errors:
@@ -533,6 +567,7 @@ def main(argv):
     <p class="summary">{esc(data.get('summary'))}</p>
     <p class="meta">{html.escape(repo)} #{number} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
   </header>
+  {teams_html(data, owners, areas, ids, housekeeping)}
   {overview_html}
   <section class="order"><h2>Reading order</h2><ol>{order}</ol>
     <p class="hint">The code for each area sits beside it. Click a line number to comment on that line.</p></section>
@@ -569,6 +604,12 @@ h2 { font-size: var(--ou-size-h4); line-height: 1.5385; margin: 0 0 var(--ou-spa
 .summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: 0 0 var(--ou-space-2); max-width: none; }
 .meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: 0; max-width: none; }
 section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); padding: var(--ou-space-3); margin-top: var(--ou-space-3); scroll-margin-top: var(--ou-space-2); }
+.teams table { width: 100%; border-collapse: collapse; font-size: var(--ou-size-body); line-height: 1.6; }
+.teams th, .teams td { text-align: left; vertical-align: top; padding: var(--ou-space-1) var(--ou-space-3) var(--ou-space-1) 0; border-top: 1px solid var(--ou-border); }
+.teams thead th { border-top: 0; padding-top: 0; color: var(--ou-text-secondary); font-weight: var(--ou-weight-medium); }
+.teams tbody th { width: 16%; font-weight: var(--ou-weight-medium); }
+.teams tbody th span { display: block; font-weight: var(--ou-weight-regular); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
+.teams td { width: 42%; }
 .order ol { margin: 0; padding-left: var(--ou-space-3); }
 .order li { margin: var(--ou-space-half) 0; }
 .order li > a { font-weight: var(--ou-weight-medium); }
@@ -662,6 +703,10 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
   .facts { grid-template-columns: 1fr; }
   .facts dd { margin-bottom: var(--ou-space-1); }
   .delta > div { grid-template-columns: 1fr; gap: 0; }
+  .teams thead { display: none; }
+  .teams table, .teams tbody, .teams tr, .teams tbody th, .teams td { display: block; width: auto; padding-right: 0; }
+  .teams td { border-top: 0; padding-top: 0; }
+  .teams td::before { content: attr(data-label); display: block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); color: var(--ou-text-secondary); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
