@@ -14,9 +14,9 @@ WORD_CAPS = {"summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12}
 ADDED, REMOVED = "#00a87e", "#e05666"
 PALETTES = {
     "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
-              "added": "#def3ec", "removed": "#ffd7df", "changed": "#fdf2cc", "note": "#fdf2cc", "cluster": "#fafafa"},
+              "added": "#def3ec", "removed": "#ffd7df", "changed": "#fdf2cc", "cluster": "#fafafa"},
     "dark": {"bg": "#121215", "text": "#f7f7f7", "line": "#ababab", "node": "#282a2e", "border": "#8a8a8a",
-             "added": "#0e382f", "removed": "#462329", "changed": "#3f3416", "note": "#3f3416", "cluster": "#1e2024"},
+             "added": "#0e382f", "removed": "#462329", "changed": "#3f3416", "cluster": "#1e2024"},
 }
 MARKS = {"added": "rgba(0, 168, 126, 0.18)", "removed": "rgba(224, 86, 102, 0.18)", "changed": "rgba(244, 190, 25, 0.22)"}
 
@@ -35,7 +35,7 @@ def mermaid_config(mode):
             "actorBkg": c["node"], "actorBorder": c["border"], "actorTextColor": c["text"], "actorLineColor": c["border"],
             "signalColor": c["text"], "signalTextColor": c["text"],
             "labelBoxBkgColor": c["bg"], "labelBoxBorderColor": c["border"], "labelTextColor": c["text"], "loopTextColor": c["text"],
-            "noteBkgColor": c["note"], "noteBorderColor": "#f4be19", "noteTextColor": c["text"],
+            "noteBkgColor": c["bg"], "noteBorderColor": c["border"], "noteTextColor": c["text"],
             "edgeLabelBackground": c["bg"], "clusterBkg": c["cluster"], "clusterBorder": c["border"],
         },
         "sequence": {"mirrorActors": False, "actorMargin": 30},
@@ -58,7 +58,7 @@ HUNK = re.compile(r"^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@")
 DIFF_KINDS = {"+": "add", "-": "del", " ": "ctx"}
 CONTEXT_STEP, SNIPPET, MAX_SOURCE = 20, 5, 1_000_000
 HLJS = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
-TEST_PATH = re.compile(r"(^|/)(tests?|__tests__)/|\.(test|spec)\.[jt]sx?$|Tests?\.(java|kt)$|_test\.(go|py)$|(^|/)test_[^/]*\.py$")
+TEST_PATH = re.compile(r"(^|/)(tests?|__tests__|__fixtures__)/|\.(test|spec)\.[jt]sx?$|Tests?\.(java|kt)$|_test\.(go|py)$|(^|/)test_[^/]*\.py$")
 EXTERNAL = 'target="_blank" rel="noopener"'
 ICON = '<svg class="ou-icon ou-icon--sm" aria-hidden="true"><use href="#ou-external"/></svg>'
 
@@ -255,6 +255,8 @@ def check(data, files, diff):
                 warnings.append(f"{name}: a test line runs past {WORD_CAPS['test']} words")
     for h in data.get("housekeeping") or []:
         seen.add(split_where(h.get("where"))[0])
+        if words(h.get("note")) > WORD_CAPS["note"]:
+            warnings.append(f"housekeeping: the note on {h.get('where')} runs past {WORD_CAPS['note']} words")
     if words(data.get("summary")) > WORD_CAPS["summary"]:
         warnings.append(f"summary runs past {WORD_CAPS['summary']} words")
     reach = {split_where(r.get("where"))[0] for a in areas for r in a["reach"]}
@@ -377,7 +379,7 @@ class Code:
 def change_html(c, target, targets, files):
     lines = split_where(c.get("where"))[1]
     also = c.get("also") or []
-    more = (f'<details class="also"><summary>and {len(also)} more</summary>'
+    more = (f' <details class="also"><summary>and {len(also)} more</summary>'
             f'{" ".join(files.link(p, href="#" + targets[p]) for p in also)}</details>' if also else "")
     return (f'<li>{chip(c.get("role"))} {esc(c.get("change"))}'
             f'{" " + files.link(c.get("where"), "L" + lines, "#" + target) if lines else ""}{more}</li>')
