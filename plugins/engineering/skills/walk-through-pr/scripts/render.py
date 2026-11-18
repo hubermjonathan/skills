@@ -61,6 +61,7 @@ HLJS = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min
 TEST_PATH = re.compile(r"(^|/)(tests?|__tests__|__fixtures__)/|\.(test|spec)\.[jt]sx?$|Tests?\.(java|kt)$|_test\.(go|py)$|(^|/)test_[^/]*\.py$")
 EXTERNAL = 'target="_blank" rel="noopener"'
 ICON = '<svg class="ou-icon ou-icon--sm" aria-hidden="true"><use href="#ou-external"/></svg>'
+VIEWED = '<label class="viewed"><input type="checkbox"> Viewed</label>'
 
 
 def esc(text):
@@ -83,6 +84,20 @@ def split_where(where):
 def span(lines):
     start, _, end = lines.partition("-")
     return int(start), int(end or start)
+
+
+def fold(name, closed=False):
+    return (f'<button type="button" class="fold" aria-expanded="{"false" if closed else "true"}" aria-label="{html.escape(name)}">'
+            '<svg class="ou-icon" aria-hidden="true"><use href="#ou-chevron"/></svg></button>')
+
+
+def block(head, body, key, name, closed=False, bid=""):
+    attrs = ' id="%s"' % bid if bid else ""
+    if not body:
+        return f'<div class="fblock"{attrs}><div class="fh">{head}</div></div>'
+    closed = closed or bool(TEST_PATH.search(split_where(name)[0]))
+    return (f'<div class="fblock{" closed" if closed else ""}"{attrs} data-key="{key}">'
+            f'<div class="fh">{fold(name, closed)}{head}{VIEWED}</div>{body}</div>')
 
 
 def short_id(*parts):
@@ -347,15 +362,16 @@ class Code:
         return (f'<tr class="l {DIFF_KINDS[l["kind"]]}{cls}" id="{rid}" data-o="{o}" data-n="{n}"><td class="o">{o}</td>'
                 f'<td class="n"{" tabindex=0" if first else ""}>{n}</td><td class="c">{html.escape(l["text"])}</td></tr>')
 
-    def table(self, path, marks, expand, tid):
+    def block(self, path, marks, expand, tid, bid="", closed=False):
         fd = self.diff.get(path)
-        head = (f'<div class="fh"><a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
+        head = (f'<a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
                 f'<code>{html.escape(self.files.label(path))}</code>{ICON}</a>')
+        wrap = lambda body: block(head, body, short_id(tid, json.dumps(fd)), path, closed, bid)
         if not fd or fd["binary"] or not fd["hunks"]:
             note = "Binary file" if fd and fd["binary"] else "No line changes"
-            return set(), f'{head}</div><p class="nodiff">{note}. Open it on GitHub to see it.</p>'
+            return set(), wrap(f'<p class="nodiff">{note}. Open it on GitHub to see it.</p>')
         lines = [l for h in fd["hunks"] for l in h["lines"]]
-        head += f' <span class="stat">+{sum(l["kind"] == "+" for l in lines)} −{sum(l["kind"] == "-" for l in lines)}</span></div>'
+        head += f' <span class="stat">+{sum(l["kind"] == "+" for l in lines)} −{sum(l["kind"] == "-" for l in lines)}</span>'
         gap = self.gap if expand else lambda *_: ""
         placed, body, prev = set(), [], (1, 1)
         for h in fd["hunks"]:
@@ -370,7 +386,7 @@ class Code:
             prev = (h["end_old"], h["end_new"])
         body.append(gap(path, prev[1], len(self.head(path) or []), prev[0] - prev[1], False))
         gh = html.escape(self.files.href(path))
-        return placed, f'{head}<div class="fwrap"><table class="diff" id="{tid}" data-pr="{gh}" data-lang="{lang(path)}">{"".join(body)}</table></div>'
+        return placed, wrap(f'<div class="fwrap"><table class="diff" id="{tid}" data-pr="{gh}" data-lang="{lang(path)}">{"".join(body)}</table></div>')
 
     def snippet(self, where, tid):
         path, lines = split_where(where)
@@ -409,19 +425,19 @@ def area_html(i, a, aid, code):
         fid = targets[path] = f"{aid}-f{k}"
         marks = [(f"{aid}-c{j}", span(split_where(c["where"])[1]), f'{chip(c.get("role"))} {esc(c.get("change"))}')
                  for j, c in by_file.get(path, []) if split_where(c["where"])[1]]
-        got, table = code.table(path, marks, True, short_id(aid, path))
+        got, fb = code.block(path, marks, True, short_id(aid, path), fid)
         placed.update(got)
-        blocks.append(f'<div class="fblock" id="{fid}">{table}</div>')
+        blocks.append(fb)
     tests = a["tests"]
     if tests["files"]:
-        blocks.append('<p class="label">Tests</p>' + "".join(
-            f'<div class="fblock">{code.table(p, [], True, short_id(aid, p))[1]}</div>' for p in tests["files"]))
+        blocks.append('<p class="label">Tests</p>' + "".join(code.block(p, [], True, short_id(aid, p))[1] for p in tests["files"]))
     reach = a["reach"]
     if reach:
-        blocks.append('<p class="label">Callers outside this PR</p>' + "".join(
-            f'<div class="fblock" id="{aid}-x{j}"><div class="fh">{esc(r.get("note"))} {files.link(r.get("where"))}</div>'
-            f'{code.snippet(r.get("where"), short_id(aid, "caller", str(r.get("where"))))}</div>'
-            for j, r in enumerate(reach)))
+        blocks.append('<p class="label">Callers outside this PR</p>')
+    for j, r in enumerate(reach):
+        where = str(r.get("where"))
+        tid = short_id(aid, "caller", where)
+        blocks.append(block(f'{esc(r.get("note"))} {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}"))
     rows = "".join(f'<li>{files.link(path, href="#" + targets[path])}<ul>'
                    f'{"".join(change_html(c, f"{aid}-c{j}" if f"{aid}-c{j}" in placed else targets[path], targets, files) for j, c in cs)}</ul></li>'
                    for path, cs in by_file.items())
@@ -435,10 +451,11 @@ def area_html(i, a, aid, code):
         facts.append(("Tests", f'<p><strong>Tested:</strong> {"; ".join(esc(t) for t in covered) if covered else "nothing in this PR"}.</p>'
                                f'<p><strong>Not tested:</strong> {"; ".join(esc(t) for t in gaps) if gaps else "no gaps found"}.</p>'))
     facts_html = "".join(f"<dt>{dt}</dt><dd>{dd}</dd>" for dt, dd in facts)
+    key = short_id(aid, *(json.dumps(code.diff.get(p)) for p in sorted(area_paths(a))))
     return f"""
-<section class="area" id="{aid}">
+<section class="area" id="{aid}" data-key="{key}">
+  <div class="ah">{fold(a["name"])}<h2><span class="num">{i}</span> {esc(a.get('name'))}</h2>{VIEWED}</div>
   <div class="prose">
-    <h2><span class="num">{i}</span> {esc(a.get('name'))}</h2>
     <p class="gist">{esc(a.get('gist'))}</p>
     {delta}
     {sketch_html(s) if s else ""}
@@ -476,11 +493,12 @@ def housekeeping_html(housekeeping, code):
     for k, h in enumerate(housekeeping):
         path = split_where(h.get("where"))[0]
         items.append(f'<li>{esc(h.get("note"))} {files.link(path, href=f"#hk-{k}")}</li>')
-        blocks.append(f'<details class="fblock" id="hk-{k}"><summary>{html.escape(files.label(path))}</summary>'
-                      f'{code.table(path, [], False, short_id("housekeeping", path))[1]}</details>')
+        blocks.append(code.block(path, [], False, short_id("housekeeping", path), f"hk-{k}", True)[1])
+    key = short_id("housekeeping", *(json.dumps(code.diff.get(split_where(h.get("where"))[0])) for h in housekeeping))
     return f"""
-<section class="area" id="housekeeping">
-  <div class="prose"><h2>Housekeeping</h2><p class="gist">Files with no behavior of their own.</p><ul class="hk">{"".join(items)}</ul></div>
+<section class="area" id="housekeeping" data-key="{key}">
+  <div class="ah">{fold("Housekeeping")}<h2>Housekeeping</h2>{VIEWED}</div>
+  <div class="prose"><p class="gist">Files with no behavior of their own.</p><ul class="hk">{"".join(items)}</ul></div>
   <div class="code">{"".join(blocks)}</div>
 </section>"""
 
@@ -549,7 +567,7 @@ def main(argv):
     tokens = open(os.path.join(design, "tokens.css")).read()
     stamp, toggle, sync = theme_toggle(tokens)
     sprite = open(os.path.join(design, "icons.svg")).read()
-    symbol = re.search(r'<symbol id="ou-external".*?</symbol>', sprite, re.S).group(0)
+    symbols = "".join(re.search(rf'<symbol id="{i}".*?</symbol>', sprite, re.S).group(0) for i in ("ou-external", "ou-chevron"))
     key, url = ticket_key(meta), os.environ.get("TICKET_URL", "")
     ticket = f' · <a href="{html.escape(url.replace("{key}", key))}" title="{key}" {EXTERNAL}>Open the ticket {ICON}</a>' if key and url else ""
 
@@ -560,8 +578,8 @@ def main(argv):
 <style>{tokens}{CSS}{MARK_CSS}</style></head>
 <body>
 {stamp}
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbol}</svg>
-<main class="page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
+<main class="page" data-store="{html.escape(repo)}#{number}">
   <header>
     <div class="top"><h1>{html.escape(meta["title"])}</h1>{toggle}</div>
     <p class="summary">{esc(data.get('summary'))}</p>
@@ -570,7 +588,7 @@ def main(argv):
   {teams_html(data, owners, areas, ids, housekeeping)}
   {overview_html}
   <section class="order"><h2>Reading order</h2><ol>{order}</ol>
-    <p class="hint">The code for each area sits beside it. Click a line number to comment on that line.</p></section>
+    <p class="hint">The code for each area sits beside it. Click a line to comment on it. Mark a file or an area viewed to fold it away.</p></section>
   {sections}
 </main>
 <div id="line-actions" class="actions" hidden><button type="button" data-act="here">Comment here</button><a data-act="gh" {EXTERNAL}>Comment on GitHub {ICON}</a></div>
@@ -630,7 +648,7 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .sketch .add { background: color-mix(in srgb, var(--ou-accent) 14%, transparent); }
 .sketch .del { background: color-mix(in srgb, var(--ou-error) 14%, transparent); }
 .overview .sketch { margin: 0; }
-.chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; white-space: nowrap; vertical-align: 1.5px; }
+.chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; margin-right: var(--ou-space-half); white-space: nowrap; vertical-align: 1.5px; }
 .chip.contract { background: var(--ou-warning); color: var(--ou-warning-text); }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--ou-space-1) var(--ou-space-2); margin: 0; padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); font-size: var(--ou-size-body); line-height: 1.6; }
 .facts dt { font-weight: var(--ou-weight-medium); margin: 0; color: var(--ou-text-secondary); }
@@ -647,13 +665,20 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .hint { font-size: var(--ou-size-body); margin: var(--ou-space-2) 0 0; }
 .hk { margin: 0; padding: 0; list-style: none; font-size: var(--ou-size-body); }
 .hk li { margin: 0 0 var(--ou-space-half); }
-.area { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ou-space-3); align-items: start; }
+.area { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ou-space-1) var(--ou-space-3); align-items: start; }
+.ah { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--ou-space-1); }
+[data-key] > :is(.fh, .ah) { cursor: pointer; }
+.ah h2 { margin: 0; }
+.fold { display: inline-flex; padding: 2px; margin: 0 -2px; background: none; border: 0; border-radius: var(--ou-radius-sm); color: var(--ou-text-secondary); cursor: pointer; }
+.fold .ou-icon { transform: rotate(90deg); transition: transform var(--ou-duration-press) var(--ou-ease-standard); }
+.closed > * > .fold .ou-icon { transform: none; }
+.viewed { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: var(--ou-size-caption); font-family: var(--ou-font-body); color: var(--ou-text-secondary); white-space: nowrap; cursor: pointer; }
+.viewed input { width: 20px; height: 20px; margin: 0; accent-color: var(--ou-accent); cursor: pointer; }
+.area.closed > :not(.ah), .fblock.closed > :not(.fh) { display: none; }
 .area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; }
 .fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: hidden; background: var(--ou-surface); }
-.fh, details.fblock > summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
-details.fblock > summary { cursor: pointer; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-details.fblock > summary:focus-visible { outline-offset: -2px; }
-details.fblock:not([open]) > summary { border-bottom: 0; }
+.fh { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
+.fblock.closed > .fh { border-bottom: 0; }
 .fh > a { text-decoration: none; font-weight: var(--ou-weight-medium); }
 .stat { color: var(--ou-text-secondary); font-size: var(--ou-size-caption); }
 .nodiff { margin: 0; padding: var(--ou-space-1) 12px; color: var(--ou-text-secondary); font-size: var(--ou-size-body); max-width: none; }
@@ -661,8 +686,10 @@ details.fblock:not([open]) > summary { border-bottom: 0; }
 .fwrap { overflow-x: auto; }
 table.diff { border-collapse: collapse; width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--ou-size-caption); line-height: 1.6; }
 .diff td { padding: 0; vertical-align: top; transition: background-color var(--ou-duration-press) var(--ou-ease-standard); }
-td.o, td.n { width: 1%; padding: 0 8px; text-align: right; white-space: nowrap; color: var(--ou-text-secondary); cursor: pointer; user-select: none; }
-td.o:hover, td.n:hover { color: var(--ou-accent-pressed); }
+tr.l td { cursor: pointer; }
+td.o, td.n { width: 1%; padding: 0 8px; text-align: right; white-space: nowrap; color: var(--ou-text-secondary); user-select: none; }
+tr.l:hover td { background-image: linear-gradient(color-mix(in srgb, var(--ou-accent) 10%, transparent) 0 0); }
+tr.l:hover td.o, tr.l:hover td.n { color: var(--ou-accent-pressed); }
 td.c { position: relative; white-space: pre-wrap; padding: 0 16px 0 20px; tab-size: 4; }
 tr.add td { background: color-mix(in srgb, var(--ou-accent) 12%, transparent); }
 tr.del td { background: color-mix(in srgb, var(--ou-error) 12%, transparent); }
@@ -678,6 +705,7 @@ tr.gap button:hover, .actions button:hover, .actions a:hover { color: var(--ou-a
 tr.picked td { background-color: var(--ou-accent-wash); }
 tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warning) 24%, transparent); }
 .actions { position: fixed; z-index: 30; display: flex; gap: var(--ou-space-1); padding: 4px 8px; background: var(--ou-surface); border: 1px solid var(--ou-border); box-shadow: var(--ou-shadow-2); }
+.actions button { padding: 0; }
 .actions[hidden] { display: none; }
 .actions [data-act=here] { display: none; }
 .can-comment .actions [data-act=here] { display: inline; }
@@ -692,6 +720,7 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
 :root[data-theme="dark"] { --sx-keyword: #ff7b72; --sx-string: #a5d6ff; --sx-comment: #8b949e; --sx-number: #79c0ff; --sx-title: #ffa657; }
 @media (max-width: 1100px) {
   .area { display: block; }
+  .ah { margin-bottom: var(--ou-space-1); }
   .area > .code { position: static; max-height: none; overflow: visible; margin-top: var(--ou-space-3); }
 }
 .key { display: flex; flex-wrap: wrap; gap: var(--ou-space-half) var(--ou-space-2); margin: 0; padding: var(--ou-space-1) var(--ou-space-2); max-width: none; border-top: 1px solid var(--ou-border); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
@@ -731,8 +760,29 @@ PAGE_JS = r'''
 const root = document.documentElement, STEP = %d;
 const smooth = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 const bar = document.getElementById("line-actions"), github = bar.querySelector("[data-act=gh]"), here = bar.querySelector("[data-act=here]");
-const sources = {};
-let picked = null, comments = null, misses = 0;
+const sources = {}, STORE = "walkthrough " + document.querySelector("main").dataset.store;
+const folds = new Map([...document.querySelectorAll("[data-key]")].map(el => [el.dataset.key, el]));
+let picked = null, comments = null, misses = 0, saved = {};
+try { saved = JSON.parse(localStorage.getItem(STORE)) || {}; } catch {}
+for (const key of Object.keys(saved)) if (!folds.has(key)) delete saved[key];
+
+const box = el => el.querySelector(":scope > :is(.fh, .ah) .viewed input");
+const isOpen = el => !el.classList.contains("closed");
+
+function show(el, open, viewed) {
+  el.classList.toggle("closed", !open);
+  el.querySelector(":scope > :is(.fh, .ah) .fold").setAttribute("aria-expanded", open);
+  box(el).checked = viewed;
+  saved[el.dataset.key] = {open, viewed};
+  try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch {}
+}
+for (const [key, el] of folds) if (saved[key]) show(el, saved[key].open, saved[key].viewed);
+
+function reveal(target) {
+  for (let el = target.closest("[data-key]"); el; el = el.parentElement.closest("[data-key]")) {
+    if (!isOpen(el) || box(el).checked) show(el, true, false);
+  }
+}
 
 function language(table) {
   const lang = table.dataset.lang;
@@ -811,7 +861,7 @@ function closeBar(refocus) {
   if (refocus) cell?.focus();
 }
 
-function openBar(cell, keyboard) {
+function openBar(cell, keyboard, x) {
   const tr = cell.parentElement, table = tr.closest("table"), {n, o} = tr.dataset;
   closeBar();
   picked = tr;
@@ -819,7 +869,7 @@ function openBar(cell, keyboard) {
   github.href = table.dataset.pr ? table.dataset.pr + (n ? "R" + n : "L" + o) : table.dataset.blob + "#L" + n;
   bar.hidden = false;
   const r = cell.getBoundingClientRect(), fits = r.bottom + 4 + bar.offsetHeight <= innerHeight;
-  bar.style.left = r.left + "px";
+  bar.style.left = Math.max(0, Math.min(x ?? r.left, innerWidth - bar.offsetWidth - 8)) + "px";
   bar.style.top = (fits ? r.bottom + 4 : r.top - 4 - bar.offsetHeight) + "px";
   if (keyboard) (root.classList.contains("can-comment") ? here : github).focus();
 }
@@ -830,13 +880,12 @@ function zoom(sketch) {
   sketch.classList.toggle("zoom", on);
 }
 
-function jump(link) {
-  const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
-  if (!target) return false;
-  target.closest("details")?.setAttribute("open", "");
-  const box = target.closest(".code");
-  if (box && getComputedStyle(box).position === "sticky" && box.scrollHeight > box.clientHeight) {
-    box.scrollTo({top: box.scrollTop + target.getBoundingClientRect().top - box.getBoundingClientRect().top - 12, behavior: smooth});
+function jump(target) {
+  const pane = target.closest(".code");
+  if (pane && getComputedStyle(pane).position === "sticky" && pane.scrollHeight > pane.clientHeight) {
+    const lift = pane.getBoundingClientRect().top - parseFloat(getComputedStyle(pane).top);
+    if (lift < 0) scrollBy({top: lift, behavior: smooth});
+    pane.scrollTo({top: pane.scrollTop + target.getBoundingClientRect().top - pane.getBoundingClientRect().top - 12, behavior: smooth});
   } else {
     target.scrollIntoView({block: "center", behavior: smooth});
   }
@@ -844,7 +893,6 @@ function jump(link) {
   target.focus({preventScroll: true});
   target.classList.add("flash");
   setTimeout(() => target.classList.remove("flash"), 1200);
-  return true;
 }
 
 document.addEventListener("click", async event => {
@@ -862,13 +910,23 @@ document.addEventListener("click", async event => {
     return;
   }
   if (bar.contains(t)) return closeBar();
-  const cell = t.closest("tr.l td.o, tr.l td.n");
-  if (cell) return cell.parentElement === picked ? closeBar() : openBar(cell, false);
+  const dragged = !t.closest("button, td.o, td.n") && !getSelection().isCollapsed && getSelection().containsNode(t, true);
+  const cell = !dragged && t.closest("tr.l td");
+  if (cell) return cell.parentElement === picked ? closeBar() : openBar(cell, false, event.clientX);
   closeBar();
   const gap = t.closest("tr.gap button");
   if (gap) return expand(gap.closest("tr.gap"));
-  const link = t.closest("a.jump");
-  if (link && jump(link)) return event.preventDefault();
+  const link = t.closest('a[href^="#"]'), target = link && document.getElementById(decodeURIComponent(link.hash.slice(1)));
+  if (target) reveal(target);
+  if (target && link.matches(".jump")) {
+    jump(target);
+    return event.preventDefault();
+  }
+  const head = !dragged && !t.closest("a, label") && t.closest("[data-key] > :is(.fh, .ah)");
+  if (head) {
+    const el = head.parentElement;
+    return show(el, !isOpen(el), box(el).checked);
+  }
   const sketch = t.closest(".sketch");
   if (sketch && !t.closest("a")) zoom(sketch);
 });
@@ -894,6 +952,10 @@ document.addEventListener("keydown", event => {
     closeBar(bar.contains(document.activeElement));
     document.querySelector(".sketch.zoom")?.classList.remove("zoom");
   }
+});
+document.addEventListener("change", event => {
+  const input = event.target.closest(".viewed input");
+  if (input) show(input.closest("[data-key]"), !input.checked, input.checked);
 });
 document.addEventListener("scroll", () => closeBar(), true);
 window.claude?.use?.("comments").then(c => {
