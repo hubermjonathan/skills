@@ -3,13 +3,14 @@ name: walk-through-pr
 description: >
   Build a short page that maps a GitHub PR for a human reviewer: what the PR is,
   then its changes grouped into areas of impact, in reading order, each with its
-  before-and-after behavior and a sketch. Use when someone wants a map of a PR
-  before reviewing it, or asks for a PR walkthrough, summary, or review prep.
+  before-and-after behavior, a sketch, and its code beside it. Use when someone
+  wants a map of a PR before reviewing it, or asks for a PR walkthrough, summary,
+  or review prep.
 ---
 
 # Walk through a PR
 
-Build one page that a reviewer can take in fast. The page is a map, not a verdict, and it's short: every sentence is written to be read once and acted on.
+Build one page that a reviewer can take in fast and review from. The page is a map, not a verdict, and it's short: every sentence is written to be read once and acted on. Each area's code sits beside its prose, with the lines its change rows point at marked, so the reviewer reads the diff without leaving the page.
 
 ## The two hard rules
 
@@ -21,7 +22,7 @@ Build one page that a reviewer can take in fast. The page is a map, not a verdic
 
     <this skill's directory>/scripts/gather.sh <pr> [out-dir]
 
-Run it inside a checkout of the PR's repo, because it reads callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `callers.tsv`, and `commit-subjects.txt`.
+Run it inside a checkout of the PR's repo, because it reads callers from the checkout. `<pr>` is a PR URL, `owner/repo#<n>`, or a bare number for the checked-out repo. It prints an output directory holding `meta.json`, `pr.diff`, `pr-numbered.diff`, `files.tsv`, `callers.tsv`, and `commit-subjects.txt`, plus `head/` and `base/`, the files the page's code pane shows.
 
 Read the whole diff. Take line numbers from `pr-numbered.diff`, which numbers each line as it is at the PR's head.
 
@@ -77,7 +78,7 @@ Leave what was already there unmarked, and keep only enough of it to place the c
 
 ### Write the rest
 
-For `changes`, write one row per change, as one complete sentence that says what the code now does. A file with several changes gets several rows, and the page lists them under the file. Give each clause its own row: "Takes `MeterRegistry`; `send` takes a user count and counts after success" becomes "The constructor takes a `MeterRegistry`." and "`send` takes the user count and records it after a successful send."
+For `changes`, write one row per change, as one complete sentence that says what the code now does. Its `where` names the lines the change covers, as `path:start-end` or `path:line`, from `pr-numbered.diff`. The page marks those lines in the code pane, with the sentence above them, and dims the rest of the file, so cover the lines that carry the change, not the whole hunk. A file with several changes gets several rows, and the page lists them under the file. Give each clause its own row: "Takes `MeterRegistry`; `send` takes a user count and counts after success" becomes "The constructor takes a `MeterRegistry`." and "`send` takes the user count and records it after a successful send."
 
 For `reach`, read `callers.tsv`. It lists where the base branch mentions each changed name in files this PR doesn't touch, and `reach` holds only those files. A caller that was left alone is the most useful thing to tell a reviewer, and "nothing else calls it" is worth saying too. Grep yourself only for a name it doesn't list.
 
@@ -91,7 +92,15 @@ It prints every error and warning. Fix the data and run it again until it writes
 
 ## Step 5: publish and hand off
 
-Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Otherwise, give the user the file's path, since a file has no link to attach.
+The page shows the PR at one commit. After the author pushes, run the skill again from step 1, and it replaces the page at the same link.
+
+Publish the page as an artifact if your agent can, with a one-sentence description naming the PR. Grant it the `comments` capability in composer-only mode, `{"comments": {"composer_only": true}}`, so a reviewer can comment on a line from the page. Otherwise, give the user the file's path, since a file has no link to attach.
+
+A rebuild goes to the page already attached, so reviewers keep one link and their comments stay in one place. Before you publish, run:
+
+    <this skill's directory>/scripts/attach.sh <pr> --url
+
+It prints the link of the walkthrough attached to the PR, or nothing. When it prints one, publish to that artifact. Otherwise, publish a new one.
 
 If the page has a link, attach it to the PR description:
 

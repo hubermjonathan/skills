@@ -1,15 +1,24 @@
 #!/bin/sh
 # Usage: attach.sh <pr> <url> [--share-note] [gh flags, such as --repo owner/name]
 #        attach.sh <pr> --shared [gh flags]
+#        attach.sh <pr> --url [gh flags]
 # Puts a Walkthrough section with the link right below the PR description's disclosure note,
 # replacing an earlier one. --share-note asks the author to share the page, on the first
 # attach only: once someone deletes the note, it stays gone. --shared deletes the note.
-# The description never reaches stdout, so the agent running this never reads it.
+# --url prints the link of the walkthrough already attached, or nothing.
+# The rest of the description never reaches stdout, so the agent running this never reads it.
 set -eu
 pr=$1 url=$2
 shift 2
 body=$(mktemp) out=$(mktemp)
 trap 'rm -f "$body" "$out"' EXIT
+if [ "$url" = --url ]; then
+  gh pr view "$pr" "$@" --json body --jq .body | awk '
+    /^<!-- pr-walkthrough -->$/ { s = 1 }
+    s && match($0, /\*\*\[Walkthrough\]\([^)]*\)\*\*/) { print substr($0, RSTART + 16, RLENGTH - 19); exit }
+    /^<!-- \/pr-walkthrough -->$/ { s = 0 }'
+  exit 0
+fi
 if [ "$url" = --shared ]; then
   gh pr view "$pr" "$@" --json body --jq .body > "$body"
   awk '
@@ -45,7 +54,7 @@ awk -v url="$url" -v sha="$sha" -v note="$note" '
     if (note) {
       print ""
       print "> [!IMPORTANT]"
-      print "> The walkthrough may be visible only to its author. Share it with the reviewers, then add the `ready-for-review` label or delete this note."
+      print "> The walkthrough may be visible only to its author. Share it with the reviewers, with comment access, then add the `ready-for-review` label or delete this note."
     }
     print "<!-- /pr-walkthrough -->"
     print ""

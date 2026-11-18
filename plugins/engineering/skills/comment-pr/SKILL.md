@@ -18,6 +18,8 @@ GitHub keeps PR feedback in three places, and a review that puts everything inli
 
 Automated reviewer bots count as reviewers. Their comments are review comments.
 
+A PR can also have a walkthrough page, linked in the description's `Walkthrough` section, and reviewers can comment on its lines there. When your agent can read and reply to an artifact's comments, read that page's comments too, and reply in their threads on the page. When it can't, tell the user the page may hold comments you couldn't read.
+
 ## Replying
 
 - A line comment gets its reply in its own thread:

@@ -132,6 +132,22 @@ for s in syms:
         for h in found[:10]:
             print(f"{s}\t{kind}\t{len(found)}\t{h}")
 PY
+  git -C "$ROOT" fetch -q origin "pull/$PR/head" 2>/dev/null || true
+  python3 - "$OUT" "$HEAD" "origin/$BASE" "$ROOT" <<'PY'
+import os, subprocess, sys
+out, head, base, root = sys.argv[1:5]
+def save(ref, path, into):
+    shown = subprocess.run(["git", "-C", root, "show", f"{ref}:{path}"], capture_output=True)
+    if shown.returncode == 0 and b"\0" not in shown.stdout[:8000]:
+        dest = os.path.join(out, into, path)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        open(dest, "wb").write(shown.stdout)
+for status, _, _, path in (l.rstrip("\n").split("\t") for l in open(f"{out}/files.tsv") if l.count("\t") == 3):
+    if status != "removed":
+        save(head, path, "head")
+for path in {l.split("\t")[3].rsplit(":", 1)[0] for l in open(f"{out}/callers.tsv") if l.count("\t") >= 4 and not l.startswith("#")} - {"-"}:
+    save(base, path, "base")
+PY
 else
   echo "# skipped: run gather.sh inside a checkout of $REPO to list callers" > "$OUT/callers.tsv"
 fi
@@ -145,6 +161,7 @@ gathered:
   $OUT/files.tsv             status, +, -, path
   $OUT/commit-subjects.txt   author prose, hints only
   $OUT/callers.tsv           where the base branch mentions each changed name, outside the diff
+  $OUT/head/, $OUT/base/     changed files at the head and callers' files on the base, for the page's code pane
 
 base: $BASE   head: $HEAD
 EOF

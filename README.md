@@ -76,10 +76,10 @@ Take a code change from ticket to merge.
 | [`kill-comments`](plugins/engineering/skills/kill-comments/SKILL.md) | Deletes code comments and "what" docs so code is the what and docs are the why | No |
 | [`git`](plugins/engineering/skills/git/SKILL.md) | Branch, worktree, commit, and cleanup conventions | No |
 | [`review-code`](plugins/engineering/skills/review-code/SKILL.md) | Reviews a PR against its ticket, optionally fixes the findings | No |
-| [`walk-through-pr`](plugins/engineering/skills/walk-through-pr/SKILL.md) | Builds a short page that maps a PR for a human reviewer: its changes grouped by area of impact in reading order, each main area with its before-and-after behavior and a sketch with the change marked, the callers the PR leaves alone, and an overview sketch when several areas change | No |
+| [`walk-through-pr`](plugins/engineering/skills/walk-through-pr/SKILL.md) | Builds a short page that maps a PR for a human reviewer: its changes grouped by area of impact in reading order, each main area with its before-and-after behavior and a sketch with the change marked, the callers the PR leaves alone, an overview sketch when several areas change, and each area's code beside it with the changed lines marked and a comment action on every line | No |
 | [`open-pr`](plugins/engineering/skills/open-pr/SKILL.md) | Opens a PR, ready for review, with a fixed title and body format | No |
 | [`push-pr`](plugins/engineering/skills/push-pr/SKILL.md) | Pushes to an open PR, then fixes its title and body to match | No |
-| [`comment-pr`](plugins/engineering/skills/comment-pr/SKILL.md) | Reads every kind of PR comment and replies in the right place | No |
+| [`comment-pr`](plugins/engineering/skills/comment-pr/SKILL.md) | Reads every kind of PR comment, including comments on its walkthrough page, and replies in the right place | No |
 | [`address-feedback`](plugins/engineering/skills/address-feedback/SKILL.md) | Sorts a PR's review feedback, makes and verifies the changes, pushes, and answers every comment | No |
 | [`babysit-pr`](plugins/engineering/skills/babysit-pr/SKILL.md) | Drives a PR to green checks, answered comments, and approval | No |
 | [`verify`](plugins/engineering/skills/verify/SKILL.md) | Proves a change builds, passes the checks CI will run, and does what it says, in a blind subagent, and writes the PR's evidence | No |

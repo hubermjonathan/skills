@@ -7,7 +7,7 @@ description: >
   changes requested.
 ---
 
-Feedback is every unanswered comment on the PR, from people and from reviewer bots. Invoke the `comment-pr` skill to read it and for every reply. One run handles all of it, so comments that arrive together need one run.
+Feedback is every unanswered comment on the PR and on its walkthrough page, from people and from reviewer bots. Invoke the `comment-pr` skill to read it and for every reply. One run handles all of it, so comments that arrive together need one run.
 
 1. Sort each comment:
    - **Change:** it asks for a change, and the change is right.
