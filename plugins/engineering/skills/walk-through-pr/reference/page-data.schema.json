@@ -51,7 +51,7 @@
               "required": ["change", "where", "role"],
               "properties": {
                 "change": {"type": "string"},
-                "where": {"type": "string", "pattern": ":\\d+(-\\d+)?$"},
+                "where": {"type": "string"},
                 "role": {"type": "string", "enum": ["behavior", "contract", "config", "docs"]},
                 "also": {"type": "array", "items": {"type": "string"}}
               }
