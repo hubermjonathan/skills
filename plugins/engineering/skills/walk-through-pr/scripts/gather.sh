@@ -128,10 +128,11 @@ for l in diff:
             enclosing.update(declared(context))
     elif hunk and l[:1] in ("+", "-", " ") and not test_path.search(path) and (text := code(l[1:])):
         indent = len(l[1:]) - len(l[1:].lstrip())
+        scopes = [s for s in scopes if s[0] < indent]
         if l[0] == " ":
-            scopes = [s for s in scopes if s[0] < indent] + [(indent, n) for n in declared(text)]
+            scopes += [(indent, n) for n in declared(text)]
             continue
-        enclosing.update(n for i, n in scopes if i < indent)
+        enclosing.update(n for _, n in scopes)
         decl.update(declared(text))
         (plus if l[0] == "+" else minus).update(call.findall(text))
 decl -= skip
