@@ -176,7 +176,7 @@ def owner_rule(line):
     anchored = pattern.startswith("/") or "/" in body
     rx = re.sub(r"\\\*\\\*/|\\\*\\\*|\\\*|\\\?", lambda m: {r"\*\*/": "(?:.*/)?", r"\*\*": ".*", r"\*": "[^/]*", r"\?": "[^/]"}[m.group()], re.escape(body))
     nested = "/.*" if pattern.endswith("/") else "" if "*" in body.rsplit("/", 1)[-1].replace("**", "") else "(?:/.*)?"
-    return re.compile(("^" if anchored else "^(?:.*/)?") + rx + nested + "$"), owners, body in ("*", "**")
+    return re.compile(("^" if anchored else "^(?:.*/)?") + rx + nested + "$"), owners, pattern in ("*", "**", "/**")
 
 source = next((p for p in (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS")
                if subprocess.run(["git", "-C", root, "cat-file", "-e", f"{base}:{p}"], capture_output=True).returncode == 0), None)
@@ -186,7 +186,8 @@ fallback = set(os.environ.get("CODEOWNERS_FALLBACK", "").split())
 owned = [f"# owner\tpath, from {source or 'no CODEOWNERS file'} on the base"]
 for path in changed:
     hits = [(group, catch_all) for rx, group, catch_all in rules if rx.match(path)]
-    owners = {o for group, c in hits if not c for o in group} or {o for group, _ in hits for o in group}
+    specific = [group for group, c in hits if not c]
+    owners = {o for group in specific or [g for g, _ in hits] for o in group}
     owned += [f"{o}\t{path}" for o in sorted(owners - fallback or owners)]
 open(f"{out}/owners.tsv", "w").write("\n".join(owned) + "\n")
 
