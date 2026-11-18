@@ -648,7 +648,7 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .sketch .add { background: color-mix(in srgb, var(--ou-accent) 14%, transparent); }
 .sketch .del { background: color-mix(in srgb, var(--ou-error) 14%, transparent); }
 .overview .sketch { margin: 0; }
-.chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; white-space: nowrap; vertical-align: 1.5px; }
+.chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; margin-right: var(--ou-space-half); white-space: nowrap; vertical-align: 1.5px; }
 .chip.contract { background: var(--ou-warning); color: var(--ou-warning-text); }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--ou-space-1) var(--ou-space-2); margin: 0; padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); font-size: var(--ou-size-body); line-height: 1.6; }
 .facts dt { font-weight: var(--ou-weight-medium); margin: 0; color: var(--ou-text-secondary); }
@@ -705,6 +705,7 @@ tr.gap button:hover, .actions button:hover, .actions a:hover { color: var(--ou-a
 tr.picked td { background-color: var(--ou-accent-wash); }
 tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warning) 24%, transparent); }
 .actions { position: fixed; z-index: 30; display: flex; gap: var(--ou-space-1); padding: 4px 8px; background: var(--ou-surface); border: 1px solid var(--ou-border); box-shadow: var(--ou-shadow-2); }
+.actions button { padding: 0; }
 .actions[hidden] { display: none; }
 .actions [data-act=here] { display: none; }
 .can-comment .actions [data-act=here] { display: inline; }
