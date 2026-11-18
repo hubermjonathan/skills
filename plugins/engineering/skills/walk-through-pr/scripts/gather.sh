@@ -95,7 +95,10 @@ plus, minus = collections.Counter(), collections.Counter()
 
 def declared(text):
     for span in decl_span.finditer(text):
-        names = [n for n in ident.findall(re.split(r"\b(?:extends|implements)\b", span.group(0))[0]) if n not in skip]
+        s = span.group(0)
+        while (t := re.sub(r"<[^<>]*>", "", s)) != s:
+            s = t
+        names = [n for n in ident.findall(re.split(r"\b(?:extends|implements)\b", s)[0]) if n not in skip]
         yield from names[-1:]
 
 def code(line):
