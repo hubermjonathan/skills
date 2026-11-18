@@ -1,7 +1,7 @@
 {
   "type": "object",
   "additionalProperties": false,
-  "required": ["summary", "overview", "areas", "housekeeping"],
+  "required": ["summary", "teams", "overview", "areas", "housekeeping"],
   "$defs": {
     "sketch": {
       "anyOf": [
@@ -20,6 +20,15 @@
   },
   "properties": {
     "summary": {"type": "string"},
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["owner", "why", "what_changes"],
+        "properties": {"owner": {"type": "string"}, "why": {"type": "string"}, "what_changes": {"type": "string"}}
+      }
+    },
     "overview": {"$ref": "#/$defs/sketch"},
     "areas": {
       "type": "array",
