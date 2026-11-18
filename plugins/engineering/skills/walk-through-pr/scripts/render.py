@@ -23,6 +23,7 @@ def mermaid_config(mode):
     c = PALETTES[mode]
     return {
         "startOnLoad": False,
+        "deterministicIds": True,
         "theme": "base",
         "themeVariables": {
             "darkMode": mode == "dark", "background": c["bg"], "fontFamily": "Lato", "fontSize": "16px",
@@ -57,6 +58,10 @@ def esc(text):
     return re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(str(text or "")))
 
 
+def lang(path):
+    return html.escape(path.rsplit(".", 1)[-1].lower())
+
+
 def inert_json(value):
     return json.dumps(value).replace("</", "<\\/")
 
@@ -84,8 +89,8 @@ def ticket_key(meta):
 
 
 class Files:
-    def __init__(self, repo, number, head, changed, paths):
-        self.repo, self.number, self.head, self.changed = repo, number, head, changed
+    def __init__(self, repo, number, base, changed, paths):
+        self.repo, self.number, self.base, self.changed = repo, number, base, changed
         by_name = collections.defaultdict(set)
         for p in paths:
             by_name[p.rsplit("/", 1)[-1]].add(p)
@@ -103,7 +108,7 @@ class Files:
         if path in self.changed:
             return (f"https://github.com/{self.repo}/pull/{self.number}/files#diff-{hashlib.sha256(path.encode()).hexdigest()}"
                     + (f"R{start}" if start else ""))
-        return f"https://github.com/{self.repo}/blob/{self.head}/{path}" + (f"#L{start}" if start else "")
+        return f"https://github.com/{self.repo}/blob/{self.base}/{path}" + (f"#L{start}" if start else "")
 
     def label(self, where):
         path, lines = split_where(where)
@@ -206,12 +211,12 @@ def check(data, changed, diff):
         for c in a["changes"]:
             if c.get("role", "behavior") not in ROLES:
                 errors.append(f"{name}: {c.get('where')} has role {c.get('role')!r}, not one of {sorted(ROLES)}")
-            seen.update([split_where(c.get("where"))[0]] + list(c.get("also") or []))
+            path, lines = split_where(c.get("where"))
+            seen.update([path] + list(c.get("also") or []))
             if words(c.get("change")) > WORD_CAPS["change"]:
                 warnings.append(f"{name}: the change at {c.get('where')} runs past {WORD_CAPS['change']} words")
             if ";" in re.sub(r"`[^`]*`", "", str(c.get("change") or "")):
                 warnings.append(f"{name}: the change at {c.get('where')} joins clauses with a semicolon, so split it into rows")
-            path, lines = split_where(c.get("where"))
             hunks = diff.get(path, {}).get("hunks")
             if hunks and not lines:
                 warnings.append(f"{name}: the change at {path} names no lines, so the code pane can't mark it")
@@ -254,7 +259,7 @@ def diagram(kind, source):
         source = re.sub(r"(?m)^(\s*rect) (added|removed)\s*$", lambda m: f"{m.group(1)} {MARKS[m.group(2)]}", source)
         source = source.replace("\\n", "<br/>")
         return f'<pre class="diagram">{html.escape(source)}</pre>'
-    cls = {"+": "add", "-": "del"} if kind == "tree-diff" else {}
+    cls = {"+": "add", "-": "del"}
     lines = "".join(f'<span class="{cls.get(l[:1], "ctx")}">{html.escape(l) or " "}</span>' for l in source.split("\n"))
     return f"<pre><code>{lines}</code></pre>"
 
@@ -322,7 +327,7 @@ class Code:
             prev = (h["end_old"], h["end_new"])
         body.append(self.gap(src, prev[1], len(self.sources.get(src) or []), prev[0] - prev[1], False))
         gh = html.escape(self.files.href(path))
-        return placed, f'{head}<div class="fwrap"><table class="diff" data-pr="{gh}" data-lang="{html.escape(path.rsplit(".", 1)[-1].lower())}">{"".join(body)}</table></div>'
+        return placed, f'{head}<div class="fwrap"><table class="diff" data-pr="{gh}" data-lang="{lang(path)}">{"".join(body)}</table></div>'
 
     def snippet(self, where):
         path, lines = split_where(where)
@@ -333,7 +338,7 @@ class Code:
         rows = "".join(self.row({"kind": " ", "old": None, "new": n, "text": src[n - 1]}, " focus" if n == at else "")
                        for n in range(max(1, at - SNIPPET), min(len(src), at + SNIPPET) + 1))
         return (f'<div class="fwrap"><table class="diff" data-blob="{html.escape(self.files.href(path))}" '
-                f'data-lang="{html.escape(path.rsplit(".", 1)[-1].lower())}">{rows}</table></div>')
+                f'data-lang="{lang(path)}">{rows}</table></div>')
 
 
 def show_text(n):
@@ -448,7 +453,7 @@ def main(argv):
     for a in areas:
         referenced.update(split_where(x.get("where"))[0] for x in a["changes"] + a["reach"])
         referenced.update(p for c in a["changes"] for p in c.get("also") or [])
-    files = Files(repo, number, head, set(changed), referenced)
+    files = Files(repo, number, meta["baseRefName"], set(changed), referenced)
     code = Code(gather, diff, files)
 
     taken = {"housekeeping"}
@@ -472,7 +477,7 @@ def main(argv):
     tokens = open(os.path.join(design, "tokens.css")).read()
     stamp, toggle, sync = theme_toggle(tokens)
     sprite = open(os.path.join(design, "icons.svg")).read()
-    symbols = "".join(re.search(rf'<symbol id="ou-{name}".*?</symbol>', sprite, re.S).group(0) for name in ("external",))
+    symbol = re.search(r'<symbol id="ou-external".*?</symbol>', sprite, re.S).group(0)
     icon = '<svg class="ou-icon" aria-hidden="true"><use href="#ou-external"/></svg>'
     key, url = ticket_key(meta), os.environ.get("TICKET_URL", "")
     ticket = f' · <a href="{html.escape(url.replace("{key}", key))}" title="{key}">Open the ticket {icon}</a>' if key and url else ""
@@ -484,7 +489,7 @@ def main(argv):
 <style>{tokens}{CSS}{MARK_CSS}</style></head>
 <body>
 {stamp}
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbol}</svg>
 <main class="page">
   <header>
     <div class="top"><span class="repo">{html.escape(repo)} #{number}</span>

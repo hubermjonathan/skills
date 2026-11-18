@@ -64,7 +64,7 @@ When the PR has two or more main areas, also draw **`overview`**: one sketch of 
 
 ### Draw the sketch
 
-The reviewer reads the code itself in the PR's diff, so the sketch draws what the diff can't show: how the pieces connect, and which of them this PR adds or removes. Name functions, components, services, and files in it, not the statements inside them.
+The code pane shows the diff, so the sketch draws what the diff can't show: how the pieces connect, and which of them this PR adds or removes. Name functions, components, services, and files in it, not the statements inside them.
 
 Default to a Mermaid diagram: a `sequenceDiagram` when the change adds or reorders calls between parts, or a `flowchart` when it adds a branch, a check, or a fallback. Use a `tree-diff` when the change is the tree itself: files added or moved, config keys, or components nested.
 

@@ -13,10 +13,11 @@ shift 2
 body=$(mktemp) out=$(mktemp)
 trap 'rm -f "$body" "$out"' EXIT
 if [ "$url" = --url ]; then
-  gh pr view "$pr" "$@" --json body --jq .body | awk '
+  gh pr view "$pr" "$@" --json body --jq .body > "$body"
+  awk '
     /^<!-- pr-walkthrough -->$/ { s = 1 }
     s && match($0, /\*\*\[Walkthrough\]\([^)]*\)\*\*/) { print substr($0, RSTART + 16, RLENGTH - 19); exit }
-    /^<!-- \/pr-walkthrough -->$/ { s = 0 }'
+    /^<!-- \/pr-walkthrough -->$/ { s = 0 }' "$body"
   exit 0
 fi
 if [ "$url" = --shared ]; then
