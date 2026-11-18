@@ -910,7 +910,7 @@ document.addEventListener("click", async event => {
     return;
   }
   if (bar.contains(t)) return closeBar();
-  const dragged = !getSelection().isCollapsed && getSelection().containsNode(t, true);
+  const dragged = !t.closest("button, td.o, td.n") && !getSelection().isCollapsed && getSelection().containsNode(t, true);
   const cell = !dragged && t.closest("tr.l td");
   if (cell) return cell.parentElement === picked ? closeBar() : openBar(cell, false, event.clientX);
   closeBar();
