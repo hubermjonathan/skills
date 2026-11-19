@@ -19,6 +19,11 @@ Feedback is every unanswered comment on the PR and on its walkthrough page, from
 3. Invoke the `verify` skill on the new head. When it fails, fix and run it again. Its evidence replaces its own part of the PR's `Evidence` section.
 4. Reply to every comment: the change with its short sha, the answer, or the reason for declining.
 5. Push: invoke the `push-pr` skill.
-6. Append the round to a working file named `<pr-number>-comments.md`: every comment and what it got, a change with its sha, an answer, or a decline with why.
+6. Once no comment waits on the user, request each team again whose review request a review cleared:
 
-Report one line per comment with what it got, and anything waiting on the user.
+       <this skill's directory>/scripts/rerequest-teams.sh <pr> [--repo <owner/name>]
+
+   Any review from a team member, even a comment, clears the team's request, and the PR leaves the team's review queue until the team is requested again.
+7. Append the round to a working file named `<pr-number>-comments.md`: every comment and what it got, a change with its sha, an answer, or a decline with why.
+
+Report one line per comment with what it got, each team requested again, and anything waiting on the user.
