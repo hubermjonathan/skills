@@ -698,7 +698,7 @@ tr.add td.c::before { content: "+"; color: var(--ou-accent-pressed); }
 tr.del td.c::before { content: "-"; color: var(--ou-error); }
 tr.dim td { opacity: 0.45; }
 tr.focus td.o { box-shadow: inset 3px 0 0 var(--ou-accent); }
-tr.lbl td { padding: 6px 12px; white-space: normal; font-family: var(--ou-font-body); font-size: var(--ou-size-body); background: var(--ou-accent-wash); border-top: 1px solid var(--ou-border); }
+tr.lbl td { padding: 6px 12px; white-space: normal; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); background: var(--ou-accent-wash); border-top: 1px solid var(--ou-border); }
 tr.gap td { padding: 2px 12px; background: var(--ou-surface-sunken); }
 tr.gap button, .actions button, .actions a { font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-caption); color: var(--ou-accent-pressed); background: none; border: 0; cursor: pointer; text-decoration: none; }
 tr.gap button:hover, .actions button:hover, .actions a:hover { color: var(--ou-accent-hover); }
