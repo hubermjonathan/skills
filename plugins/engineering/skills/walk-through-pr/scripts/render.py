@@ -673,7 +673,11 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .fold .ou-icon { transform: rotate(90deg); transition: transform var(--ou-duration-press) var(--ou-ease-standard); }
 .closed > * > .fold .ou-icon { transform: none; }
 .viewed { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: var(--ou-size-caption); font-family: var(--ou-font-body); color: var(--ou-text-secondary); white-space: nowrap; cursor: pointer; }
-.viewed input { width: 20px; height: 20px; margin: 0; accent-color: var(--ou-accent); cursor: pointer; }
+.viewed input { appearance: none; flex: none; width: 20px; height: 20px; margin: 0; border: 2px solid var(--ou-text-hint); border-radius: var(--ou-radius-sm); background: var(--ou-surface) center / 18px no-repeat; cursor: pointer; transition: background-color 150ms var(--ou-ease-standard), border-color 150ms var(--ou-ease-standard); }
+.viewed:hover input { border-color: var(--ou-text-secondary); }
+.viewed input:checked { border-color: var(--ou-accent); background-color: var(--ou-accent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='m9.54988 17.575c-.13333 0-.25833-.021-.375-.063-.11667-.0413-.225-.112-.325-.212l-4.3-4.3c-.18333-.1833-.271-.421-.263-.713.00867-.2913.10466-.5287.288-.712.18333-.1833.41667-.275.7-.275s.51667.0917.7.275l3.575 3.575 8.47502-8.47501c.1833-.18333.421-.275.713-.275.2913 0 .5286.09167.712.275.1833.18334.275.42067.275.712 0 .292-.0917.52967-.275.713l-9.2 9.20001c-.1.1-.2084.1707-.32502.212-.11667.042-.24167.063-.375.063z'/%3E%3C/svg%3E"); }
+.viewed:hover input:checked { border-color: var(--ou-accent-hover); background-color: var(--ou-accent-hover); }
+.viewed input:checked:active { border-color: var(--ou-accent-pressed); background-color: var(--ou-accent-pressed); }
 .area.closed > :not(.ah), .fblock.closed > :not(.fh) { display: none; }
 .area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; }
 .fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: hidden; background: var(--ou-surface); }
