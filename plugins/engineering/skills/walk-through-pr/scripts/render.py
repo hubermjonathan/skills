@@ -448,8 +448,9 @@ def area_html(i, a, aid, code):
                       if reach else "<p>Nothing outside this PR calls the changed code.</p>"))
     covered, gaps = tests.get("covered") or [], tests.get("missing") or []
     if main or covered or gaps:
-        facts.append(("Tests", f'<p><strong>Tested:</strong> {"; ".join(esc(t) for t in covered) if covered else "nothing in this PR"}.</p>'
-                               f'<p><strong>Not tested:</strong> {"; ".join(esc(t) for t in gaps) if gaps else "no gaps found"}.</p>'))
+        listed = lambda label, items, none: (f'<p><strong>{label}</strong></p><ul class="tests">{"".join(f"<li>{esc(t)}</li>" for t in items)}</ul>'
+                                             if items else f'<p><strong>{label}:</strong> {none}.</p>')
+        facts.append(("Tests", listed("Tested", covered, "nothing in this PR") + listed("Not tested", gaps, "no gaps found")))
     facts_html = "".join(f"<dt>{dt}</dt><dd>{dd}</dd>" for dt, dd in facts)
     key = short_id(aid, *(json.dumps(code.diff.get(p)) for p in sorted(area_paths(a))))
     return f"""
@@ -656,6 +657,8 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .facts ul { margin: 0; padding: 0; list-style: none; }
 .facts li { margin: 0 0 var(--ou-space-half); }
 .facts p { margin: 0; }
+.facts .tests { list-style: disc; padding-left: 1.25em; }
+.facts .tests + p { margin-top: var(--ou-space-1); }
 .facts .chip { vertical-align: 0.5px; }
 .changes > li { margin: 0 0 var(--ou-space-1); }
 .changes ul { margin: var(--ou-space-half) 0 0; padding-left: var(--ou-space-3); list-style: disc; }
