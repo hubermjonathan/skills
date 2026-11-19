@@ -10,7 +10,7 @@ import urllib.parse
 
 ROLES = {"behavior", "contract", "config", "docs"}
 SKETCH_KINDS = {"mermaid", "tree-diff"}
-WORD_CAPS = {"summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12, "why": 20, "what_changes": 45}
+WORD_CAPS = {"title": 12, "summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12, "why": 20, "what_changes": 45}
 ADDED, REMOVED = "#00a87e", "#e05666"
 PALETTES = {
     "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
@@ -114,20 +114,6 @@ def slug(name, taken):
 
 
 TICKET = r"[A-Z][A-Z0-9]{1,9}-\d+"
-TICKETS = rf"[(\[]\s*{TICKET}(?:\s*(?:[,/&]|and)\s*{TICKET})*\s*[)\]]|#{TICKET}\b"
-
-
-def title_parts(meta):
-    title = meta.get("title", "")
-    keys = re.findall(TICKET, " ".join(re.findall(TICKETS, title)))
-    keys = keys or [k.upper() for k in re.findall(rf"\b{TICKET}\b", meta.get("headRefName", ""), re.I)[:1]]
-    rest = re.sub(TICKETS, "", title)
-    for k in keys:
-        rest = re.sub(rf"\b{k}\b", "", rest, flags=re.I)
-    rest = " ".join(rest.split()) or title
-    m = re.match(r"([\w.-]+(?:\([^)]*\))?!?):\s+(.+)", rest)
-    kind, rest = m.groups() if m else ("", rest)
-    return kind, (rest[0].upper() + rest[1:] if re.match(r"[a-z]+\b", rest) else rest), list(dict.fromkeys(keys))
 
 
 class Files:
@@ -283,8 +269,14 @@ def check(data, files, diff, owners):
         seen.add(split_where(h.get("where"))[0])
         if words(h.get("note")) > WORD_CAPS["note"]:
             warnings.append(f"housekeeping: the note on {h.get('where')} runs past {WORD_CAPS['note']} words")
-    if words(data.get("summary")) > WORD_CAPS["summary"]:
-        warnings.append(f"summary runs past {WORD_CAPS['summary']} words")
+    if not data.get("title"):
+        warnings.append("no title, so the page shows the PR's title as written")
+    for field in ("title", "summary"):
+        if words(data.get(field)) > WORD_CAPS[field]:
+            warnings.append(f"{field} runs past {WORD_CAPS[field]} words")
+    for key in data.get("tickets") or []:
+        if not re.fullmatch(TICKET, str(key)):
+            warnings.append(f"tickets: {key} doesn't look like a ticket key, such as ABC-123")
     teams = {t.get("owner"): t for t in data.get("teams") or []}
     for owner in sorted(set(teams) - set(owners)):
         warnings.append(f"teams: {owner} owns no file in owners.tsv, so its row doesn't show")
@@ -607,11 +599,9 @@ def main(argv):
     stamp, toggle, sync = theme_toggle(tokens)
     sprite = open(os.path.join(design, "icons.svg")).read()
     symbols = "".join(re.search(rf'<symbol id="{i}".*?</symbol>', sprite, re.S).group(0) for i in ("ou-external", "ou-chevron"))
-    kind, title, keys = title_parts(meta)
     url = os.environ.get("TICKET_URL", "")
-    ticket = "".join(f' · <a href="{html.escape(url.replace("{key}", k))}" title="Open the ticket" {EXTERNAL}>{k} {ICON}</a>' if url
-                     else f" · {k}" for k in keys)
-    kind = f" · <code>{html.escape(kind)}</code>" if kind else ""
+    ticket = "".join(f' · <a href="{html.escape(url.replace("{key}", k))}" title="Open the ticket" {EXTERNAL}>{html.escape(k)} {ICON}</a>' if url
+                     else f" · {html.escape(k)}" for k in map(str, data.get("tickets") or []))
 
     page = f"""<!doctype html>
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -623,8 +613,8 @@ def main(argv):
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
 <main class="page" data-store="{html.escape(repo)}#{number}">
   <header>
-    <div class="top"><h1>{html.escape(title)}</h1>{toggle}</div>
-    <p class="meta">{html.escape(repo)} #{number}{kind} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
+    <div class="top"><h1>{esc(data.get("title") or meta["title"])}</h1>{toggle}</div>
+    <p class="meta">{html.escape(repo)} #{number} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
     <div class="brief{" split" if overview else ""}">
       <div><p class="summary">{esc(data.get('summary'))}</p>{teams_html(data, owners, areas, ids, housekeeping)}
         <p class="cta"><a class="pill" href="{html.escape(meta['url'])}/files" {EXTERNAL}>Approve on GitHub {ICON}</a></p></div>

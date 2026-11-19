@@ -1,7 +1,7 @@
 {
   "type": "object",
   "additionalProperties": false,
-  "required": ["summary", "teams", "overview", "areas", "housekeeping"],
+  "required": ["title", "tickets", "summary", "teams", "overview", "areas", "housekeeping"],
   "$defs": {
     "sketch": {
       "anyOf": [
@@ -19,6 +19,8 @@
     }
   },
   "properties": {
+    "title": {"type": "string"},
+    "tickets": {"type": "array", "items": {"type": "string"}},
     "summary": {"type": "string"},
     "teams": {
       "type": "array",
