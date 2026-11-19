@@ -437,7 +437,7 @@ def area_html(i, a, aid, code):
     for j, r in enumerate(reach):
         where = str(r.get("where"))
         tid = short_id(aid, "caller", where)
-        blocks.append(block(f'{esc(r.get("note"))} {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}", caller=True))
+        blocks.append(block(f'<span>{esc(r.get("note"))}</span> {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}", caller=True))
     rows = "".join(f'<li>{files.link(path, href="#" + targets[path])}<ul>'
                    f'{"".join(change_html(c, f"{aid}-c{j}" if f"{aid}-c{j}" in placed else targets[path], targets, files) for j, c in cs)}</ul></li>'
                    for path, cs in by_file.items())
