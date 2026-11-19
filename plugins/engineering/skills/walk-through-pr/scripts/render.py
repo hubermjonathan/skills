@@ -509,11 +509,19 @@ def teams_html(data, owners, areas, ids, housekeeping):
                  for i, (a, aid) in enumerate(zip(areas, ids), 1) if paths & area_paths(a)]
         links += ['<a href="#housekeeping">housekeeping</a>'] if paths & skippable else []
         n = notes.get(owner, {})
-        what = f'<p class="what">{esc(n["what_changes"])}</p>' if n.get("what_changes") else ""
-        rows.append(f'<li><p class="who"><strong title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}</strong>'
+        why = esc(n.get("why"))
+        why = (f'<details><summary>{why} <span class="more">more</span></summary><p>{esc(n["what_changes"])}</p></details>'
+               if n.get("what_changes") else f"<p>{why}</p>")
+        rows.append(f'<div class="team"><p class="who"><strong title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}</strong> '
                     f'<span>{len(paths)} file{"" if len(paths) == 1 else "s"} · {", ".join(links)}</span></p>'
-                    f'<div><p>{esc(n.get("why"))}</p>{what}</div></li>')
-    return f'<section class="teams"><h2>Why each team is here</h2><ul>{"".join(rows)}</ul></section>' if rows else ""
+                    f'{why}</div>')
+    return "".join(rows)
+
+
+def counts(paths, files_tsv):
+    rows = [files_tsv[p] for p in sorted(paths) if p in files_tsv]
+    add, dele = (sum(int(r[i]) for r in rows if r[i].isdigit()) for i in (1, 2))
+    return f'{len(rows)} file{"" if len(rows) == 1 else "s"} · +{add:,} −{dele:,}'
 
 
 def housekeeping_html(housekeeping, code):
@@ -577,18 +585,20 @@ def main(argv):
 
     taken = set()
     ids = [slug("a " + a["name"], taken) for a in areas]
-    order = "".join(f'<li><a href="#{aid}">{esc(a["name"])}</a>{" " + chip("contract") if changes_contract(a) else ""} <span>{esc(a.get("gist"))}</span></li>'
-                    for a, aid in zip(areas, ids))
+    step = lambda n, aid, name, gist, paths, contract, cls="": (
+        f'<li{cls}><a href="#{aid}"><span class="n">{n}</span><strong>{name}</strong></a><p>{gist}</p>'
+        f'<p class="c">{counts(paths, files_tsv)}{" " + chip("contract") if contract else ""}</p></li>')
+    order = "".join(step(i, aid, esc(a["name"]), esc(a.get("gist")), area_paths(a), changes_contract(a))
+                    for i, (a, aid) in enumerate(zip(areas, ids), 1))
     sections = "".join(area_html(i, a, aid, code) for i, (a, aid) in enumerate(zip(areas, ids), 1))
     if housekeeping:
-        one = len(housekeeping) == 1
-        count = f'{len(housekeeping)} file{"" if one else "s"} with no behavior of {"its" if one else "their"} own'
-        order += f'<li class="housekeeping"><a href="#housekeeping">Housekeeping</a> <span>{count}</span></li>'
+        order += step(len(areas) + 1, "housekeeping", "Housekeeping", "Files with no behavior of their own.",
+                      {split_where(h.get("where"))[0] for h in housekeeping}, False, ' class="housekeeping"')
         sections += housekeeping_html(housekeeping, code)
     sources = "".join(f'<script type="application/json" id="{sid}">{inert_json(lines)}</script>' for sid, lines in code.sources.items())
 
     overview = data.get("overview")
-    overview_html = f'<section class="overview"><h2>Where the changes land</h2>{sketch_html(overview)}</section>' if overview else ""
+    overview_html = f'<div class="map">{sketch_html(overview)}</div>' if overview else ""
     configs = {mode: mermaid_config(mode) for mode in PALETTES}
     sketches = [overview] + [a.get("sketch") for a in areas]
     mermaid = (f'<script type="module">{MERMAID_JS % json.dumps(configs)}</script>'
@@ -615,12 +625,13 @@ def main(argv):
   <header>
     <div class="top"><h1>{html.escape(title)}</h1>{toggle}</div>
     <p class="meta">{html.escape(repo)} #{number}{kind} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
-    <p class="summary">{esc(data.get('summary'))}</p>
-    <p class="cta"><a class="pill" href="{html.escape(meta['url'])}/files" {EXTERNAL}>Approve on GitHub {ICON}</a></p>
+    <div class="brief{" split" if overview else ""}">
+      <div><p class="summary">{esc(data.get('summary'))}</p>{teams_html(data, owners, areas, ids, housekeeping)}
+        <p class="cta"><a class="pill" href="{html.escape(meta['url'])}/files" {EXTERNAL}>Approve on GitHub {ICON}</a></p></div>
+      {overview_html}
+    </div>
   </header>
-  {teams_html(data, owners, areas, ids, housekeeping)}
-  {overview_html}
-  <section class="order"><h2>Reading order</h2><ol>{order}</ol>
+  <section class="steps"><h2>Read it in this order</h2><ol>{order}</ol>
     <p class="hint">The code for each area sits beside it. Click a line to comment on it. Mark a file or an area viewed to fold it away.</p></section>
   {sections}
 </main>
@@ -655,20 +666,35 @@ h2 { font-size: var(--ou-size-h4); line-height: 1.5385; margin: 0 0 var(--ou-spa
 section:not(.area) > h2 { font-size: var(--ou-size-h6); line-height: 1.3333; margin-bottom: var(--ou-space-2); }
 .meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: var(--ou-space-1) 0 0; max-width: none; }
 .meta :is(code, a) { white-space: nowrap; }
-.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: var(--ou-space-3) 0 var(--ou-space-2); }
-.cta { margin: 0 0 var(--ou-space-5); }
+.brief { margin-top: var(--ou-space-3); }
+.brief.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ou-space-3); align-items: start; }
+.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: 0 0 var(--ou-space-3); }
+.split .summary { max-width: none; }
+.team { margin: 0 0 var(--ou-space-2); font-size: var(--ou-size-body); line-height: 1.6; }
+.team p { margin: 0; }
+.who span { font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
+.team summary { display: block; cursor: pointer; }
+.team summary::-webkit-details-marker { display: none; }
+.team .more { color: var(--ou-accent-pressed); font-weight: var(--ou-weight-medium); }
+.team summary:hover .more { color: var(--ou-accent-hover); }
+.team details[open] .more { display: none; }
+.team details p { margin-top: var(--ou-space-half); color: var(--ou-text-secondary); }
+.cta { margin: var(--ou-space-3) 0 0; }
 section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); padding: var(--ou-space-3); margin-top: var(--ou-space-3); scroll-margin-top: var(--ou-space-2); }
-.teams ul { margin: 0; padding: 0; list-style: none; }
-.teams li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); gap: var(--ou-space-1) var(--ou-space-3); max-width: none; margin: 0; }
-.teams li + li { margin-top: var(--ou-space-2); padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); }
-.teams p { margin: 0; }
-.who span { display: block; font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
-.teams li > div { max-width: var(--ou-measure); }
-.teams .what { margin-top: var(--ou-space-1); max-width: none; font-size: var(--ou-size-body); line-height: 1.6; }
-.order ol { margin: 0; padding-left: var(--ou-space-3); }
-.order li { margin: var(--ou-space-half) 0; }
-.order li > a { font-weight: var(--ou-weight-medium); }
-.order li > span, .gist, .hint { color: var(--ou-text-secondary); }
+.map .sketch { margin: 0; }
+.map pre.diagram svg { width: 100%; height: auto; max-height: 360px; min-width: 0 !important; }
+.steps { border: 0; padding: 0; margin-top: var(--ou-space-5); }
+.steps ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--ou-space-3); margin: 0; padding: 0; list-style: none; }
+.steps li { margin: 0; max-width: none; padding-top: var(--ou-space-2); border-top: 3px solid var(--ou-accent); }
+.steps li.housekeeping { border-top-color: var(--ou-border); }
+.steps a { color: var(--ou-text); text-decoration: none; }
+.steps a:hover strong { color: var(--ou-accent-pressed); }
+.steps .n { display: block; font-size: var(--ou-size-h5); font-weight: var(--ou-weight-heading); line-height: 1.2; color: var(--ou-accent-pressed); }
+.steps strong { display: block; font-size: var(--ou-size-body-lg); line-height: 1.4; margin-top: var(--ou-space-half); }
+.steps p { margin: var(--ou-space-1) 0 0; font-size: var(--ou-size-body); line-height: 1.6; color: var(--ou-text-secondary); }
+.steps p.c { font-size: var(--ou-size-caption); }
+.steps .hint { margin-top: var(--ou-space-3); }
+.gist, .hint { color: var(--ou-text-secondary); }
 .num { color: var(--ou-accent-pressed); margin-right: var(--ou-space-half); }
 .gist { margin: 0 0 var(--ou-space-2); }
 .delta { display: grid; gap: var(--ou-space-1); margin: 0 0 var(--ou-space-2); }
@@ -684,7 +710,6 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .sketch pre.diagram { padding: var(--ou-space-2); text-align: center; }
 .sketch .add { background: color-mix(in srgb, var(--ou-accent) 14%, transparent); }
 .sketch .del { background: color-mix(in srgb, var(--ou-error) 14%, transparent); }
-.overview .sketch { margin: 0; }
 .chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; margin-right: var(--ou-space-half); white-space: nowrap; vertical-align: 1.5px; }
 .chip.contract { background: var(--ou-warning); color: var(--ou-warning-text); }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--ou-space-1) var(--ou-space-2); margin: 0; padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); font-size: var(--ou-size-body); line-height: 1.6; }
@@ -762,7 +787,7 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
 .actions [data-act=here] { display: none; }
 .can-comment .actions [data-act=here] { display: inline-flex; }
 .sketch.zoom { position: fixed; inset: var(--ou-space-3); z-index: 40; margin: 0; overflow: auto; cursor: zoom-out; box-shadow: 0 0 0 100vmax var(--ou-overlay-strong); }
-.sketch.zoom pre.diagram svg { max-width: none !important; min-width: 0 !important; width: 100%; height: auto; }
+.sketch.zoom pre.diagram svg { max-width: none !important; min-width: 0 !important; width: 100%; height: auto; max-height: none; }
 .hljs-keyword, .hljs-selector-tag, .hljs-doctag { color: var(--sx-keyword); }
 .hljs-string, .hljs-regexp, .hljs-template-string { color: var(--sx-string); }
 .hljs-comment, .hljs-quote, .hljs-meta { color: var(--sx-comment); }
@@ -774,6 +799,8 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
   .area { display: block; }
   .ah { margin-bottom: var(--ou-space-1); }
   .area > .code { position: static; max-height: none; overflow: visible; margin-top: var(--ou-space-3); }
+  .brief.split { display: block; }
+  .map { margin-top: var(--ou-space-3); }
 }
 .key { display: flex; flex-wrap: wrap; gap: var(--ou-space-half) var(--ou-space-2); margin: 0; padding: var(--ou-space-1) var(--ou-space-2); max-width: none; border-top: 1px solid var(--ou-border); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
 .key span { display: inline-flex; align-items: center; gap: 6px; }
@@ -784,7 +811,6 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
   .facts { grid-template-columns: 1fr; }
   .facts dd { margin-bottom: var(--ou-space-1); }
   .delta > div { grid-template-columns: 1fr; gap: 0; }
-  .teams li { grid-template-columns: 1fr; }
   .summary { padding: var(--ou-space-2); }
 }
 @media (prefers-reduced-motion: reduce) {
