@@ -700,15 +700,20 @@ tr.dim td { opacity: 0.45; }
 tr.focus td.o { box-shadow: inset 3px 0 0 var(--ou-accent); }
 tr.lbl td { padding: 6px 12px; white-space: normal; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); background: var(--ou-accent-wash); border-top: 1px solid var(--ou-border); }
 tr.gap td { padding: 2px 12px; background: var(--ou-surface-sunken); }
-tr.gap button, .actions button, .actions a { font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-caption); color: var(--ou-accent-pressed); background: none; border: 0; cursor: pointer; text-decoration: none; }
-tr.gap button:hover, .actions button:hover, .actions a:hover { color: var(--ou-accent-hover); }
+tr.gap button { font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-caption); color: var(--ou-accent-pressed); background: none; border: 0; cursor: pointer; }
+tr.gap button:hover { color: var(--ou-accent-hover); }
 tr.picked td { background-color: var(--ou-accent-wash); }
 tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warning) 24%, transparent); }
-.actions { position: fixed; z-index: 30; display: flex; gap: var(--ou-space-1); padding: 4px 8px; background: var(--ou-surface); border: 1px solid var(--ou-border); box-shadow: var(--ou-shadow-2); }
-.actions button { padding: 0; }
+.actions { position: fixed; z-index: 30; display: flex; flex-direction: column; min-width: 200px; padding: var(--ou-space-half) 0; background: var(--ou-surface); box-shadow: var(--ou-shadow-2); }
+:root[data-theme="dark"] .actions { box-shadow: none; border: 1px solid var(--ou-border); }
+.actions :is(button, a) { display: flex; align-items: center; gap: var(--ou-space-1); padding: var(--ou-space-1) var(--ou-space-2); font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-body); color: var(--ou-text); text-align: left; text-decoration: none; background: none; border: 0; cursor: pointer; }
+.actions :is(button, a):hover { background: var(--ou-surface-hover); }
+.actions :is(button, a):active { background: var(--ou-surface-pressed); }
+.actions :is(button, a):focus-visible { outline-offset: -2px; }
+.actions .ou-icon { margin-left: auto; color: var(--ou-text-secondary); }
 .actions[hidden] { display: none; }
 .actions [data-act=here] { display: none; }
-.can-comment .actions [data-act=here] { display: inline; }
+.can-comment .actions [data-act=here] { display: flex; }
 .sketch.zoom { position: fixed; inset: var(--ou-space-3); z-index: 40; margin: 0; overflow: auto; cursor: zoom-out; box-shadow: 0 0 0 100vmax var(--ou-overlay-strong); }
 .sketch.zoom pre.diagram svg { max-width: none !important; min-width: 0 !important; width: 100%; height: auto; }
 .hljs-keyword, .hljs-selector-tag, .hljs-doctag { color: var(--sx-keyword); }
