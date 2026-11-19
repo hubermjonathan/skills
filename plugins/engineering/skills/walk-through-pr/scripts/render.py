@@ -362,10 +362,13 @@ class Code:
         return (f'<tr class="l {DIFF_KINDS[l["kind"]]}{cls}" id="{rid}" data-o="{o}" data-n="{n}"><td class="o">{o}</td>'
                 f'<td class="n"{" tabindex=0" if first else ""}>{n}</td><td class="c">{html.escape(l["text"])}</td></tr>')
 
+    def head_link(self, path):
+        return (f'<a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
+                f'<code>{html.escape(self.files.label(path))}</code>{ICON}</a>')
+
     def block(self, path, marks, expand, tid, bid="", closed=False):
         fd = self.diff.get(path)
-        head = (f'<a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
-                f'<code>{html.escape(self.files.label(path))}</code>{ICON}</a>')
+        head = self.head_link(path)
         wrap = lambda body: block(head, body, short_id(tid, json.dumps(fd)), path, closed, bid)
         if not fd or fd["binary"] or not fd["hunks"]:
             note = "Binary file" if fd and fd["binary"] else "No line changes"
@@ -388,17 +391,26 @@ class Code:
         gh = html.escape(self.files.href(path))
         return placed, wrap(f'<div class="fwrap"><table class="diff" id="{tid}" data-pr="{gh}" data-lang="{lang(path)}">{"".join(body)}</table></div>')
 
-    def snippet(self, where, tid):
-        path, lines = split_where(where)
-        src = self.read("base", path)
-        if not src or not lines:
-            return ""
-        at = span(lines)[0]
-        first = max(1, at - SNIPPET)
-        rows = "".join(self.row({"kind": " ", "old": None, "new": n, "text": src[n - 1]}, tid, " focus" if n == at else "", n == first)
-                       for n in range(first, min(len(src), at + SNIPPET) + 1))
-        return (f'<div class="fwrap"><table class="diff" id="{tid}" data-blob="{html.escape(self.files.href(path))}" '
-                f'data-lang="{lang(path)}">{rows}</table></div>')
+    def callers(self, path, hits, tid):
+        src, notes, ranges = self.read("base", path), collections.defaultdict(list), []
+        for k, n, note in hits:
+            notes[n].append((k, note))
+        for n in sorted(notes):
+            lo, hi = max(1, n - SNIPPET), min(len(src), n + SNIPPET)
+            if ranges and lo <= ranges[-1][1] + 1:
+                ranges[-1][1] = max(ranges[-1][1], hi)
+            else:
+                ranges.append([lo, hi])
+        rows = []
+        for lo, hi in ranges:
+            if rows:
+                rows.append('<tr class="skip"><td colspan="3">⋯</td></tr>')
+            for n in range(lo, hi + 1):
+                rows += [f'<tr class="lbl" id="{k}"><td colspan="3">{esc(note)}</td></tr>' for k, note in notes.get(n, [])]
+                rows.append(self.row({"kind": " ", "old": None, "new": n, "text": src[n - 1]}, tid, " focus" if n in notes else " dim", n == ranges[0][0]))
+        table = (f'<div class="fwrap"><table class="diff" id="{tid}" data-blob="{html.escape(self.files.href(path))}" '
+                 f'data-lang="{lang(path)}">{"".join(rows)}</table></div>')
+        return block(self.head_link(path), table, tid, path, caller=True)
 
 
 def change_html(c, target, targets, files):
@@ -434,10 +446,16 @@ def area_html(i, a, aid, code):
     reach = a["reach"]
     if reach:
         blocks.append('<p class="label">Callers outside this PR</p>')
+    by_path = {}
     for j, r in enumerate(reach):
-        where = str(r.get("where"))
-        tid = short_id(aid, "caller", where)
-        blocks.append(block(f'<span>{esc(r.get("note"))}</span> {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}", caller=True))
+        by_path.setdefault(split_where(str(r.get("where")))[0], []).append((f"{aid}-x{j}", r))
+    for path, hits in by_path.items():
+        lines = {k: split_where(str(r.get("where")))[1] for k, r in hits} if code.read("base", path) else {}
+        shown = [(k, span(lines[k])[0], r.get("note")) for k, r in hits if lines.get(k)]
+        if shown:
+            blocks.append(code.callers(path, shown, short_id(aid, "caller", *(str(r.get("where")) for _, r in hits))))
+        blocks += [block(f'<span>{esc(r.get("note"))}</span> {files.link(str(r.get("where")))}', "", k, path, bid=k)
+                   for k, r in hits if not lines.get(k)]
     rows = "".join(f'<li>{files.link(path, href="#" + targets[path])}<ul>'
                    f'{"".join(change_html(c, f"{aid}-c{j}" if f"{aid}-c{j}" in placed else targets[path], targets, files) for j, c in cs)}</ul></li>'
                    for path, cs in by_file.items())
@@ -708,6 +726,7 @@ tr.dim td { opacity: 0.45; }
 tr.focus td.o { box-shadow: inset 3px 0 0 var(--ou-accent); }
 tr.lbl td { padding: 6px 12px; white-space: normal; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); background: var(--ou-accent-wash); border-top: 1px solid var(--ou-border); }
 tr.gap td { padding: 2px 12px; background: var(--ou-surface-sunken); }
+tr.skip td { padding: 0 12px; background: var(--ou-surface-sunken); color: var(--ou-text-hint); }
 tr.gap button { font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-caption); color: var(--ou-accent-pressed); background: none; border: 0; cursor: pointer; }
 tr.gap button:hover { color: var(--ou-accent-hover); }
 tr.picked td { background-color: var(--ou-accent-wash); }
