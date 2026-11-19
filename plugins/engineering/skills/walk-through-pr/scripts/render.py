@@ -91,12 +91,12 @@ def fold(name, closed=False):
             '<svg class="ou-icon" aria-hidden="true"><use href="#ou-chevron"/></svg></button>')
 
 
-def block(head, body, key, name, closed=False, bid=""):
+def block(head, body, key, name, closed=False, bid="", caller=False):
     attrs = ' id="%s"' % bid if bid else ""
     if not body:
         return f'<div class="fblock"{attrs}><div class="fh">{head}</div></div>'
     closed = closed or bool(TEST_PATH.search(split_where(name)[0]))
-    return (f'<div class="fblock{" closed" if closed else ""}"{attrs} data-key="{key}">'
+    return (f'<div class="fblock{" caller" if caller else ""}{" closed" if closed else ""}"{attrs} data-key="{key}">'
             f'<div class="fh">{fold(name, closed)}{head}{VIEWED}</div>{body}</div>')
 
 
@@ -437,7 +437,7 @@ def area_html(i, a, aid, code):
     for j, r in enumerate(reach):
         where = str(r.get("where"))
         tid = short_id(aid, "caller", where)
-        blocks.append(block(f'{esc(r.get("note"))} {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}"))
+        blocks.append(block(f'{esc(r.get("note"))} {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}", caller=True))
     rows = "".join(f'<li>{files.link(path, href="#" + targets[path])}<ul>'
                    f'{"".join(change_html(c, f"{aid}-c{j}" if f"{aid}-c{j}" in placed else targets[path], targets, files) for j, c in cs)}</ul></li>'
                    for path, cs in by_file.items())
@@ -965,7 +965,13 @@ document.addEventListener("keydown", event => {
 });
 document.addEventListener("change", event => {
   const input = event.target.closest(".viewed input");
-  if (input) show(input.closest("[data-key]"), !input.checked, input.checked);
+  if (!input) return;
+  const item = input.closest("[data-key]"), area = item.parentElement.closest(".area[data-key]");
+  show(item, !input.checked, input.checked);
+  if (!area || item.matches(".caller")) return;
+  const files = [...area.querySelectorAll(".fblock[data-key]:not(.caller)")];
+  if (input.checked && files.every(f => box(f).checked)) show(area, false, true);
+  else if (!input.checked && box(area).checked) show(area, isOpen(area), false);
 });
 document.addEventListener("scroll", () => closeBar(), true);
 window.claude?.use?.("comments").then(c => {
