@@ -113,15 +113,15 @@ def slug(name, taken):
     return sid
 
 
-KEY = r"[A-Z][A-Z0-9]{1,9}-\d+"
-KEYS = rf"[(\[]\s*{KEY}(?:\s*(?:[,/&]|and)\s*{KEY})*\s*[)\]]|#{KEY}\b"
+TICKET = r"[A-Z][A-Z0-9]{1,9}-\d+"
+TICKETS = rf"[(\[]\s*{TICKET}(?:\s*(?:[,/&]|and)\s*{TICKET})*\s*[)\]]|#{TICKET}\b"
 
 
 def title_parts(meta):
     title = meta.get("title", "")
-    keys = re.findall(KEY, " ".join(re.findall(KEYS, title)))
-    keys = keys or [k.upper() for k in re.findall(rf"\b{KEY}\b", meta.get("headRefName", ""), re.I)[:1]]
-    rest = re.sub(KEYS, "", title)
+    keys = re.findall(TICKET, " ".join(re.findall(TICKETS, title)))
+    keys = keys or [k.upper() for k in re.findall(rf"\b{TICKET}\b", meta.get("headRefName", ""), re.I)[:1]]
+    rest = re.sub(TICKETS, "", title)
     for k in keys:
         rest = re.sub(rf"\b{k}\b", "", rest, flags=re.I)
     rest = " ".join(rest.split()) or title
