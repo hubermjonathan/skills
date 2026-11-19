@@ -113,10 +113,21 @@ def slug(name, taken):
     return sid
 
 
-def ticket_key(meta):
-    m = (re.search(r"\(([A-Z][A-Z0-9]{1,9}-\d+)\)", meta.get("title", ""))
-         or re.search(r"\b([A-Z][A-Z0-9]{1,9}-\d+)\b", meta.get("headRefName", ""), re.I))
-    return m.group(1).upper() if m else ""
+KEY = r"[A-Z][A-Z0-9]{1,9}-\d+"
+KEYS = rf"[(\[]\s*{KEY}(?:\s*(?:[,/&]|and)\s*{KEY})*\s*[)\]]|#{KEY}\b"
+
+
+def title_parts(meta):
+    title = meta.get("title", "")
+    keys = re.findall(KEY, " ".join(re.findall(KEYS, title)))
+    keys = keys or [k.upper() for k in re.findall(rf"\b{KEY}\b", meta.get("headRefName", ""), re.I)[:1]]
+    rest = re.sub(KEYS, "", title)
+    for k in keys:
+        rest = re.sub(rf"\b{k}\b", "", rest, flags=re.I)
+    rest = " ".join(rest.split()) or title
+    m = re.match(r"([\w.-]+(?:\([^)]*\))?!?):\s+(.+)", rest)
+    kind, rest = m.groups() if m else ("", rest)
+    return kind, (rest[0].upper() + rest[1:] if re.match(r"[a-z]+\b", rest) else rest), list(dict.fromkeys(keys))
 
 
 class Files:
@@ -498,12 +509,11 @@ def teams_html(data, owners, areas, ids, housekeeping):
                  for i, (a, aid) in enumerate(zip(areas, ids), 1) if paths & area_paths(a)]
         links += ['<a href="#housekeeping">housekeeping</a>'] if paths & skippable else []
         n = notes.get(owner, {})
-        rows.append(f'<tr><th scope="row" title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}'
-                    f'<span>{len(paths)} file{"" if len(paths) == 1 else "s"} · {", ".join(links)}</span></th>'
-                    f'<td data-label="Why you\'re here">{esc(n.get("why"))}</td>'
-                    f'<td data-label="What changes for you">{esc(n.get("what_changes"))}</td></tr>')
-    return (f'<section class="teams"><h2>Why each team is here</h2><table><thead><tr><th>Team</th><th>Why you\'re here</th>'
-            f'<th>What changes for you</th></tr></thead><tbody>{"".join(rows)}</tbody></table></section>') if rows else ""
+        what = f'<p class="what">{esc(n["what_changes"])}</p>' if n.get("what_changes") else ""
+        rows.append(f'<li><p class="who"><strong title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}</strong>'
+                    f'<span>{len(paths)} file{"" if len(paths) == 1 else "s"} · {", ".join(links)}</span></p>'
+                    f'<div><p>{esc(n.get("why"))}</p>{what}</div></li>')
+    return f'<section class="teams"><h2>Why each team is here</h2><ul>{"".join(rows)}</ul></section>' if rows else ""
 
 
 def housekeeping_html(housekeeping, code):
@@ -587,8 +597,11 @@ def main(argv):
     stamp, toggle, sync = theme_toggle(tokens)
     sprite = open(os.path.join(design, "icons.svg")).read()
     symbols = "".join(re.search(rf'<symbol id="{i}".*?</symbol>', sprite, re.S).group(0) for i in ("ou-external", "ou-chevron"))
-    key, url = ticket_key(meta), os.environ.get("TICKET_URL", "")
-    ticket = f' · <a href="{html.escape(url.replace("{key}", key))}" title="{key}" {EXTERNAL}>Open the ticket {ICON}</a>' if key and url else ""
+    kind, title, keys = title_parts(meta)
+    url = os.environ.get("TICKET_URL", "")
+    ticket = "".join(f' · <a href="{html.escape(url.replace("{key}", k))}" title="Open the ticket" {EXTERNAL}>{k} {ICON}</a>' if url
+                     else f" · {k}" for k in keys)
+    kind = f" · <code>{html.escape(kind)}</code>" if kind else ""
 
     page = f"""<!doctype html>
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -600,9 +613,9 @@ def main(argv):
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
 <main class="page" data-store="{html.escape(repo)}#{number}">
   <header>
-    <div class="top"><h1>{html.escape(meta["title"])}</h1>{toggle}</div>
+    <div class="top"><h1>{html.escape(title)}</h1>{toggle}</div>
+    <p class="meta">{html.escape(repo)} #{number}{kind} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
     <p class="summary">{esc(data.get('summary'))}</p>
-    <p class="meta">{html.escape(repo)} #{number} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
   </header>
   {teams_html(data, owners, areas, ids, housekeeping)}
   {overview_html}
@@ -636,17 +649,20 @@ a.file code { color: var(--ou-accent-pressed); border-bottom: 1px solid var(--ou
 a.file:hover code { border-bottom-color: var(--ou-accent); }
 p, li { max-width: var(--ou-measure); }
 header .top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--ou-space-2); }
-h1 { font-size: var(--ou-size-h3); line-height: 1.375; margin: var(--ou-space-1) 0 var(--ou-space-2); min-width: 0; }
+h1 { font-size: var(--ou-size-h3); line-height: 1.375; margin: var(--ou-space-1) 0 0; min-width: 0; }
 h2 { font-size: var(--ou-size-h4); line-height: 1.5385; margin: 0 0 var(--ou-space-1); }
-.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: 0 0 var(--ou-space-2); max-width: none; }
-.meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: 0; max-width: none; }
+section:not(.area) > h2 { font-size: var(--ou-size-h6); line-height: 1.3333; margin-bottom: var(--ou-space-2); }
+.meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: var(--ou-space-1) 0 0; max-width: none; }
+.meta :is(code, a) { white-space: nowrap; }
+.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: var(--ou-space-3) 0 var(--ou-space-5); }
 section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); padding: var(--ou-space-3); margin-top: var(--ou-space-3); scroll-margin-top: var(--ou-space-2); }
-.teams table { width: 100%; border-collapse: collapse; font-size: var(--ou-size-body); line-height: 1.6; }
-.teams th, .teams td { text-align: left; vertical-align: top; padding: var(--ou-space-1) var(--ou-space-3) var(--ou-space-1) 0; border-top: 1px solid var(--ou-border); }
-.teams thead th { border-top: 0; padding-top: 0; color: var(--ou-text-secondary); font-weight: var(--ou-weight-medium); }
-.teams tbody th { width: 16%; font-weight: var(--ou-weight-medium); }
-.teams tbody th span { display: block; font-weight: var(--ou-weight-regular); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
-.teams td { width: 42%; }
+.teams ul { margin: 0; padding: 0; list-style: none; }
+.teams li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); gap: var(--ou-space-1) var(--ou-space-3); max-width: none; margin: 0; }
+.teams li + li { margin-top: var(--ou-space-2); padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); }
+.teams p { margin: 0; }
+.who span { display: block; font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
+.teams li > div { max-width: var(--ou-measure); }
+.teams .what { margin-top: var(--ou-space-1); max-width: none; font-size: var(--ou-size-body); line-height: 1.6; }
 .order ol { margin: 0; padding-left: var(--ou-space-3); }
 .order li { margin: var(--ou-space-half) 0; }
 .order li > a { font-weight: var(--ou-weight-medium); }
@@ -766,10 +782,8 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
   .facts { grid-template-columns: 1fr; }
   .facts dd { margin-bottom: var(--ou-space-1); }
   .delta > div { grid-template-columns: 1fr; gap: 0; }
-  .teams thead { display: none; }
-  .teams table, .teams tbody, .teams tr, .teams tbody th, .teams td { display: block; width: auto; padding-right: 0; }
-  .teams td { border-top: 0; padding-top: 0; }
-  .teams td::before { content: attr(data-label); display: block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); color: var(--ou-text-secondary); }
+  .teams li { grid-template-columns: 1fr; }
+  .summary { padding: var(--ou-space-2); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
