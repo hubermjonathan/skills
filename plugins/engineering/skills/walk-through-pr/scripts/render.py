@@ -679,7 +679,8 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .viewed:hover input:checked { border-color: var(--ou-accent-hover); background-color: var(--ou-accent-hover); }
 .viewed input:checked:active { border-color: var(--ou-accent-pressed); background-color: var(--ou-accent-pressed); }
 .area.closed > :not(.ah), .fblock.closed > :not(.fh) { display: none; }
-.area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; }
+.area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; scrollbar-width: none; }
+.area > .code::-webkit-scrollbar { display: none; }
 .fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: hidden; background: var(--ou-surface); }
 .fh { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
 .fblock.closed > .fh { border-bottom: 0; }
