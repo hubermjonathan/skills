@@ -616,6 +616,7 @@ def main(argv):
     <div class="top"><h1>{html.escape(title)}</h1>{toggle}</div>
     <p class="meta">{html.escape(repo)} #{number}{kind} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
     <p class="summary">{esc(data.get('summary'))}</p>
+    <p class="cta"><a class="pill" href="{html.escape(meta['url'])}/files" {EXTERNAL}>Approve on GitHub {ICON}</a></p>
   </header>
   {teams_html(data, owners, areas, ids, housekeeping)}
   {overview_html}
@@ -623,7 +624,7 @@ def main(argv):
     <p class="hint">The code for each area sits beside it. Click a line to comment on it. Mark a file or an area viewed to fold it away.</p></section>
   {sections}
 </main>
-<div id="line-actions" class="actions" hidden><button type="button" data-act="here">Comment here</button><a data-act="gh" {EXTERNAL}>Comment on GitHub {ICON}</a></div>
+<div id="line-actions" class="actions" hidden><button type="button" class="pill" data-act="here">Comment here</button><a class="pill" data-act="gh" {EXTERNAL}>Comment on GitHub {ICON}</a></div>
 {sources}
 <script src="{HLJS}"></script>
 <script type="module">{PAGE_JS}</script>
@@ -654,7 +655,8 @@ h2 { font-size: var(--ou-size-h4); line-height: 1.5385; margin: 0 0 var(--ou-spa
 section:not(.area) > h2 { font-size: var(--ou-size-h6); line-height: 1.3333; margin-bottom: var(--ou-space-2); }
 .meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: var(--ou-space-1) 0 0; max-width: none; }
 .meta :is(code, a) { white-space: nowrap; }
-.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: var(--ou-space-3) 0 var(--ou-space-5); }
+.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: var(--ou-space-3) 0 var(--ou-space-2); }
+.cta { margin: 0 0 var(--ou-space-5); }
 section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); padding: var(--ou-space-3); margin-top: var(--ou-space-3); scroll-margin-top: var(--ou-space-2); }
 .teams ul { margin: 0; padding: 0; list-style: none; }
 .teams li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); gap: var(--ou-space-1) var(--ou-space-3); max-width: none; margin: 0; }
@@ -750,9 +752,9 @@ tr.picked td { background-color: var(--ou-accent-wash); }
 tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warning) 24%, transparent); }
 .actions { position: fixed; z-index: 30; display: flex; gap: var(--ou-space-1); padding: var(--ou-space-1); background: var(--ou-surface); border: 1px solid var(--ou-border); border-radius: var(--ou-radius-sm); box-shadow: var(--ou-shadow-2); }
 :root[data-theme="dark"] .actions { box-shadow: none; }
-.actions [data-act] { display: inline-flex; align-items: center; gap: var(--ou-space-half); height: 32px; padding: 0 var(--ou-space-2); border: 1px solid var(--ou-accent); border-radius: var(--ou-radius-pill); background: var(--ou-accent); color: var(--ou-text-on-accent); font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color var(--ou-duration-press) var(--ou-ease-standard), border-color var(--ou-duration-press) var(--ou-ease-standard); }
-.actions [data-act]:hover { background: var(--ou-accent-hover); border-color: var(--ou-accent-hover); }
-.actions [data-act]:active { background: var(--ou-accent-pressed); border-color: var(--ou-accent-pressed); }
+.pill { display: inline-flex; align-items: center; gap: var(--ou-space-half); height: 32px; padding: 0 var(--ou-space-2); border: 1px solid var(--ou-accent); border-radius: var(--ou-radius-pill); background: var(--ou-accent); color: var(--ou-text-on-accent); font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color var(--ou-duration-press) var(--ou-ease-standard), border-color var(--ou-duration-press) var(--ou-ease-standard); }
+.pill:hover { background: var(--ou-accent-hover); border-color: var(--ou-accent-hover); color: var(--ou-text-on-accent); }
+.pill:active { background: var(--ou-accent-pressed); border-color: var(--ou-accent-pressed); }
 .can-comment .actions [data-act=gh] { background: var(--ou-surface); border-color: var(--ou-accent-pressed); color: var(--ou-accent-pressed); }
 .can-comment .actions [data-act=gh]:hover { background: var(--ou-accent-wash); }
 .can-comment .actions [data-act=gh]:active { background: color-mix(in srgb, var(--ou-accent) 24%, var(--ou-surface)); }
