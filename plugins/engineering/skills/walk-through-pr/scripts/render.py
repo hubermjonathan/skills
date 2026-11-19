@@ -702,8 +702,9 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .area.closed > :not(.ah), .fblock.closed > :not(.fh) { display: none; }
 .area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; scrollbar-width: none; }
 .area > .code::-webkit-scrollbar { display: none; }
-.fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: hidden; background: var(--ou-surface); }
-.fh { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
+.fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: clip; background: var(--ou-surface); }
+.fblock :is(tr, td) { scroll-margin-top: 3rem; }
+.fh { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
 .fblock.closed > .fh { border-bottom: 0; }
 .fh > a { text-decoration: none; font-weight: var(--ou-weight-medium); }
 .stat { color: var(--ou-text-secondary); font-size: var(--ou-size-caption); }
@@ -917,7 +918,8 @@ function jump(target) {
   if (pane && getComputedStyle(pane).position === "sticky" && pane.scrollHeight > pane.clientHeight) {
     const lift = pane.getBoundingClientRect().top - parseFloat(getComputedStyle(pane).top);
     if (lift < 0) scrollBy({top: lift, behavior: smooth});
-    pane.scrollTo({top: pane.scrollTop + target.getBoundingClientRect().top - pane.getBoundingClientRect().top - 12, behavior: smooth});
+    const head = target.matches(".fblock") ? null : target.closest(".fblock")?.querySelector(":scope > .fh");
+    pane.scrollTo({top: pane.scrollTop + target.getBoundingClientRect().top - pane.getBoundingClientRect().top - 12 - (head?.offsetHeight || 0), behavior: smooth});
   } else {
     target.scrollIntoView({block: "center", behavior: smooth});
   }
