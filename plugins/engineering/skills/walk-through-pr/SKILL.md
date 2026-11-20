@@ -17,7 +17,7 @@ To only delete the share note, run `<this skill's directory>/scripts/attach.sh <
 
 **1. You are not reviewing.** No findings, no severities, no bugs, no questions, and no approve or block. When something deserves a second look, read the code until you know what it does, and state that as a fact in the row of the change it bears on, or in a `reach` note when it's about a caller outside the PR. The reviewer judges it. If the user wants a review, that's the `review-code` skill.
 
-**2. The PR description and comments are off limits.** Don't read the PR body or any comment, and don't pass them to a subagent. `scripts/gather.sh` leaves them out, and `scripts/attach.sh` edits the description without showing it to you. Every sentence on the page traces to the diff or the repo, so the reviewer doesn't inherit the author's framing of their own change. Commit subjects are author prose too: use them only as a hint about which files belong together. Code comments are author prose as well, and they go stale. Take what the code does from the code, take only the why from a comment, and state a fact only when the code shows it.
+**2. The PR description and comments are off limits.** Don't read the PR body or any comment, and don't pass them to a subagent. `scripts/gather.sh` leaves them out, and `scripts/attach.sh` edits the description without showing it to you. Every sentence on the page traces to the diff or the repo, so the reviewer doesn't inherit the author's framing of their own change. Commit subjects are author prose too: use them only as a hint about which files belong together, and to find ticket keys. Code comments are author prose as well, and they go stale. Take what the code does from the code, take only the why from a comment, and state a fact only when the code shows it.
 
 ## Step 1: gather
 
@@ -95,7 +95,7 @@ For `teams`, write one row for each owner in `owners.tsv`, so each team on a PR 
 
     python3 <this skill's directory>/scripts/render.py <data.json> <gather-out-dir> <page.html> <design-dir>
 
-`<design-dir>` is the directory of the `offerup` design profile, the profile the renderer's styles are built on. Find it with the `use-design-profile` skill, and pass only the directory, since the renderer applies the profile itself: its tokens, its icons, and its light and dark switch. To link the ticket, set `TICKET_URL` to the tracker's URL for a ticket, with `{key}` where the key goes.
+`<design-dir>` is the directory of the `offerup` design profile, the profile the renderer's styles are built on. Find it with the `use-design-profile` skill, and pass only the directory, since the renderer applies the profile itself: its tokens, its icons, and its light and dark switch. To link each key in `tickets`, set `TICKET_URL` to the tracker's URL for a ticket, with `{key}` where the key goes.
 
 It prints every error and warning. Fix the data and run it again until it writes the page with neither. The renderer can't parse Mermaid, so if your agent can open the page in a browser, check at a 1440px window that no sketch shows Mermaid's "Syntax error in text" or scrolls sideways.
 

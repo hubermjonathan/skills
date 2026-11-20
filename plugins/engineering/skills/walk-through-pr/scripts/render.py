@@ -10,7 +10,7 @@ import urllib.parse
 
 ROLES = {"behavior", "contract", "config", "docs"}
 SKETCH_KINDS = {"mermaid", "tree-diff"}
-WORD_CAPS = {"summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12, "why": 20, "what_changes": 45}
+WORD_CAPS = {"title": 12, "summary": 50, "gist": 15, "change": 20, "note": 15, "test": 12, "why": 20, "what_changes": 45}
 ADDED, REMOVED = "#00a87e", "#e05666"
 PALETTES = {
     "light": {"bg": "#ffffff", "text": "#121212", "line": "#505050", "node": "#f7f7f7", "border": "#8a8a8a",
@@ -113,10 +113,7 @@ def slug(name, taken):
     return sid
 
 
-def ticket_key(meta):
-    m = (re.search(r"\(([A-Z][A-Z0-9]{1,9}-\d+)\)", meta.get("title", ""))
-         or re.search(r"\b([A-Z][A-Z0-9]{1,9}-\d+)\b", meta.get("headRefName", ""), re.I))
-    return m.group(1).upper() if m else ""
+TICKET = r"[A-Z][A-Z0-9]{1,9}-\d+"
 
 
 class Files:
@@ -272,8 +269,14 @@ def check(data, files, diff, owners):
         seen.add(split_where(h.get("where"))[0])
         if words(h.get("note")) > WORD_CAPS["note"]:
             warnings.append(f"housekeeping: the note on {h.get('where')} runs past {WORD_CAPS['note']} words")
-    if words(data.get("summary")) > WORD_CAPS["summary"]:
-        warnings.append(f"summary runs past {WORD_CAPS['summary']} words")
+    if not data.get("title"):
+        warnings.append("no title, so the page shows the PR's title as written")
+    for field in ("title", "summary"):
+        if words(data.get(field)) > WORD_CAPS[field]:
+            warnings.append(f"{field} runs past {WORD_CAPS[field]} words")
+    for key in data.get("tickets") or []:
+        if not re.fullmatch(TICKET, str(key)):
+            warnings.append(f"tickets: {key} doesn't look like a ticket key, such as ABC-123")
     teams = {t.get("owner"): t for t in data.get("teams") or []}
     for owner in sorted(set(teams) - set(owners)):
         warnings.append(f"teams: {owner} owns no file in owners.tsv, so its row doesn't show")
@@ -362,10 +365,13 @@ class Code:
         return (f'<tr class="l {DIFF_KINDS[l["kind"]]}{cls}" id="{rid}" data-o="{o}" data-n="{n}"><td class="o">{o}</td>'
                 f'<td class="n"{" tabindex=0" if first else ""}>{n}</td><td class="c">{html.escape(l["text"])}</td></tr>')
 
+    def head_link(self, path):
+        return (f'<a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
+                f'<code>{html.escape(self.files.label(path))}</code>{ICON}</a>')
+
     def block(self, path, marks, expand, tid, bid="", closed=False):
         fd = self.diff.get(path)
-        head = (f'<a href="{html.escape(self.files.href(path))}" title="{html.escape(path)}" {EXTERNAL}>'
-                f'<code>{html.escape(self.files.label(path))}</code>{ICON}</a>')
+        head = self.head_link(path)
         wrap = lambda body: block(head, body, short_id(tid, json.dumps(fd)), path, closed, bid)
         if not fd or fd["binary"] or not fd["hunks"]:
             note = "Binary file" if fd and fd["binary"] else "No line changes"
@@ -388,17 +394,26 @@ class Code:
         gh = html.escape(self.files.href(path))
         return placed, wrap(f'<div class="fwrap"><table class="diff" id="{tid}" data-pr="{gh}" data-lang="{lang(path)}">{"".join(body)}</table></div>')
 
-    def snippet(self, where, tid):
-        path, lines = split_where(where)
-        src = self.read("base", path)
-        if not src or not lines:
-            return ""
-        at = span(lines)[0]
-        first = max(1, at - SNIPPET)
-        rows = "".join(self.row({"kind": " ", "old": None, "new": n, "text": src[n - 1]}, tid, " focus" if n == at else "", n == first)
-                       for n in range(first, min(len(src), at + SNIPPET) + 1))
-        return (f'<div class="fwrap"><table class="diff" id="{tid}" data-blob="{html.escape(self.files.href(path))}" '
-                f'data-lang="{lang(path)}">{rows}</table></div>')
+    def callers(self, path, hits, tid):
+        src, notes, ranges = self.read("base", path), collections.defaultdict(list), []
+        for k, n, note in hits:
+            notes[n].append((k, note))
+        for n in sorted(notes):
+            lo, hi = max(1, n - SNIPPET), min(len(src), n + SNIPPET)
+            if ranges and lo <= ranges[-1][1] + 1:
+                ranges[-1][1] = max(ranges[-1][1], hi)
+            else:
+                ranges.append([lo, hi])
+        rows = []
+        for lo, hi in ranges:
+            if rows:
+                rows.append('<tr class="skip"><td colspan="3">⋯</td></tr>')
+            for n in range(lo, hi + 1):
+                rows += [f'<tr class="lbl" id="{k}"><td colspan="3">{esc(note)}</td></tr>' for k, note in notes.get(n, [])]
+                rows.append(self.row({"kind": " ", "old": None, "new": n, "text": src[n - 1]}, tid, " focus" if n in notes else " dim", n == ranges[0][0]))
+        table = (f'<div class="fwrap"><table class="diff" id="{tid}" data-blob="{html.escape(self.files.href(path))}" '
+                 f'data-lang="{lang(path)}">{"".join(rows)}</table></div>')
+        return block(self.head_link(path), table, tid, path)
 
 
 def change_html(c, target, targets, files):
@@ -434,10 +449,16 @@ def area_html(i, a, aid, code):
     reach = a["reach"]
     if reach:
         blocks.append('<p class="label">Callers outside this PR</p>')
+    by_path = {}
     for j, r in enumerate(reach):
-        where = str(r.get("where"))
-        tid = short_id(aid, "caller", where)
-        blocks.append(block(f'{esc(r.get("note"))} {files.link(where)}', code.snippet(where, tid), tid, where, bid=f"{aid}-x{j}"))
+        by_path.setdefault(split_where(str(r.get("where")))[0], []).append((f"{aid}-x{j}", r))
+    for path, hits in by_path.items():
+        lines = {k: split_where(str(r.get("where")))[1] for k, r in hits} if code.read("base", path) else {}
+        shown = [(k, span(lines[k])[0], r.get("note")) for k, r in hits if lines.get(k)]
+        if shown:
+            blocks.append(code.callers(path, shown, short_id(aid, "caller", *(str(r.get("where")) for _, r in hits))))
+        blocks += [block(f'<span>{esc(r.get("note"))}</span> {files.link(str(r.get("where")))}', "", k, path, bid=k)
+                   for k, r in hits if not lines.get(k)]
     rows = "".join(f'<li>{files.link(path, href="#" + targets[path])}<ul>'
                    f'{"".join(change_html(c, f"{aid}-c{j}" if f"{aid}-c{j}" in placed else targets[path], targets, files) for j, c in cs)}</ul></li>'
                    for path, cs in by_file.items())
@@ -448,8 +469,9 @@ def area_html(i, a, aid, code):
                       if reach else "<p>Nothing outside this PR calls the changed code.</p>"))
     covered, gaps = tests.get("covered") or [], tests.get("missing") or []
     if main or covered or gaps:
-        facts.append(("Tests", f'<p><strong>Tested:</strong> {"; ".join(esc(t) for t in covered) if covered else "nothing in this PR"}.</p>'
-                               f'<p><strong>Not tested:</strong> {"; ".join(esc(t) for t in gaps) if gaps else "no gaps found"}.</p>'))
+        listed = lambda label, items, none: (f'<p><strong>{label}</strong></p><ul class="tests">{"".join(f"<li>{esc(t)}</li>" for t in items)}</ul>'
+                                             if items else f'<p><strong>{label}:</strong> {none}.</p>')
+        facts.append(("Tests", listed("Tested", covered, "nothing in this PR") + listed("Not tested", gaps, "no gaps found")))
     facts_html = "".join(f"<dt>{dt}</dt><dd>{dd}</dd>" for dt, dd in facts)
     key = short_id(aid, *(json.dumps(code.diff.get(p)) for p in sorted(area_paths(a))))
     return f"""
@@ -479,12 +501,19 @@ def teams_html(data, owners, areas, ids, housekeeping):
                  for i, (a, aid) in enumerate(zip(areas, ids), 1) if paths & area_paths(a)]
         links += ['<a href="#housekeeping">housekeeping</a>'] if paths & skippable else []
         n = notes.get(owner, {})
-        rows.append(f'<tr><th scope="row" title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}'
-                    f'<span>{len(paths)} file{"" if len(paths) == 1 else "s"} · {", ".join(links)}</span></th>'
-                    f'<td data-label="Why you\'re here">{esc(n.get("why"))}</td>'
-                    f'<td data-label="What changes for you">{esc(n.get("what_changes"))}</td></tr>')
-    return (f'<section class="teams"><h2>Why each team is here</h2><table><thead><tr><th>Team</th><th>Why you\'re here</th>'
-            f'<th>What changes for you</th></tr></thead><tbody>{"".join(rows)}</tbody></table></section>') if rows else ""
+        why = esc(n.get("why"))
+        why = (f'<details><summary>{why} <span class="more">more</span></summary><p>{esc(n["what_changes"])}</p></details>'
+               if n.get("what_changes") else f"<p>{why}</p>")
+        rows.append(f'<div class="team"><p class="who"><strong title="{html.escape(owner)}">{html.escape(owner.lstrip("@").rsplit("/", 1)[-1])}</strong> '
+                    f'<span>{len(paths)} file{"" if len(paths) == 1 else "s"} · {", ".join(links)}</span></p>'
+                    f'{why}</div>')
+    return "".join(rows)
+
+
+def counts(paths, files_tsv):
+    rows = [files_tsv[p] for p in sorted(paths) if p in files_tsv]
+    add, dele = (sum(int(r[i]) for r in rows if r[i].isdigit()) for i in (1, 2))
+    return f'{len(rows)} file{"" if len(rows) == 1 else "s"} · +{add:,} −{dele:,}'
 
 
 def housekeeping_html(housekeeping, code):
@@ -548,18 +577,20 @@ def main(argv):
 
     taken = set()
     ids = [slug("a " + a["name"], taken) for a in areas]
-    order = "".join(f'<li><a href="#{aid}">{esc(a["name"])}</a>{" " + chip("contract") if changes_contract(a) else ""} <span>{esc(a.get("gist"))}</span></li>'
-                    for a, aid in zip(areas, ids))
+    step = lambda n, aid, name, gist, paths, contract, cls="": (
+        f'<li{cls}><a href="#{aid}"><span class="n">{n}</span><strong>{name}</strong></a><p>{gist}</p>'
+        f'<p class="c">{counts(paths, files_tsv)}{" " + chip("contract") if contract else ""}</p></li>')
+    order = "".join(step(i, aid, esc(a["name"]), esc(a.get("gist")), area_paths(a), changes_contract(a))
+                    for i, (a, aid) in enumerate(zip(areas, ids), 1))
     sections = "".join(area_html(i, a, aid, code) for i, (a, aid) in enumerate(zip(areas, ids), 1))
     if housekeeping:
-        one = len(housekeeping) == 1
-        count = f'{len(housekeeping)} file{"" if one else "s"} with no behavior of {"its" if one else "their"} own'
-        order += f'<li class="housekeeping"><a href="#housekeeping">Housekeeping</a> <span>{count}</span></li>'
+        order += step(len(areas) + 1, "housekeeping", "Housekeeping", "Files with no behavior of their own.",
+                      {split_where(h.get("where"))[0] for h in housekeeping}, False, ' class="housekeeping"')
         sections += housekeeping_html(housekeeping, code)
     sources = "".join(f'<script type="application/json" id="{sid}">{inert_json(lines)}</script>' for sid, lines in code.sources.items())
 
     overview = data.get("overview")
-    overview_html = f'<section class="overview"><h2>Where the changes land</h2>{sketch_html(overview)}</section>' if overview else ""
+    overview_html = f'<div class="map">{sketch_html(overview)}</div>' if overview else ""
     configs = {mode: mermaid_config(mode) for mode in PALETTES}
     sketches = [overview] + [a.get("sketch") for a in areas]
     mermaid = (f'<script type="module">{MERMAID_JS % json.dumps(configs)}</script>'
@@ -568,8 +599,9 @@ def main(argv):
     stamp, toggle, sync = theme_toggle(tokens)
     sprite = open(os.path.join(design, "icons.svg")).read()
     symbols = "".join(re.search(rf'<symbol id="{i}".*?</symbol>', sprite, re.S).group(0) for i in ("ou-external", "ou-chevron"))
-    key, url = ticket_key(meta), os.environ.get("TICKET_URL", "")
-    ticket = f' · <a href="{html.escape(url.replace("{key}", key))}" title="{key}" {EXTERNAL}>Open the ticket {ICON}</a>' if key and url else ""
+    url = os.environ.get("TICKET_URL", "")
+    ticket = "".join(f' · <a href="{html.escape(url.replace("{key}", k))}" title="Open the ticket" {EXTERNAL}>{html.escape(k)} {ICON}</a>' if url
+                     else f" · {html.escape(k)}" for k in map(str, data.get("tickets") or []))
 
     page = f"""<!doctype html>
 <html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -581,17 +613,19 @@ def main(argv):
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">{symbols}</svg>
 <main class="page" data-store="{html.escape(repo)}#{number}">
   <header>
-    <div class="top"><h1>{html.escape(meta["title"])}</h1>{toggle}</div>
-    <p class="summary">{esc(data.get('summary'))}</p>
+    <div class="top"><h1>{esc(data.get("title") or meta["title"])}</h1>{toggle}</div>
     <p class="meta">{html.escape(repo)} #{number} · {esc(meta['author']['login'])} · built from <code>{head[:7]}</code> · <a href="{html.escape(meta['url'])}" {EXTERNAL}>Open the PR {ICON}</a>{ticket}</p>
+    <div class="brief{" split" if overview else ""}">
+      <div><p class="summary">{esc(data.get('summary'))}</p>{teams_html(data, owners, areas, ids, housekeeping)}
+        <p class="cta"><a class="pill" href="{html.escape(meta['url'])}/files" {EXTERNAL}>Approve on GitHub {ICON}</a></p></div>
+      {overview_html}
+    </div>
   </header>
-  {teams_html(data, owners, areas, ids, housekeeping)}
-  {overview_html}
-  <section class="order"><h2>Reading order</h2><ol>{order}</ol>
+  <section class="steps"><h2>Read it in this order</h2><ol>{order}</ol>
     <p class="hint">The code for each area sits beside it. Click a line to comment on it. Mark a file or an area viewed to fold it away.</p></section>
   {sections}
 </main>
-<div id="line-actions" class="actions" hidden><button type="button" data-act="here">Comment here</button><a data-act="gh" {EXTERNAL}>Comment on GitHub {ICON}</a></div>
+<div id="line-actions" class="actions" hidden><button type="button" class="pill" data-act="here">Comment here</button><a class="pill" data-act="gh" {EXTERNAL}>Comment on GitHub {ICON}</a></div>
 {sources}
 <script src="{HLJS}"></script>
 <script type="module">{PAGE_JS}</script>
@@ -617,21 +651,40 @@ a.file code { color: var(--ou-accent-pressed); border-bottom: 1px solid var(--ou
 a.file:hover code { border-bottom-color: var(--ou-accent); }
 p, li { max-width: var(--ou-measure); }
 header .top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--ou-space-2); }
-h1 { font-size: var(--ou-size-h3); line-height: 1.375; margin: var(--ou-space-1) 0 var(--ou-space-2); min-width: 0; }
+h1 { font-size: var(--ou-size-h3); line-height: 1.375; margin: var(--ou-space-1) 0 0; min-width: 0; }
 h2 { font-size: var(--ou-size-h4); line-height: 1.5385; margin: 0 0 var(--ou-space-1); }
-.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: 0 0 var(--ou-space-2); max-width: none; }
-.meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: 0; max-width: none; }
+section:not(.area) > h2 { font-size: var(--ou-size-h6); line-height: 1.3333; margin-bottom: var(--ou-space-2); }
+.meta { font-size: var(--ou-size-body); color: var(--ou-text-secondary); margin: var(--ou-space-1) 0 0; max-width: none; }
+.meta :is(code, a) { white-space: nowrap; }
+.brief { margin-top: var(--ou-space-3); }
+.brief.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ou-space-3); align-items: start; }
+.summary { background: var(--ou-accent-wash); border-radius: var(--ou-radius-md); padding: var(--ou-space-2) var(--ou-space-3); margin: 0 0 var(--ou-space-3); }
+.split .summary { max-width: none; }
+.team { margin: 0 0 var(--ou-space-2); font-size: var(--ou-size-body); line-height: 1.6; }
+.team p { margin: 0; }
+.who span { font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
+.team summary { display: block; cursor: pointer; }
+.team summary::-webkit-details-marker { display: none; }
+.team .more { color: var(--ou-accent-pressed); font-weight: var(--ou-weight-medium); }
+.team summary:hover .more { color: var(--ou-accent-hover); }
+.team details[open] .more { display: none; }
+.team details p { margin-top: var(--ou-space-half); color: var(--ou-text-secondary); }
+.cta { margin: var(--ou-space-3) 0 0; }
 section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); padding: var(--ou-space-3); margin-top: var(--ou-space-3); scroll-margin-top: var(--ou-space-2); }
-.teams table { width: 100%; border-collapse: collapse; font-size: var(--ou-size-body); line-height: 1.6; }
-.teams th, .teams td { text-align: left; vertical-align: top; padding: var(--ou-space-1) var(--ou-space-3) var(--ou-space-1) 0; border-top: 1px solid var(--ou-border); }
-.teams thead th { border-top: 0; padding-top: 0; color: var(--ou-text-secondary); font-weight: var(--ou-weight-medium); }
-.teams tbody th { width: 16%; font-weight: var(--ou-weight-medium); }
-.teams tbody th span { display: block; font-weight: var(--ou-weight-regular); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
-.teams td { width: 42%; }
-.order ol { margin: 0; padding-left: var(--ou-space-3); }
-.order li { margin: var(--ou-space-half) 0; }
-.order li > a { font-weight: var(--ou-weight-medium); }
-.order li > span, .gist, .hint { color: var(--ou-text-secondary); }
+.map .sketch { margin: 0; }
+.map pre.diagram svg { width: 100%; height: auto; max-height: 360px; min-width: 0 !important; }
+.steps { border: 0; padding: 0; margin-top: var(--ou-space-5); }
+.steps ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--ou-space-3); margin: 0; padding: 0; list-style: none; }
+.steps li { margin: 0; max-width: none; padding-top: var(--ou-space-2); border-top: 3px solid var(--ou-accent); }
+.steps li.housekeeping { border-top-color: var(--ou-border); }
+.steps a { color: var(--ou-text); text-decoration: none; }
+.steps a:hover strong { color: var(--ou-accent-pressed); }
+.steps .n { display: block; font-size: var(--ou-size-h5); font-weight: var(--ou-weight-heading); line-height: 1.2; color: var(--ou-accent-pressed); }
+.steps strong { display: block; font-size: var(--ou-size-body-lg); line-height: 1.4; margin-top: var(--ou-space-half); }
+.steps p { margin: var(--ou-space-1) 0 0; font-size: var(--ou-size-body); line-height: 1.6; color: var(--ou-text-secondary); }
+.steps p.c { font-size: var(--ou-size-caption); }
+.steps .hint { margin-top: var(--ou-space-3); }
+.gist, .hint { color: var(--ou-text-secondary); }
 .num { color: var(--ou-accent-pressed); margin-right: var(--ou-space-half); }
 .gist { margin: 0 0 var(--ou-space-2); }
 .delta { display: grid; gap: var(--ou-space-1); margin: 0 0 var(--ou-space-2); }
@@ -647,7 +700,6 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .sketch pre.diagram { padding: var(--ou-space-2); text-align: center; }
 .sketch .add { background: color-mix(in srgb, var(--ou-accent) 14%, transparent); }
 .sketch .del { background: color-mix(in srgb, var(--ou-error) 14%, transparent); }
-.overview .sketch { margin: 0; }
 .chip { display: inline-block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); background: var(--ou-fill); color: var(--ou-text); border-radius: var(--ou-radius-lg); padding: 0 10px; margin-right: var(--ou-space-half); white-space: nowrap; vertical-align: 1.5px; }
 .chip.contract { background: var(--ou-warning); color: var(--ou-warning-text); }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--ou-space-1) var(--ou-space-2); margin: 0; padding-top: var(--ou-space-2); border-top: 1px solid var(--ou-border); font-size: var(--ou-size-body); line-height: 1.6; }
@@ -656,6 +708,8 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .facts ul { margin: 0; padding: 0; list-style: none; }
 .facts li { margin: 0 0 var(--ou-space-half); }
 .facts p { margin: 0; }
+.facts .tests { list-style: disc; padding-left: 1.25em; }
+.facts .tests + p { margin-top: var(--ou-space-1); }
 .facts .chip { vertical-align: 0.5px; }
 .changes > li { margin: 0 0 var(--ou-space-1); }
 .changes ul { margin: var(--ou-space-half) 0 0; padding-left: var(--ou-space-3); list-style: disc; }
@@ -666,18 +720,25 @@ section { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md)
 .hk { margin: 0; padding: 0; list-style: none; font-size: var(--ou-size-body); }
 .hk li { margin: 0 0 var(--ou-space-half); }
 .area { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--ou-space-1) var(--ou-space-3); align-items: start; }
-.ah { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--ou-space-1); }
+.ah { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--ou-space-1); padding-bottom: var(--ou-space-2); border-bottom: 1px solid var(--ou-border); margin-bottom: var(--ou-space-2); }
+.area.closed > .ah { padding: 0; margin: 0; border: 0; }
 [data-key] > :is(.fh, .ah) { cursor: pointer; }
 .ah h2 { margin: 0; }
 .fold { display: inline-flex; padding: 2px; margin: 0 -2px; background: none; border: 0; border-radius: var(--ou-radius-sm); color: var(--ou-text-secondary); cursor: pointer; }
 .fold .ou-icon { transform: rotate(90deg); transition: transform var(--ou-duration-press) var(--ou-ease-standard); }
 .closed > * > .fold .ou-icon { transform: none; }
-.viewed { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; font-size: var(--ou-size-caption); font-family: var(--ou-font-body); color: var(--ou-text-secondary); white-space: nowrap; cursor: pointer; }
-.viewed input { width: 20px; height: 20px; margin: 0; accent-color: var(--ou-accent); cursor: pointer; }
+.viewed { display: inline-flex; align-items: center; gap: 6px; padding: 6px; margin: -6px -6px -6px auto; font-size: var(--ou-size-caption); font-family: var(--ou-font-body); color: var(--ou-text-secondary); white-space: nowrap; cursor: pointer; }
+.viewed input { appearance: none; flex: none; width: 20px; height: 20px; margin: 0; border: 2px solid var(--ou-text-hint); border-radius: var(--ou-radius-sm); background: var(--ou-surface) center / 18px no-repeat; cursor: pointer; transition: background-color 150ms var(--ou-ease-standard), border-color 150ms var(--ou-ease-standard); }
+.viewed:hover input { border-color: var(--ou-text-secondary); }
+.viewed input:checked { border-color: var(--ou-accent); background-color: var(--ou-accent); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='m9.54988 17.575c-.13333 0-.25833-.021-.375-.063-.11667-.0413-.225-.112-.325-.212l-4.3-4.3c-.18333-.1833-.271-.421-.263-.713.00867-.2913.10466-.5287.288-.712.18333-.1833.41667-.275.7-.275s.51667.0917.7.275l3.575 3.575 8.47502-8.47501c.1833-.18333.421-.275.713-.275.2913 0 .5286.09167.712.275.1833.18334.275.42067.275.712 0 .292-.0917.52967-.275.713l-9.2 9.20001c-.1.1-.2084.1707-.32502.212-.11667.042-.24167.063-.375.063z'/%3E%3C/svg%3E"); }
+.viewed:hover input:checked { border-color: var(--ou-accent-hover); background-color: var(--ou-accent-hover); }
+.viewed input:checked:active { border-color: var(--ou-accent-pressed); background-color: var(--ou-accent-pressed); }
 .area.closed > :not(.ah), .fblock.closed > :not(.fh) { display: none; }
-.area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; }
-.fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: hidden; background: var(--ou-surface); }
-.fh { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
+.area > .code { position: sticky; top: var(--ou-space-2); max-height: calc(100vh - 2 * var(--ou-space-2)); overflow: auto; min-width: 0; scrollbar-width: none; }
+.area > .code::-webkit-scrollbar { display: none; }
+.fblock { border: 1px solid var(--ou-border); border-radius: var(--ou-radius-md); margin: 0 0 var(--ou-space-2); overflow: clip; background: var(--ou-surface); }
+.fblock :is(tr, td) { scroll-margin-top: 3rem; }
+.fh { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--ou-space-1); padding: 6px 12px; background: var(--ou-surface-sunken); border-bottom: 1px solid var(--ou-border); font-size: var(--ou-size-body); }
 .fblock.closed > .fh { border-bottom: 0; }
 .fh > a { text-decoration: none; font-weight: var(--ou-weight-medium); }
 .stat { color: var(--ou-text-secondary); font-size: var(--ou-size-caption); }
@@ -698,19 +759,26 @@ tr.add td.c::before { content: "+"; color: var(--ou-accent-pressed); }
 tr.del td.c::before { content: "-"; color: var(--ou-error); }
 tr.dim td { opacity: 0.45; }
 tr.focus td.o { box-shadow: inset 3px 0 0 var(--ou-accent); }
-tr.lbl td { padding: 6px 12px; white-space: normal; font-family: var(--ou-font-body); font-size: var(--ou-size-body); background: var(--ou-accent-wash); border-top: 1px solid var(--ou-border); }
+tr.lbl td { padding: 6px 12px; white-space: normal; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); background: var(--ou-accent-wash); border-top: 1px solid var(--ou-border); }
 tr.gap td { padding: 2px 12px; background: var(--ou-surface-sunken); }
-tr.gap button, .actions button, .actions a { font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-caption); color: var(--ou-accent-pressed); background: none; border: 0; cursor: pointer; text-decoration: none; }
-tr.gap button:hover, .actions button:hover, .actions a:hover { color: var(--ou-accent-hover); }
+tr.skip td { padding: 0 12px; background: var(--ou-surface-sunken); color: var(--ou-text-hint); }
+tr.gap button { font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-caption); color: var(--ou-accent-pressed); background: none; border: 0; cursor: pointer; }
+tr.gap button:hover { color: var(--ou-accent-hover); }
 tr.picked td { background-color: var(--ou-accent-wash); }
 tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warning) 24%, transparent); }
-.actions { position: fixed; z-index: 30; display: flex; gap: var(--ou-space-1); padding: 4px 8px; background: var(--ou-surface); border: 1px solid var(--ou-border); box-shadow: var(--ou-shadow-2); }
-.actions button { padding: 0; }
+.actions { position: fixed; z-index: 30; display: flex; gap: var(--ou-space-1); padding: var(--ou-space-1); background: var(--ou-surface); border: 1px solid var(--ou-border); border-radius: var(--ou-radius-sm); box-shadow: var(--ou-shadow-2); }
+:root[data-theme="dark"] .actions { box-shadow: none; }
+.pill { display: inline-flex; align-items: center; gap: var(--ou-space-half); height: 32px; padding: 0 var(--ou-space-2); border: 1px solid var(--ou-accent); border-radius: var(--ou-radius-pill); background: var(--ou-accent); color: var(--ou-text-on-accent); font: inherit; font-family: var(--ou-font-body); font-size: var(--ou-size-body); font-weight: var(--ou-weight-medium); white-space: nowrap; text-decoration: none; cursor: pointer; transition: background-color var(--ou-duration-press) var(--ou-ease-standard), border-color var(--ou-duration-press) var(--ou-ease-standard); }
+.pill:hover { background: var(--ou-accent-hover); border-color: var(--ou-accent-hover); color: var(--ou-text-on-accent); }
+.pill:active { background: var(--ou-accent-pressed); border-color: var(--ou-accent-pressed); }
+.can-comment .actions [data-act=gh] { background: var(--ou-surface); border-color: var(--ou-accent-pressed); color: var(--ou-accent-pressed); }
+.can-comment .actions [data-act=gh]:hover { background: var(--ou-accent-wash); }
+.can-comment .actions [data-act=gh]:active { background: color-mix(in srgb, var(--ou-accent) 24%, var(--ou-surface)); }
 .actions[hidden] { display: none; }
 .actions [data-act=here] { display: none; }
-.can-comment .actions [data-act=here] { display: inline; }
+.can-comment .actions [data-act=here] { display: inline-flex; }
 .sketch.zoom { position: fixed; inset: var(--ou-space-3); z-index: 40; margin: 0; overflow: auto; cursor: zoom-out; box-shadow: 0 0 0 100vmax var(--ou-overlay-strong); }
-.sketch.zoom pre.diagram svg { max-width: none !important; min-width: 0 !important; width: 100%; height: auto; }
+.sketch.zoom pre.diagram svg { max-width: none !important; min-width: 0 !important; width: 100%; height: auto; max-height: none; }
 .hljs-keyword, .hljs-selector-tag, .hljs-doctag { color: var(--sx-keyword); }
 .hljs-string, .hljs-regexp, .hljs-template-string { color: var(--sx-string); }
 .hljs-comment, .hljs-quote, .hljs-meta { color: var(--sx-comment); }
@@ -720,8 +788,9 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
 :root[data-theme="dark"] { --sx-keyword: #ff7b72; --sx-string: #a5d6ff; --sx-comment: #8b949e; --sx-number: #79c0ff; --sx-title: #ffa657; }
 @media (max-width: 1100px) {
   .area { display: block; }
-  .ah { margin-bottom: var(--ou-space-1); }
   .area > .code { position: static; max-height: none; overflow: visible; margin-top: var(--ou-space-3); }
+  .brief.split { display: block; }
+  .map { margin-top: var(--ou-space-3); }
 }
 .key { display: flex; flex-wrap: wrap; gap: var(--ou-space-half) var(--ou-space-2); margin: 0; padding: var(--ou-space-1) var(--ou-space-2); max-width: none; border-top: 1px solid var(--ou-border); font-size: var(--ou-size-caption); color: var(--ou-text-secondary); }
 .key span { display: inline-flex; align-items: center; gap: 6px; }
@@ -732,10 +801,7 @@ tr.flash td, .fblock.flash { background-color: color-mix(in srgb, var(--ou-warni
   .facts { grid-template-columns: 1fr; }
   .facts dd { margin-bottom: var(--ou-space-1); }
   .delta > div { grid-template-columns: 1fr; gap: 0; }
-  .teams thead { display: none; }
-  .teams table, .teams tbody, .teams tr, .teams tbody th, .teams td { display: block; width: auto; padding-right: 0; }
-  .teams td { border-top: 0; padding-top: 0; }
-  .teams td::before { content: attr(data-label); display: block; font-size: var(--ou-size-caption); font-weight: var(--ou-weight-medium); color: var(--ou-text-secondary); }
+  .summary { padding: var(--ou-space-2); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
@@ -777,6 +843,18 @@ function show(el, open, viewed) {
   try { localStorage.setItem(STORE, JSON.stringify(saved)); } catch {}
 }
 for (const [key, el] of folds) if (saved[key]) show(el, saved[key].open, saved[key].viewed);
+
+function collapse(el, viewed) {
+  const pane = el.closest(".code");
+  const scroller = pane && getComputedStyle(pane).position === "sticky" && pane.scrollHeight > pane.clientHeight ? pane : null;
+  const edge = () => scroller ? scroller.getBoundingClientRect().top : 0;
+  const passed = el.getBoundingClientRect().top < edge() - 1;
+  show(el, false, viewed);
+  if (!passed) return;
+  const next = el.nextElementSibling;
+  const y = next ? next.getBoundingClientRect().top - parseFloat(getComputedStyle(next).scrollMarginTop) : el.getBoundingClientRect().bottom;
+  (scroller || window).scrollBy({top: y - edge()});
+}
 
 function reveal(target) {
   for (let el = target.closest("[data-key]"); el; el = el.parentElement.closest("[data-key]")) {
@@ -885,7 +963,8 @@ function jump(target) {
   if (pane && getComputedStyle(pane).position === "sticky" && pane.scrollHeight > pane.clientHeight) {
     const lift = pane.getBoundingClientRect().top - parseFloat(getComputedStyle(pane).top);
     if (lift < 0) scrollBy({top: lift, behavior: smooth});
-    pane.scrollTo({top: pane.scrollTop + target.getBoundingClientRect().top - pane.getBoundingClientRect().top - 12, behavior: smooth});
+    const head = target.matches(".fblock") ? null : target.closest(".fblock")?.querySelector(":scope > .fh");
+    pane.scrollTo({top: pane.scrollTop + target.getBoundingClientRect().top - pane.getBoundingClientRect().top - 12 - (head?.offsetHeight || 0), behavior: smooth});
   } else {
     target.scrollIntoView({block: "center", behavior: smooth});
   }
@@ -925,7 +1004,7 @@ document.addEventListener("click", async event => {
   const head = !dragged && !t.closest("a, label") && t.closest("[data-key] > :is(.fh, .ah)");
   if (head) {
     const el = head.parentElement;
-    return show(el, !isOpen(el), box(el).checked);
+    return isOpen(el) ? collapse(el, box(el).checked) : show(el, true, box(el).checked);
   }
   const sketch = t.closest(".sketch");
   if (sketch && !t.closest("a")) zoom(sketch);
@@ -955,7 +1034,14 @@ document.addEventListener("keydown", event => {
 });
 document.addEventListener("change", event => {
   const input = event.target.closest(".viewed input");
-  if (input) show(input.closest("[data-key]"), !input.checked, input.checked);
+  if (!input) return;
+  const item = input.closest("[data-key]"), area = item.parentElement.closest(".area[data-key]");
+  if (input.checked) collapse(item, true);
+  else show(item, true, false);
+  if (!area) return;
+  const files = [...area.querySelectorAll(".fblock[data-key]")];
+  if (input.checked && files.every(f => box(f).checked)) collapse(area, true);
+  else if (!input.checked && box(area).checked) show(area, isOpen(area), false);
 });
 document.addEventListener("scroll", () => closeBar(), true);
 window.claude?.use?.("comments").then(c => {

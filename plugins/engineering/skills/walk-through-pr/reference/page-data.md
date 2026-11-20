@@ -6,6 +6,8 @@ Text fields allow `backtick` spans for code. A `where` is a repo path, optionall
 
 ```json
 {
+  "title": "Play a confetti burst when a buyer accepts an offer",
+  "tickets": ["ACME-42"],
   "summary": "Adds a confetti burst when a buyer accepts an offer.",
   "teams": [
     {"owner": "@acme/chat", "why": "You own the offer sheet, where the burst plays.", "what_changes": "Accepting an offer plays 40 particles for 1.2 seconds before the sheet closes."},
@@ -54,6 +56,8 @@ The renderer warns when a field runs past its word cap. Treat a warning as a sen
 
 | Field | What it holds | Cap |
 |---|---|---|
+| `title` | The page's headline: what the PR does, in plain words and sentence case. Start from the PR's title in `meta.json` and keep its wording where the diff bears it out. Leave out commit prefixes such as `feat(scope):`, ticket keys, and branch names. | 12 words |
+| `tickets` | The ticket keys the PR is for, such as `ABC-123`, from its title, its branch name, or `commit-subjects.txt`, or an empty list. A number that isn't a ticket, such as a build number in a release branch, doesn't count. The page links each key when `TICKET_URL` is set. | |
 | `summary` | What the PR is, for someone who hasn't seen it. One or two sentences. | 50 words |
 | `teams` | One row per owner in `owners.tsv`, as `SKILL.md` describes, or an empty list when it lists none. `owner` is the handle as `owners.tsv` writes it. `why`: why the team is on the PR. `what_changes`: what changes in the team's code, in two or three sentences. | 20 words per `why`, 45 per `what_changes` |
 | `overview` | One sketch of the parts the main areas touch, in the same shape as an area's `sketch`, or `null`, as `SKILL.md` describes. | |
