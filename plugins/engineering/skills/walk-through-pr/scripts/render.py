@@ -91,12 +91,12 @@ def fold(name, closed=False):
             '<svg class="ou-icon" aria-hidden="true"><use href="#ou-chevron"/></svg></button>')
 
 
-def block(head, body, key, name, closed=False, bid="", caller=False):
+def block(head, body, key, name, closed=False, bid=""):
     attrs = ' id="%s"' % bid if bid else ""
     if not body:
         return f'<div class="fblock"{attrs}><div class="fh">{head}</div></div>'
     closed = closed or bool(TEST_PATH.search(split_where(name)[0]))
-    return (f'<div class="fblock{" caller" if caller else ""}{" closed" if closed else ""}"{attrs} data-key="{key}">'
+    return (f'<div class="fblock{" closed" if closed else ""}"{attrs} data-key="{key}">'
             f'<div class="fh">{fold(name, closed)}{head}{VIEWED}</div>{body}</div>')
 
 
@@ -413,7 +413,7 @@ class Code:
                 rows.append(self.row({"kind": " ", "old": None, "new": n, "text": src[n - 1]}, tid, " focus" if n in notes else " dim", n == ranges[0][0]))
         table = (f'<div class="fwrap"><table class="diff" id="{tid}" data-blob="{html.escape(self.files.href(path))}" '
                  f'data-lang="{lang(path)}">{"".join(rows)}</table></div>')
-        return block(self.head_link(path), table, tid, path, caller=True)
+        return block(self.head_link(path), table, tid, path)
 
 
 def change_html(c, target, targets, files):
@@ -1038,8 +1038,8 @@ document.addEventListener("change", event => {
   const item = input.closest("[data-key]"), area = item.parentElement.closest(".area[data-key]");
   if (input.checked) collapse(item, true);
   else show(item, true, false);
-  if (!area || item.matches(".caller")) return;
-  const files = [...area.querySelectorAll(".fblock[data-key]:not(.caller)")];
+  if (!area) return;
+  const files = [...area.querySelectorAll(".fblock[data-key]")];
   if (input.checked && files.every(f => box(f).checked)) collapse(area, true);
   else if (!input.checked && box(area).checked) show(area, isOpen(area), false);
 });
