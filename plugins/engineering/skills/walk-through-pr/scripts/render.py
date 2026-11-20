@@ -844,6 +844,18 @@ function show(el, open, viewed) {
 }
 for (const [key, el] of folds) if (saved[key]) show(el, saved[key].open, saved[key].viewed);
 
+function collapse(el, viewed) {
+  const pane = el.closest(".code");
+  const scroller = pane && getComputedStyle(pane).position === "sticky" && pane.scrollHeight > pane.clientHeight ? pane : null;
+  const edge = () => scroller ? scroller.getBoundingClientRect().top : 0;
+  const passed = el.getBoundingClientRect().top < edge() - 1;
+  show(el, false, viewed);
+  if (!passed) return;
+  const next = el.nextElementSibling;
+  const y = next ? next.getBoundingClientRect().top - parseFloat(getComputedStyle(next).scrollMarginTop) : el.getBoundingClientRect().bottom;
+  (scroller || window).scrollBy({top: y - edge()});
+}
+
 function reveal(target) {
   for (let el = target.closest("[data-key]"); el; el = el.parentElement.closest("[data-key]")) {
     if (!isOpen(el) || box(el).checked) show(el, true, false);
@@ -992,7 +1004,7 @@ document.addEventListener("click", async event => {
   const head = !dragged && !t.closest("a, label") && t.closest("[data-key] > :is(.fh, .ah)");
   if (head) {
     const el = head.parentElement;
-    return show(el, !isOpen(el), box(el).checked);
+    return isOpen(el) ? collapse(el, box(el).checked) : show(el, true, box(el).checked);
   }
   const sketch = t.closest(".sketch");
   if (sketch && !t.closest("a")) zoom(sketch);
@@ -1024,10 +1036,11 @@ document.addEventListener("change", event => {
   const input = event.target.closest(".viewed input");
   if (!input) return;
   const item = input.closest("[data-key]"), area = item.parentElement.closest(".area[data-key]");
-  show(item, !input.checked, input.checked);
+  if (input.checked) collapse(item, true);
+  else show(item, true, false);
   if (!area || item.matches(".caller")) return;
   const files = [...area.querySelectorAll(".fblock[data-key]:not(.caller)")];
-  if (input.checked && files.every(f => box(f).checked)) show(area, false, true);
+  if (input.checked && files.every(f => box(f).checked)) collapse(area, true);
   else if (!input.checked && box(area).checked) show(area, isOpen(area), false);
 });
 document.addEventListener("scroll", () => closeBar(), true);
